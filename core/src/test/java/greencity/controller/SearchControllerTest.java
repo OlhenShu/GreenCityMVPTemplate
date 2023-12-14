@@ -34,32 +34,27 @@ class SearchControllerTest {
 
     @Test
     void searchEverythingTest() {
-        // Arrange
+
         String searchQuery = "Title";
         Locale locale = Locale.getDefault();
         when(searchService.search(eq(searchQuery), eq(locale.getLanguage())))
                 .thenReturn(SearchResponseDto.create(Collections.emptyList(), 0L));
 
-        // Act
         ResponseEntity<SearchResponseDto> response = searchController.search(searchQuery, locale);
 
-        // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(searchService, times(1)).search(eq(searchQuery), eq(locale.getLanguage()));
     }
 
     @Test
     void searchEcoNewsTest() {
-        // Arrange
         String searchQuery = "Eco news title";
         Locale locale = Locale.getDefault();
         when(searchService.searchAllNews(any(Pageable.class), eq(searchQuery), eq(locale.getLanguage())))
                 .thenReturn(new PageableDto<>(Collections.emptyList(), 0, 1, 1));
 
-        // Act
         ResponseEntity<PageableDto<SearchNewsDto>> response = searchController.searchEcoNews(Pageable.unpaged(), searchQuery, locale);
 
-        // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(searchService, times(1)).searchAllNews(any(Pageable.class), eq(searchQuery), eq(locale.getLanguage()));
     }
