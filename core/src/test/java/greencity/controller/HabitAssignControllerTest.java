@@ -74,11 +74,9 @@ class HabitAssignControllerTest {
     @Test
     void getHabitAssign() throws Exception {
 
-        Long habitAssignId = 1L;
+        Long habitAssignId = getHabitAssignId();
 
-        HabitAssignDto habitAssignDto = HabitAssignDto.builder()
-                .id(habitAssignId)
-                .build();
+        HabitAssignDto habitAssignDto = getHabitAssignDto();
 
         when(habitAssignService.getByHabitAssignIdAndUserId(anyLong(), anyLong(), anyString()))
                 .thenReturn(habitAssignDto);
@@ -96,11 +94,9 @@ class HabitAssignControllerTest {
     @Test
     void assignDefault() throws Exception {
 
-        Long habitId = 1L;
+        Long habitId = getHabitAssignId();
 
-        HabitAssignManagementDto managementDto = HabitAssignManagementDto.builder()
-                .habitId(10L)
-                .build();
+        HabitAssignManagementDto managementDto = getManagementDto();
 
         when(habitAssignService.assignDefaultHabitForUser(anyLong(), any()))
                 .thenReturn(managementDto);
@@ -115,12 +111,10 @@ class HabitAssignControllerTest {
     @Test
     void assignCustom() throws Exception {
 
-        Long habitId = 1L;
+        Long habitId = getHabitAssignId();
 
         HabitAssignCustomPropertiesDto customPropertiesDto = getHabitAssignCustomPropertiesDto();
-        HabitAssignManagementDto managementDto = HabitAssignManagementDto.builder()
-                .habitId(10L)
-                .build();
+        HabitAssignManagementDto managementDto = getManagementDto();
 
         when(habitAssignService.assignCustomHabitForUser(anyLong(), any(), any()))
                 .thenReturn(List.of(managementDto));
@@ -137,10 +131,10 @@ class HabitAssignControllerTest {
     @Test
     void updateHabitAssignDuration() throws Exception {
 
-        Long habitAssignId = 1L;
+        Long habitAssignId = getHabitAssignId();
         Integer duration = 10;
         HabitAssignUserDurationDto durationDto = HabitAssignUserDurationDto.builder()
-                .habitId(1L)
+                .habitId(getHabitAssignId())
                 .workingDays(5)
                 .duration(10)
                 .build();
@@ -159,10 +153,7 @@ class HabitAssignControllerTest {
     @Test
     void getCurrentUserHabitAssignsByIdAndAcquired() throws Exception {
 
-        HabitAssignDto habitAssignDto = HabitAssignDto.builder()
-                .id(1L)
-                .createDateTime(ZonedDateTime.now())
-                .build();
+        HabitAssignDto habitAssignDto = getHabitAssignDto();
 
         when(habitAssignService.getAllHabitAssignsByUserIdAndStatusNotCancelled(anyLong(), anyString()))
                 .thenReturn(List.of(habitAssignDto));
@@ -177,7 +168,7 @@ class HabitAssignControllerTest {
     @Test
     void getUserShoppingAndCustomShoppingLists() throws Exception {
 
-        Long habitAssignId = 1L;
+        Long habitAssignId = getHabitAssignId();
         UserShoppingAndCustomShoppingListsDto shoppingListsDto = UserShoppingAndCustomShoppingListsDto.builder()
                 .customShoppingListItemDto(List.of(getCustomShoppingListItemResponseDto()))
                 .userShoppingListItemDto(List.of())
@@ -196,7 +187,7 @@ class HabitAssignControllerTest {
     @Test
     void updateUserAndCustomShoppingLists() throws Exception {
 
-        Long habitAssignId = 1L;
+        Long habitAssignId = getHabitAssignId();
         UserShoppingAndCustomShoppingListsDto listsDto = getUserShoppingAndCustomShoppingListsDto();
 
         doNothing().when(habitAssignService)
@@ -227,10 +218,8 @@ class HabitAssignControllerTest {
     @Test
     void getAllHabitAssignsByHabitIdAndAcquired() throws Exception {
 
-        Long habitId = 1L;
-        HabitAssignDto habitAssignDto = HabitAssignDto.builder()
-                .createDateTime(ZonedDateTime.now())
-                .build();
+        Long habitId = getHabitAssignId();
+        HabitAssignDto habitAssignDto = getHabitAssignDto();
 
         when(habitAssignService.getAllHabitAssignsByHabitIdAndStatusNotCancelled(anyLong(), anyString()))
                 .thenReturn(List.of(habitAssignDto));
@@ -244,11 +233,8 @@ class HabitAssignControllerTest {
     @Test
     void getHabitAssignByHabitId() throws Exception {
 
-        Long habitId = 1L;
-        HabitAssignDto habitAssignDto = HabitAssignDto.builder()
-                .createDateTime(ZonedDateTime.now())
-                .id(10L)
-                .build();
+        Long habitId = getHabitAssignId();
+        HabitAssignDto habitAssignDto = getHabitAssignDto();
 
         when(habitAssignService.findHabitAssignByUserIdAndHabitId(anyLong(), anyLong(), anyString()))
                 .thenReturn(habitAssignDto);
@@ -263,7 +249,7 @@ class HabitAssignControllerTest {
     @Test
     void getUsersHabitByHabitAssignId() throws Exception {
 
-        Long habitAssignId = 1L;
+        Long habitAssignId = getHabitAssignId();
         HabitDto habitDto = HabitDto.builder()
                 .id(10L)
                 .build();
@@ -281,12 +267,12 @@ class HabitAssignControllerTest {
     @Test
     void updateAssignByHabitId() throws Exception {
 
-        Long habitAssignId = 1L;
+        Long habitAssignId = getHabitAssignId();
         HabitAssignStatDto habitAssignStatDto = HabitAssignStatDto.builder()
                 .status(HabitAssignStatus.INPROGRESS)
                 .build();
         HabitAssignManagementDto managementDto = HabitAssignManagementDto.builder()
-                .id(1L)
+                .id(getHabitAssignId())
                 .createDateTime(ZonedDateTime.now())
                 .build();
 
@@ -304,12 +290,9 @@ class HabitAssignControllerTest {
     @Test
     void enrollHabit() throws Exception {
 
-        Long habitAssignId = 1L;
+        Long habitAssignId = getHabitAssignId();
         LocalDate date = LocalDate.now();
-        HabitAssignDto habitAssignDto = HabitAssignDto.builder()
-                .id(1L)
-                .createDateTime(ZonedDateTime.now())
-                .build();
+        HabitAssignDto habitAssignDto = getHabitAssignDto();
 
         when(habitAssignService.enrollHabit(anyLong(), anyLong(), any(), anyString()))
                 .thenReturn(habitAssignDto);
@@ -325,12 +308,9 @@ class HabitAssignControllerTest {
     @Test
     void unenrollHabit() throws Exception {
 
-        Long habitAssignId = 1L;
+        Long habitAssignId = getHabitAssignId();
         LocalDate date = LocalDate.now();
-        HabitAssignDto habitAssignDto = HabitAssignDto.builder()
-                .id(1L)
-                .createDateTime(ZonedDateTime.now())
-                .build();
+        HabitAssignDto habitAssignDto = getHabitAssignDto();
 
         when(habitAssignService.unenrollHabit(anyLong(), anyLong(), any()))
                 .thenReturn(habitAssignDto);
@@ -347,10 +327,7 @@ class HabitAssignControllerTest {
     void getInprogressHabitAssignOnDate() throws Exception {
 
         LocalDate date = LocalDate.now();
-        HabitAssignDto habitAssignDto = HabitAssignDto.builder()
-                .id(1L)
-                .createDateTime(ZonedDateTime.now())
-                .build();
+        HabitAssignDto habitAssignDto = getHabitAssignDto();
 
         when(habitAssignService.findInprogressHabitAssignsOnDate(anyLong(), any(), anyString()))
                 .thenReturn(List.of(habitAssignDto));
@@ -384,11 +361,8 @@ class HabitAssignControllerTest {
     @Test
     void cancelHabitAssign() throws Exception {
 
-        Long habitId = 1L;
-        HabitAssignDto habitAssignDto = HabitAssignDto.builder()
-                .id(1L)
-                .createDateTime(ZonedDateTime.now())
-                .build();
+        Long habitId = getHabitAssignId();
+        HabitAssignDto habitAssignDto = getHabitAssignDto();
 
         when(habitAssignService.cancelHabitAssign(anyLong(), anyLong()))
                 .thenReturn(habitAssignDto);
@@ -403,7 +377,7 @@ class HabitAssignControllerTest {
     @Test
     void deleteHabitAssign() throws Exception {
 
-        Long habitAssignId = 1L;
+        Long habitAssignId = getHabitAssignId();
 
         doNothing().when(habitAssignService).deleteHabitAssign(anyLong(), anyLong());
 
@@ -432,7 +406,7 @@ class HabitAssignControllerTest {
     @Test
     void updateProgressNotificationHasDisplayed() throws Exception {
 
-        Long habitAssignId = 1L;
+        Long habitAssignId = getHabitAssignId();
 
         doNothing().when(habitAssignService).updateProgressNotificationHasDisplayed(anyLong(), anyLong());
 
@@ -441,5 +415,24 @@ class HabitAssignControllerTest {
                 .andExpect(status().isOk());
 
         verify(habitAssignService).updateProgressNotificationHasDisplayed(eq(habitAssignId), eq(userVO.getId()));
+    }
+
+    private static long getHabitAssignId() {
+
+        return 1L;
+    }
+
+    private static HabitAssignManagementDto getManagementDto() {
+
+        return HabitAssignManagementDto.builder()
+                .habitId(10L)
+                .build();
+    }
+
+    private static HabitAssignDto getHabitAssignDto() {
+
+        return HabitAssignDto.builder()
+                .id(getHabitAssignId())
+                .build();
     }
 }
