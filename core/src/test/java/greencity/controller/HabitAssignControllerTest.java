@@ -3,7 +3,10 @@ package greencity.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.config.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
+import greencity.dto.habit.HabitAssignCustomPropertiesDto;
 import greencity.dto.habit.HabitAssignDto;
+import greencity.dto.habit.HabitAssignManagementDto;
+import greencity.dto.habit.HabitAssignUserDurationDto;
 import greencity.dto.user.UserVO;
 import greencity.service.HabitAssignService;
 import greencity.service.UserService;
@@ -20,18 +23,18 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Locale;
 
-import static greencity.ModelUtils.getPrincipal;
-import static greencity.ModelUtils.getUserVO;
+import static greencity.ModelUtils.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -55,40 +58,105 @@ class HabitAssignControllerTest {
     HabitAssignController habitAssignController;
 
     private static final String link = "/habit/assign";
-    private Principal principal = getPrincipal();
+    private final Principal principal = getPrincipal();
+    private final ObjectMapper mapper = new ObjectMapper();
+    private final UserVO userVO = getUserVO();
+    private final Locale locale = Locale.ENGLISH;
 
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(habitAssignController)
                 .setCustomArgumentResolvers(new UserArgumentResolver(userService, modelMapper))
                 .build();
+        when(userService.findByEmail(anyString())).thenReturn(userVO);
+        when(modelMapper.map(userVO, UserVO.class)).thenReturn(userVO);
     }
 
     @Test
     void getHabitAssign() throws Exception {
 
-        UserVO userVO = getUserVO();
-        Locale locale = Locale.ENGLISH;
         Long habitAssignId = 1L;
 
         HabitAssignDto habitAssignDto = HabitAssignDto.builder()
                 .id(habitAssignId)
                 .build();
 
-        when(userService.findByEmail(anyString())).thenReturn(userVO);
-        when(modelMapper.map(userVO, UserVO.class)).thenReturn(userVO);
         when(habitAssignService.getByHabitAssignIdAndUserId(anyLong(), anyLong(), anyString()))
                 .thenReturn(habitAssignDto);
 
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(habitAssignDto);
-
         mockMvc.perform(get(link + "/{habitAssignId}", habitAssignId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .principal(principal)
-                        .content(json))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                        .principal(principal))
+                .andExpect(status().isOk());
 
-        verify(habitAssignService).getByHabitAssignIdAndUserId(eq(habitAssignId), eq(userVO.getId()), eq(locale.getLanguage()));
+        verify(habitAssignService).getByHabitAssignIdAndUserId(
+                eq(habitAssignId),
+                eq(userVO.getId()),
+                eq(locale.getLanguage()));
+    }
+
+    @Test
+    void assignDefault() throws Exception {
+
+        Long habitId = 1L;
+
+        HabitAssignManagementDto managementDto = HabitAssignManagementDto.builder()
+                .habitId(10L)
+                .build();
+
+        when(habitAssignService.assignDefaultHabitForUser(anyLong(), any()))
+                .thenReturn(managementDto);
+
+        mockMvc.perform(post(link + "/{habitId}", habitId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .principal(principal))
+                .andExpect(status().isCreated());
+
+        verify(habitAssignService).assignDefaultHabitForUser(eq(habitId), eq(userVO));
+    }
+
+    @Test
+    void assignCustom() throws Exception {
+
+        Long habitId = 1L;
+
+        HabitAssignCustomPropertiesDto customPropertiesDto = getHabitAssignCustomPropertiesDto();
+        HabitAssignManagementDto managementDto = HabitAssignManagementDto.builder()
+                .habitId(10L)
+                .build();
+
+        when(habitAssignService.assignCustomHabitForUser(anyLong(), any(), any()))
+                .thenReturn(List.of(managementDto));
+
+        mockMvc.perform(post(link + "/{habitId}/custom", habitId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .principal(principal)
+                        .content(mapper.writeValueAsString(customPropertiesDto)))
+                .andExpect(status().isCreated());
+
+        verify(habitAssignService).assignCustomHabitForUser(eq(habitId), eq(userVO), eq(customPropertiesDto));
+    }
+
+    @Test
+    void updateHabitAssignDuration() throws Exception {
+
+        Long habitAssignId = 1L;
+        Integer duration = 10;
+        HabitAssignUserDurationDto durationDto = HabitAssignUserDurationDto.builder()
+                .habitId(1L)
+                .workingDays(5)
+                .duration(10)
+                .build();
+
+        when(habitAssignService.updateUserHabitInfoDuration(anyLong(), anyLong(), anyInt()))
+                .thenReturn(durationDto);
+
+        mockMvc.perform(put(link + "/{habitAssignId}/update-habit-duration", habitAssignId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .principal(principal)
+                        .param("duration", String.valueOf(duration)))
+                .andExpect(status().isOk());
+
+        verify(habitAssignService).updateUserHabitInfoDuration(eq(habitAssignId), eq(userVO.getId()), eq(duration));
     }
 }
