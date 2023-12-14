@@ -1,0 +1,329 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > EcoNewsCommentController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">greencity.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: EcoNewsCommentController (greencity.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">EcoNewsCommentController</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/18)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package greencity.controller;
+&nbsp;
+&nbsp;import greencity.annotations.ApiPageable;
+&nbsp;import greencity.annotations.ApiPageableWithoutSort;
+&nbsp;import greencity.annotations.CurrentUser;
+&nbsp;import greencity.constant.HttpStatuses;
+&nbsp;import greencity.dto.PageableDto;
+&nbsp;import greencity.dto.econews.EcoNewsVO;
+&nbsp;import greencity.dto.econewscomment.*;
+&nbsp;import greencity.dto.user.UserVO;
+&nbsp;import greencity.service.EcoNewsCommentService;
+&nbsp;import io.swagger.annotations.ApiOperation;
+&nbsp;import io.swagger.annotations.ApiResponse;
+&nbsp;import io.swagger.annotations.ApiResponses;
+&nbsp;import lombok.AllArgsConstructor;
+&nbsp;import org.springframework.data.domain.Pageable;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.messaging.handler.annotation.MessageMapping;
+&nbsp;import org.springframework.messaging.handler.annotation.Payload;
+&nbsp;import org.springframework.validation.annotation.Validated;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;import springfox.documentation.annotations.ApiIgnore;
+&nbsp;
+&nbsp;import javax.validation.Valid;
+&nbsp;import javax.validation.constraints.NotBlank;
+&nbsp;
+&nbsp;@Validated
+&nbsp;@AllArgsConstructor
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;/econews/comments&quot;)
+&nbsp;public class EcoNewsCommentController {
+&nbsp;    private final EcoNewsCommentService ecoNewsCommentService;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method for creating {@link EcoNewsCommentVO}.
+&nbsp;     *
+&nbsp;     * @param econewsId id of {@link EcoNewsVO} to add comment to.
+&nbsp;     * @param request   - dto for {@link EcoNewsCommentVO} entity.
+&nbsp;     * @return dto {@link greencity.dto.econewscomment.AddEcoNewsCommentDtoResponse}
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Add comment.&quot;)
+&nbsp;    @ResponseStatus(value = HttpStatus.CREATED)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = AddEcoNewsCommentDtoResponse.class),
+&nbsp;        @ApiResponse(code = 303, message = HttpStatuses.SEE_OTHER),
+&nbsp;        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+&nbsp;        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
+&nbsp;    })
+&nbsp;    @PostMapping(&quot;{econewsId}&quot;)
+&nbsp;    public ResponseEntity&lt;AddEcoNewsCommentDtoResponse&gt; save(@PathVariable Long econewsId,
+&nbsp;        @Valid @RequestBody AddEcoNewsCommentDtoRequest request,
+&nbsp;        @ApiIgnore @CurrentUser UserVO user) {
+<b class="nc">&nbsp;        return ResponseEntity</b>
+<b class="nc">&nbsp;            .status(HttpStatus.CREATED)</b>
+<b class="nc">&nbsp;            .body(ecoNewsCommentService.save(econewsId, request, user));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method to count not deleted comments to certain {@link EcoNewsVO}.
+&nbsp;     *
+&nbsp;     * @param ecoNewsId to specify {@link EcoNewsVO}
+&nbsp;     * @return amount of comments
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Count comments.&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK),
+&nbsp;        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
+&nbsp;    })
+&nbsp;    @GetMapping(&quot;/count/comments/{ecoNewsId}&quot;)
+&nbsp;    public int getCountOfComments(@PathVariable Long ecoNewsId) {
+<b class="nc">&nbsp;        return ecoNewsCommentService.countOfComments(ecoNewsId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method to get all replies to {@link EcoNewsCommentVO} specified by
+&nbsp;     * parentCommentId.
+&nbsp;     *
+&nbsp;     * @param parentCommentId specifies parent comment to all replies
+&nbsp;     * @return Pageable of {@link EcoNewsCommentDto} replies
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Get all replies to comment.&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK),
+&nbsp;        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+&nbsp;        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
+&nbsp;    })
+&nbsp;    @GetMapping(&quot;replies/{parentCommentId}&quot;)
+&nbsp;    @ApiPageable
+&nbsp;    public ResponseEntity&lt;PageableDto&lt;EcoNewsCommentDto&gt;&gt; findAllReplies(@ApiIgnore Pageable pageable,
+&nbsp;        @PathVariable Long parentCommentId,
+&nbsp;        @ApiIgnore @CurrentUser UserVO user) {
+<b class="nc">&nbsp;        return ResponseEntity</b>
+<b class="nc">&nbsp;            .status(HttpStatus.OK)</b>
+<b class="nc">&nbsp;            .body(ecoNewsCommentService.findAllReplies(pageable, parentCommentId, user));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method to count replies to certain {@link EcoNewsCommentVO}.
+&nbsp;     *
+&nbsp;     * @param parentCommentId specifies parent comment to all replies
+&nbsp;     * @return amount of replies
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Get count of replies to comment.&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK),
+&nbsp;        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+&nbsp;        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
+&nbsp;    })
+&nbsp;    @GetMapping(&quot;count/replies/{parentCommentId}&quot;)
+&nbsp;    public int getCountOfReplies(@PathVariable Long parentCommentId) {
+<b class="nc">&nbsp;        return ecoNewsCommentService.countReplies(parentCommentId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method to mark comment as deleted.
+&nbsp;     *
+&nbsp;     * @param id comment id
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Mark comment as deleted.&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK),
+&nbsp;        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+&nbsp;        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
+&nbsp;    })
+&nbsp;    @DeleteMapping(&quot;&quot;)
+&nbsp;    public ResponseEntity&lt;Object&gt; delete(Long id, @ApiIgnore @CurrentUser UserVO user) {
+<b class="nc">&nbsp;        ecoNewsCommentService.deleteById(id, user);</b>
+<b class="nc">&nbsp;        return ResponseEntity.ok().build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method to update certain {@link EcoNewsCommentVO} specified by id.
+&nbsp;     *
+&nbsp;     * @param id   of {@link EcoNewsCommentVO} to update
+&nbsp;     * @param text new text of {@link EcoNewsCommentVO}
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Update comment.&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK),
+&nbsp;        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+&nbsp;        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+&nbsp;    })
+&nbsp;    @PatchMapping(&quot;&quot;)
+&nbsp;    public void update(Long id, @RequestParam @NotBlank String text, @ApiIgnore @CurrentUser UserVO user) {
+<b class="nc">&nbsp;        ecoNewsCommentService.update(text, id, user);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method to like/dislike certain {@link EcoNewsCommentVO} specified by id.
+&nbsp;     *
+&nbsp;     * @param id of {@link EcoNewsCommentVO} to like/dislike
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Like comment.&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK),
+&nbsp;        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+&nbsp;        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+&nbsp;    })
+&nbsp;    @PostMapping(&quot;like&quot;)
+&nbsp;    public void like(@RequestParam(&quot;id&quot;) Long id, @ApiIgnore @CurrentUser UserVO user) {
+<b class="nc">&nbsp;        ecoNewsCommentService.like(id, user);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method to like/dislike comment and count likes.
+&nbsp;     *
+&nbsp;     * @param amountCommentLikesDto dto with id and count likes for comments.
+&nbsp;     */
+&nbsp;    @MessageMapping(&quot;/likeAndCount&quot;)
+&nbsp;    public void getCountOfLike(@Payload AmountCommentLikesDto amountCommentLikesDto) {
+<b class="nc">&nbsp;        ecoNewsCommentService.countLikes(amountCommentLikesDto);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method to get all active comments to {@link EcoNewsVO} specified by
+&nbsp;     * ecoNewsId.
+&nbsp;     *
+&nbsp;     * @param ecoNewsId id of {@link EcoNewsVO}
+&nbsp;     * @return Pageable of {@link EcoNewsCommentDto}
+&nbsp;     * @author Taras Dovganyuk
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Get all active comments.&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK),
+&nbsp;        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+&nbsp;    })
+&nbsp;    @GetMapping(&quot;/active&quot;)
+&nbsp;    @ApiPageableWithoutSort
+&nbsp;    public ResponseEntity&lt;PageableDto&lt;EcoNewsCommentDto&gt;&gt; getAllActiveComments(@ApiIgnore Pageable pageable,
+&nbsp;        Long ecoNewsId,
+&nbsp;        @ApiIgnore @CurrentUser UserVO user) {
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.OK)</b>
+<b class="nc">&nbsp;            .body(ecoNewsCommentService.getAllActiveComments(pageable, user, ecoNewsId));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method to get all active replies to {@link EcoNewsCommentVO} specified by
+&nbsp;     * parentCommentId.
+&nbsp;     *
+&nbsp;     * @param parentCommentId specifies parent comment to all replies
+&nbsp;     * @return Pageable of {@link EcoNewsCommentDto} replies
+&nbsp;     * @author Dovganyuk Taras
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Get all active replies to comment.&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK),
+&nbsp;        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+&nbsp;        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
+&nbsp;    })
+&nbsp;    @GetMapping(&quot;replies/active/{parentCommentId}&quot;)
+&nbsp;    @ApiPageable
+&nbsp;    public ResponseEntity&lt;PageableDto&lt;EcoNewsCommentDto&gt;&gt; findAllActiveReplies(@ApiIgnore Pageable pageable,
+&nbsp;        @PathVariable Long parentCommentId,
+&nbsp;        @ApiIgnore @CurrentUser UserVO user) {
+<b class="nc">&nbsp;        return ResponseEntity</b>
+<b class="nc">&nbsp;            .status(HttpStatus.OK)</b>
+<b class="nc">&nbsp;            .body(ecoNewsCommentService.findAllActiveReplies(pageable, parentCommentId, user));</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-12-13 23:47</div>
+</div>
+</body>
+</html>

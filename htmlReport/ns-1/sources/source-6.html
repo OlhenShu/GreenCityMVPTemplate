@@ -1,0 +1,632 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > HabitAssignController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">greencity.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: HabitAssignController (greencity.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">HabitAssignController</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/48)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package greencity.controller;
+&nbsp;
+&nbsp;import greencity.annotations.ApiLocale;
+&nbsp;import greencity.annotations.CurrentUser;
+&nbsp;import greencity.annotations.ValidLanguage;
+&nbsp;import greencity.constant.AppConstant;
+&nbsp;import greencity.constant.HttpStatuses;
+&nbsp;import greencity.dto.habit.*;
+&nbsp;import greencity.dto.habitstatuscalendar.HabitStatusCalendarDto;
+&nbsp;import greencity.dto.user.UserVO;
+&nbsp;import greencity.service.HabitAssignService;
+&nbsp;import io.swagger.annotations.ApiOperation;
+&nbsp;import io.swagger.annotations.ApiResponse;
+&nbsp;import io.swagger.annotations.ApiResponses;
+&nbsp;import lombok.AllArgsConstructor;
+&nbsp;import org.springframework.format.annotation.DateTimeFormat;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.validation.annotation.Validated;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;import springfox.documentation.annotations.ApiIgnore;
+&nbsp;
+&nbsp;import javax.validation.Valid;
+&nbsp;import javax.validation.constraints.Max;
+&nbsp;import javax.validation.constraints.Min;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale;
+&nbsp;
+&nbsp;@Validated
+&nbsp;@AllArgsConstructor
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;/habit/assign&quot;)
+&nbsp;public class HabitAssignController {
+&nbsp;    private final HabitAssignService habitAssignService;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method which assigns habit for {@link UserVO} with default props.
+&nbsp;     *
+&nbsp;     * @param habitId {@link HabitVO} id.
+&nbsp;     * @param userVO  {@link UserVO} instance.
+&nbsp;     * @return {@link ResponseEntity}.
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Assign habit with default properties for current user.&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = HabitAssignDto.class),
+&nbsp;        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+&nbsp;        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+&nbsp;    })
+&nbsp;    @ResponseStatus(HttpStatus.NOT_FOUND)
+&nbsp;    @PostMapping(&quot;/{habitId}&quot;)
+&nbsp;    public ResponseEntity&lt;HabitAssignManagementDto&gt; assignDefault(@PathVariable Long habitId,
+&nbsp;        @ApiIgnore @CurrentUser UserVO userVO) {
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.CREATED)</b>
+<b class="nc">&nbsp;            .body(habitAssignService.assignDefaultHabitForUser(habitId, userVO));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method which assigns habit for {@link UserVO} with custom props.
+&nbsp;     *
+&nbsp;     * @param habitId                        {@link HabitVO} id.
+&nbsp;     * @param userVO                         {@link UserVO} instance.
+&nbsp;     * @param habitAssignCustomPropertiesDto {@link HabitAssignCustomPropertiesDto}
+&nbsp;     *                                       instance.
+&nbsp;     * @return {@link ResponseEntity}.
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Assign habit with custom properties for current user and his friends.&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 201, message = HttpStatuses.CREATED, response = HabitAssignDto.class),
+&nbsp;        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+&nbsp;        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+&nbsp;    })
+&nbsp;    @ResponseStatus(HttpStatus.NOT_FOUND)
+&nbsp;    @PostMapping(&quot;/{habitId}/custom&quot;)
+&nbsp;    public ResponseEntity&lt;List&lt;HabitAssignManagementDto&gt;&gt; assignCustom(@PathVariable Long habitId,
+&nbsp;        @ApiIgnore @CurrentUser UserVO userVO,
+&nbsp;        @Valid @RequestBody HabitAssignCustomPropertiesDto habitAssignCustomPropertiesDto) {
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.CREATED)</b>
+<b class="nc">&nbsp;            .body(habitAssignService.assignCustomHabitForUser(habitId, userVO, habitAssignCustomPropertiesDto));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method which updates duration of habit assigned for user.
+&nbsp;     *
+&nbsp;     * @param habitAssignId {@link HabitVO} id.
+&nbsp;     * @param userVO        {@link UserVO} instance.
+&nbsp;     * @param duration      {@link Integer} with needed duration.
+&nbsp;     * @return {@link ResponseEntity}.
+&nbsp;     */
+&nbsp;    @PutMapping(&quot;/{habitAssignId}/update-habit-duration&quot;)
+&nbsp;    @ApiOperation(value = &quot;Update duration of habit with habitAssignId for user.&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK, response = HabitAssignUserDurationDto.class),
+&nbsp;        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+&nbsp;        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+&nbsp;    })
+&nbsp;    public ResponseEntity&lt;HabitAssignUserDurationDto&gt; updateHabitAssignDuration(
+&nbsp;        @PathVariable Long habitAssignId,
+&nbsp;        @ApiIgnore @CurrentUser UserVO userVO,
+&nbsp;        @RequestParam @Min(AppConstant.MIN_DAYS_DURATION) @Max(AppConstant.MAX_DAYS_DURATION) Integer duration) {
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.OK)</b>
+<b class="nc">&nbsp;            .body(habitAssignService.updateUserHabitInfoDuration(habitAssignId, userVO.getId(), duration));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method returns {@link HabitAssignDto} by it&#39;s id, current user id and
+&nbsp;     * specific language.
+&nbsp;     *
+&nbsp;     * @param habitAssignId {@link HabitAssignVO} id.
+&nbsp;     * @param userVO        {@link UserVO}.
+&nbsp;     * @param locale        needed language code.
+&nbsp;     * @return {@link HabitAssignDto}.
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Get habit assign.&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK, response = HabitAssignDto.class),
+&nbsp;        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+&nbsp;        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+&nbsp;        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+&nbsp;    })
+&nbsp;    @ApiLocale
+&nbsp;    @GetMapping(&quot;/{habitAssignId}&quot;)
+&nbsp;    public ResponseEntity&lt;HabitAssignDto&gt; getHabitAssign(@PathVariable Long habitAssignId,
+&nbsp;        @ApiIgnore @CurrentUser UserVO userVO, @ApiIgnore @ValidLanguage Locale locale) {
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.OK)</b>
+<b class="nc">&nbsp;            .body(habitAssignService.getByHabitAssignIdAndUserId(habitAssignId, userVO.getId(), locale.getLanguage()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method for finding all inprogress, acquired {@link HabitAssignDto}&#39;s for
+&nbsp;     * current user.
+&nbsp;     *
+&nbsp;     * @param userVO {@link UserVO} instance.
+&nbsp;     * @param locale needed language code.
+&nbsp;     * @return list of {@link HabitAssignDto}.
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Get (inprogress, acquired) assigned habits for current user&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK, response = HabitAssignDto.class,
+&nbsp;            responseContainer = &quot;List&quot;),
+&nbsp;        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+&nbsp;    })
+&nbsp;    @ApiLocale
+&nbsp;    @GetMapping(&quot;/allForCurrentUser&quot;)
+&nbsp;    public ResponseEntity&lt;List&lt;HabitAssignDto&gt;&gt; getCurrentUserHabitAssignsByIdAndAcquired(
+&nbsp;        @ApiIgnore @CurrentUser UserVO userVO,
+&nbsp;        @ApiIgnore @ValidLanguage Locale locale) {
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.OK)</b>
+<b class="nc">&nbsp;            .body(habitAssignService</b>
+<b class="nc">&nbsp;                .getAllHabitAssignsByUserIdAndStatusNotCancelled(userVO.getId(), locale.getLanguage()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method that return UserShoppingList and CustomShoppingList.
+&nbsp;     *
+&nbsp;     * @param habitAssignId {@link HabitAssignVO} id.
+&nbsp;     * @param userVO        {@link UserVO} instance.
+&nbsp;     * @param locale        needed language code.
+&nbsp;     * @return User Shopping List and Custom Shopping List.
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Get user shopping and custom shopping lists by habitAssignId&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK,
+&nbsp;            response = UserShoppingAndCustomShoppingListsDto.class),
+&nbsp;        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+&nbsp;        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+&nbsp;    })
+&nbsp;    @ApiLocale
+&nbsp;    @GetMapping(&quot;{habitAssignId}/allUserAndCustomList&quot;)
+&nbsp;    public ResponseEntity&lt;UserShoppingAndCustomShoppingListsDto&gt; getUserShoppingAndCustomShoppingLists(
+&nbsp;        @PathVariable Long habitAssignId,
+&nbsp;        @ApiIgnore @CurrentUser UserVO userVO,
+&nbsp;        @ApiIgnore @ValidLanguage Locale locale) {
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.OK)</b>
+<b class="nc">&nbsp;            .body(habitAssignService</b>
+<b class="nc">&nbsp;                .getUserShoppingAndCustomShoppingLists(userVO.getId(), habitAssignId, locale.getLanguage()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method that update UserShoppingList and CustomShopping List.
+&nbsp;     *
+&nbsp;     * @param habitAssignId {@link HabitAssignVO} id.
+&nbsp;     * @param userVO        {@link UserVO} instance.
+&nbsp;     * @param locale        needed language code.
+&nbsp;     * @param listsDto      {@link UserShoppingAndCustomShoppingListsDto} instance.
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Update user and custom shopping lists&quot;,
+&nbsp;        notes = &quot;If the item is already present in the db, the method updates it\n&quot;
+&nbsp;            + &quot;If item is not present in the db and id is null, the method attempts to add it to the user\n&quot;
+&nbsp;            + &quot;If some items from db are not present in the lists, the method deletes &quot;
+&nbsp;            + &quot;them (except for items with DISABLED status).&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK),
+&nbsp;        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+&nbsp;        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+&nbsp;    })
+&nbsp;    @ApiLocale
+&nbsp;    @PutMapping(&quot;{habitAssignId}/allUserAndCustomList&quot;)
+&nbsp;    public ResponseEntity&lt;ResponseEntity.BodyBuilder&gt; updateUserAndCustomShoppingLists(
+&nbsp;        @PathVariable Long habitAssignId,
+&nbsp;        @ApiIgnore @CurrentUser UserVO userVO,
+&nbsp;        @ApiIgnore @ValidLanguage Locale locale,
+&nbsp;        @Valid @RequestBody UserShoppingAndCustomShoppingListsDto listsDto) {
+<b class="nc">&nbsp;        habitAssignService.fullUpdateUserAndCustomShoppingLists(userVO.getId(), habitAssignId, listsDto,</b>
+<b class="nc">&nbsp;            locale.getLanguage());</b>
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.OK).build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method that return list of UserShoppingLists and CustomShoppingLists for
+&nbsp;     * current user, specific language and INPROGRESS status.
+&nbsp;     *
+&nbsp;     * @param userVO {@link UserVO} instance.
+&nbsp;     * @param locale needed language code.
+&nbsp;     * @return List of User Shopping Lists and Custom Shopping Lists.
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Get list of user shopping list items and custom shopping list items with status INPROGRESS&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK,
+&nbsp;            response = UserShoppingAndCustomShoppingListsDto.class),
+&nbsp;        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+&nbsp;        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+&nbsp;        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+&nbsp;    })
+&nbsp;    @ApiLocale
+&nbsp;    @GetMapping(&quot;/allUserAndCustomShoppingListsInprogress&quot;)
+&nbsp;    public ResponseEntity&lt;List&lt;UserShoppingAndCustomShoppingListsDto&gt;&gt; getListOfUserAndCustomShoppingListsInprogress(
+&nbsp;        @ApiIgnore @CurrentUser UserVO userVO, @ApiIgnore @ValidLanguage Locale locale) {
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.OK)</b>
+<b class="nc">&nbsp;            .body(habitAssignService</b>
+<b class="nc">&nbsp;                .getListOfUserAndCustomShoppingListsWithStatusInprogress(userVO.getId(), locale.getLanguage()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method to return all inprogress, acquired {@link HabitAssignDto} by it&#39;s
+&nbsp;     * {@link HabitVO} id.
+&nbsp;     *
+&nbsp;     * @param habitId {@link HabitVO} id.
+&nbsp;     * @param locale  needed language code.
+&nbsp;     * @return {@link List} of {@link HabitAssignDto}.
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Get all inprogress, acquired assigns by certain habit.&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK, response = HabitAssignDto.class,
+&nbsp;            responseContainer = &quot;List&quot;),
+&nbsp;        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+&nbsp;    })
+&nbsp;    @ApiLocale
+&nbsp;    @GetMapping(&quot;/{habitId}/all&quot;)
+&nbsp;    public ResponseEntity&lt;List&lt;HabitAssignDto&gt;&gt; getAllHabitAssignsByHabitIdAndAcquired(@PathVariable Long habitId,
+&nbsp;        @ApiIgnore @ValidLanguage Locale locale) {
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.OK)</b>
+<b class="nc">&nbsp;            .body(habitAssignService.getAllHabitAssignsByHabitIdAndStatusNotCancelled(habitId,</b>
+<b class="nc">&nbsp;                locale.getLanguage()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method to return {@link HabitAssignVO} by it&#39;s {@link HabitVO} id.
+&nbsp;     *
+&nbsp;     * @param habitId {@link HabitVO} id.
+&nbsp;     * @param userVO  {@link UserVO} user.
+&nbsp;     * @param locale  needed language code.
+&nbsp;     * @return {@link HabitAssignDto} instance.
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Get inprogress or acquired assign by habit id for current user.&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK, response = HabitAssignDto.class),
+&nbsp;        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+&nbsp;        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+&nbsp;    })
+&nbsp;    @ApiLocale
+&nbsp;    @GetMapping(&quot;/{habitId}/active&quot;)
+&nbsp;    public ResponseEntity&lt;HabitAssignDto&gt; getHabitAssignByHabitId(
+&nbsp;        @ApiIgnore @CurrentUser UserVO userVO,
+&nbsp;        @PathVariable Long habitId,
+&nbsp;        @ApiIgnore @ValidLanguage Locale locale) {
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.OK)</b>
+<b class="nc">&nbsp;            .body(habitAssignService</b>
+<b class="nc">&nbsp;                .findHabitAssignByUserIdAndHabitId(userVO.getId(), habitId, locale.getLanguage()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method to return {@link HabitDto} with more it&#39;s information by
+&nbsp;     * {@link HabitAssignVO} id.
+&nbsp;     *
+&nbsp;     * @param habitAssignId {@link HabitAssignVO} id.
+&nbsp;     * @param userVO        {@link UserVO} user.
+&nbsp;     * @param locale        needed language code.
+&nbsp;     * @return {@link HabitDto} instance.
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Get habit assign by habit assign id for current user.&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK, response = HabitDto.class),
+&nbsp;        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+&nbsp;        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+&nbsp;    })
+&nbsp;    @ApiLocale
+&nbsp;    @GetMapping(&quot;/{habitAssignId}/more&quot;)
+&nbsp;    public ResponseEntity&lt;HabitDto&gt; getUsersHabitByHabitAssignId(
+&nbsp;        @ApiIgnore @CurrentUser UserVO userVO,
+&nbsp;        @PathVariable Long habitAssignId,
+&nbsp;        @ApiIgnore @ValidLanguage Locale locale) {
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.OK)</b>
+<b class="nc">&nbsp;            .body(habitAssignService</b>
+<b class="nc">&nbsp;                .findHabitByUserIdAndHabitAssignId(userVO.getId(), habitAssignId, locale.getLanguage()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method to update inprogress, acquired {@link HabitAssignVO} for it&#39;s
+&nbsp;     * {@link HabitVO} id and current user.
+&nbsp;     *
+&nbsp;     * @param habitAssignId      {@link HabitAssignVO} id.
+&nbsp;     * @param habitAssignStatDto {@link HabitAssignStatDto} instance.
+&nbsp;     * @return {@link HabitAssignManagementDto}.
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Update inprogress, acquired user habit assign acquired or cancelled status.&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK, response = HabitAssignDto.class),
+&nbsp;        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+&nbsp;        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+&nbsp;    })
+&nbsp;    @PatchMapping(&quot;/{habitAssignId}&quot;)
+&nbsp;    public ResponseEntity&lt;HabitAssignManagementDto&gt; updateAssignByHabitId(
+&nbsp;        @PathVariable Long habitAssignId, @Valid @RequestBody HabitAssignStatDto habitAssignStatDto) {
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.OK).body(habitAssignService</b>
+<b class="nc">&nbsp;            .updateStatusByHabitAssignId(habitAssignId, habitAssignStatDto));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method to enroll {@link HabitAssignVO} for current date.
+&nbsp;     *
+&nbsp;     * @param habitAssignId - id of {@link HabitAssignVO}.
+&nbsp;     * @param userVO        {@link UserVO} user.
+&nbsp;     * @param date          - {@link LocalDate} we want to enroll.
+&nbsp;     * @param locale        - needed language code.
+&nbsp;     * @return {@link HabitStatusCalendarDto}.
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Enroll habit assign by habitAssignId for current user.&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK, response = HabitAssignDto.class),
+&nbsp;        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+&nbsp;        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+&nbsp;        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+&nbsp;    })
+&nbsp;    @ApiLocale
+&nbsp;    @PostMapping(&quot;/{habitAssignId}/enroll/{date}&quot;)
+&nbsp;    public ResponseEntity&lt;HabitAssignDto&gt; enrollHabit(@PathVariable Long habitAssignId,
+&nbsp;        @ApiIgnore @CurrentUser UserVO userVO,
+&nbsp;        @PathVariable(value = &quot;date&quot;) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+&nbsp;        @ApiIgnore @ValidLanguage Locale locale) {
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.OK)</b>
+<b class="nc">&nbsp;            .body(habitAssignService.enrollHabit(habitAssignId, userVO.getId(), date, locale.getLanguage()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method to unenroll {@link HabitAssignVO} for defined date.
+&nbsp;     *
+&nbsp;     * @param habitAssignId - id of {@link HabitAssignVO}.
+&nbsp;     * @param userVO        {@link UserVO} user.
+&nbsp;     * @param date          - {@link LocalDate} we want to unenroll.
+&nbsp;     * @return {@link HabitAssignDto} instance.
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Unenroll assigned habit for a specific day.&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK, response = HabitAssignDto.class),
+&nbsp;        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+&nbsp;        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+&nbsp;        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+&nbsp;    })
+&nbsp;    @PostMapping(&quot;/{habitAssignId}/unenroll/{date}&quot;)
+&nbsp;    public ResponseEntity&lt;HabitAssignDto&gt; unenrollHabit(@PathVariable Long habitAssignId,
+&nbsp;        @ApiIgnore @CurrentUser UserVO userVO,
+&nbsp;        @PathVariable(value = &quot;date&quot;) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.OK)</b>
+<b class="nc">&nbsp;            .body(habitAssignService.unenrollHabit(habitAssignId, userVO.getId(), date));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method to find all inprogress {@link HabitAssignVO} on certain
+&nbsp;     * {@link LocalDate}.
+&nbsp;     *
+&nbsp;     * @param userVO {@link UserVO} user.
+&nbsp;     * @param date   {@link LocalDate} date to check if has inprogress assigns.
+&nbsp;     * @param locale needed language code.
+&nbsp;     * @return {@link HabitAssignDto} instance.
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Get inprogress user habit assigns on certain date.&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK, response = HabitAssignDto.class,
+&nbsp;            responseContainer = &quot;List&quot;),
+&nbsp;        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+&nbsp;    })
+&nbsp;    @ApiLocale
+&nbsp;    @GetMapping(&quot;/active/{date}&quot;)
+&nbsp;    public ResponseEntity&lt;List&lt;HabitAssignDto&gt;&gt; getInprogressHabitAssignOnDate(
+&nbsp;        @ApiIgnore @CurrentUser UserVO userVO,
+&nbsp;        @PathVariable(value = &quot;date&quot;) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+&nbsp;        @ApiIgnore @ValidLanguage Locale locale) {
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.OK)</b>
+<b class="nc">&nbsp;            .body(habitAssignService</b>
+<b class="nc">&nbsp;                .findInprogressHabitAssignsOnDate(userVO.getId(), date, locale.getLanguage()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method to find all user inprogress activities {@link HabitsDateEnrollmentDto}
+&nbsp;     * between the specified {@link LocalDate}s.
+&nbsp;     *
+&nbsp;     * @param userVO {@link UserVO} user.
+&nbsp;     * @param from   The start {@link LocalDate} to retrieve from
+&nbsp;     * @param to     The end {@link LocalDate} to retrieve to
+&nbsp;     * @param locale needed language code.
+&nbsp;     * @return {@link HabitsDateEnrollmentDto} instance.
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Get user inprogress activities between the specified dates.&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK, response = HabitsDateEnrollmentDto.class,
+&nbsp;            responseContainer = &quot;List&quot;),
+&nbsp;        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+&nbsp;    })
+&nbsp;    @ApiLocale
+&nbsp;    @GetMapping(&quot;/activity/{from}/to/{to}&quot;)
+&nbsp;    public ResponseEntity&lt;List&lt;HabitsDateEnrollmentDto&gt;&gt; getHabitAssignBetweenDates(
+&nbsp;        @ApiIgnore @CurrentUser UserVO userVO,
+&nbsp;        @PathVariable(value = &quot;from&quot;) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+&nbsp;        @PathVariable(value = &quot;to&quot;) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+&nbsp;        @ApiIgnore @ValidLanguage Locale locale) {
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.OK)</b>
+<b class="nc">&nbsp;            .body(habitAssignService</b>
+<b class="nc">&nbsp;                .findHabitAssignsBetweenDates(userVO.getId(), from, to, locale.getLanguage()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method to cancel inprogress {@link HabitAssignVO} by it&#39;s {@link HabitVO} id
+&nbsp;     * and current user id.
+&nbsp;     *
+&nbsp;     * @param habitId - id of {@link HabitVO}.
+&nbsp;     * @param userVO  - {@link UserVO} user.
+&nbsp;     * @return {@link HabitAssignDto}.
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Cancel inprogress user assigned habit.&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK, response = HabitAssignDto.class),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+&nbsp;        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+&nbsp;    })
+&nbsp;    @PatchMapping(&quot;/cancel/{habitId}&quot;)
+&nbsp;    public ResponseEntity&lt;HabitAssignDto&gt; cancelHabitAssign(@PathVariable Long habitId,
+&nbsp;        @ApiIgnore @CurrentUser UserVO userVO) {
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.OK).body(habitAssignService.cancelHabitAssign(habitId, userVO.getId()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method delete habit assign {@link HabitAssignVO} for current {@link UserVO}
+&nbsp;     * by habitAssignId.
+&nbsp;     *
+&nbsp;     * @param habitAssignId - id of {@link HabitAssignVO}.
+&nbsp;     * @param userVO        - {@link UserVO} user.
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Delete habit assign by habitAssignId for current user.&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK),
+&nbsp;        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+&nbsp;        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+&nbsp;    })
+&nbsp;    @DeleteMapping(&quot;/delete/{habitAssignId}&quot;)
+&nbsp;    public ResponseEntity&lt;ResponseEntity.BodyBuilder&gt; deleteHabitAssign(@PathVariable Long habitAssignId,
+&nbsp;        @ApiIgnore @CurrentUser UserVO userVO) {
+<b class="nc">&nbsp;        habitAssignService.deleteHabitAssign(habitAssignId, userVO.getId());</b>
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.OK).build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method updates user shopping list item {@link UpdateUserShoppingListDto}.
+&nbsp;     *
+&nbsp;     * @param updateUserShoppingListDto - id of {@link UpdateUserShoppingListDto}.
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Update shopping list status for current habit.&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+&nbsp;        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+&nbsp;    })
+&nbsp;    @PutMapping(&quot;/saveShoppingListForHabitAssign&quot;)
+&nbsp;    public ResponseEntity&lt;ResponseEntity.BodyBuilder&gt; updateShoppingListStatus(
+&nbsp;        @RequestBody UpdateUserShoppingListDto updateUserShoppingListDto) {
+<b class="nc">&nbsp;        habitAssignService.updateUserShoppingListItem(updateUserShoppingListDto);</b>
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.OK).build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Method updates value progressNotificationHasDisplayed in HabitAssign to true
+&nbsp;     * {@link Boolean}.
+&nbsp;     *
+&nbsp;     * @param habitAssignId {@link HabitAssignVO} id.
+&nbsp;     * @param userVO        {@link UserVO}.
+&nbsp;     */
+&nbsp;    @ApiOperation(value = &quot;Update value progressNotificationHasDisplayed to true.&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;        @ApiResponse(code = 200, message = HttpStatuses.OK),
+&nbsp;        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+&nbsp;        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+&nbsp;        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+&nbsp;        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+&nbsp;    })
+&nbsp;    @PutMapping(&quot;{habitAssignId}/updateProgressNotificationHasDisplayed&quot;)
+&nbsp;    public ResponseEntity&lt;ResponseEntity.BodyBuilder&gt; updateProgressNotificationHasDisplayed(
+&nbsp;        @PathVariable Long habitAssignId,
+&nbsp;        @ApiIgnore @CurrentUser UserVO userVO) {
+<b class="nc">&nbsp;        habitAssignService.updateProgressNotificationHasDisplayed(habitAssignId, userVO.getId());</b>
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.OK).build();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-12-13 23:47</div>
+</div>
+</body>
+</html>
