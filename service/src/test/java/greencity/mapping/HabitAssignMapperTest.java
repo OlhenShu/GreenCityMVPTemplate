@@ -6,6 +6,11 @@ import greencity.dto.habit.HabitDto;
 import greencity.dto.user.UserShoppingListItemAdvanceDto;
 import greencity.entity.Habit;
 import greencity.entity.HabitAssign;
+import greencity.entity.UserShoppingListItem;
+import greencity.enums.ShoppingListItemStatus;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +27,12 @@ public class HabitAssignMapperTest {
     @Test
     void convertTest() {
         HabitAssign habitAssign = ModelUtils.getHabitAssign();
+        ArrayList<UserShoppingListItem> userShoppingListItemArrayList = new ArrayList<>();
+        UserShoppingListItem shoppingListItem = ModelUtils.getUserShoppingListItem();
+        shoppingListItem.setStatus(ShoppingListItemStatus.INPROGRESS);
+        userShoppingListItemArrayList.add(ModelUtils.getUserShoppingListItem());
+        userShoppingListItemArrayList.add(shoppingListItem);
+        habitAssign.setUserShoppingListItems(userShoppingListItemArrayList);
 
         HabitAssignDto habitAssignDto = HabitAssignDto.builder()
             .createDateTime(habitAssign.getCreateDate())
@@ -57,15 +68,17 @@ public class HabitAssignMapperTest {
             .habitStreak(habitAssignDto.getHabitStreak())
             .lastEnrollmentDate(habitAssignDto.getLastEnrollmentDate())
             .progressNotificationHasDisplayed(habitAssignDto.getProgressNotificationHasDisplayed())
-            .userShoppingListItems(habitAssignDto.getUserShoppingListItems().stream().map(
-                    userShoppingListItemAdvanceDto -> greencity.entity.UserShoppingListItem.builder()
-                        .id(userShoppingListItemAdvanceDto.getId())
-                        .dateCompleted(userShoppingListItemAdvanceDto.getDateCompleted())
-                        .status(userShoppingListItemAdvanceDto.getStatus())
-                        .shoppingListItem(greencity.entity.ShoppingListItem.builder()
-                            .id(userShoppingListItemAdvanceDto.getShoppingListItemId())
-                            .build())
+            .userShoppingListItems(habitAssignDto.getUserShoppingListItems().stream()
+                .filter(userShoppingListItemAdvanceDto ->
+                    userShoppingListItemAdvanceDto.getStatus() == ShoppingListItemStatus.INPROGRESS)
+                .map(userShoppingListItemAdvanceDto -> greencity.entity.UserShoppingListItem.builder()
+                    .id(userShoppingListItemAdvanceDto.getId())
+                    .dateCompleted(userShoppingListItemAdvanceDto.getDateCompleted())
+                    .status(userShoppingListItemAdvanceDto.getStatus())
+                    .shoppingListItem(greencity.entity.ShoppingListItem.builder()
+                        .id(userShoppingListItemAdvanceDto.getShoppingListItemId())
                         .build())
+                    .build())
                 .collect(Collectors.toList()))
             .habit(Habit.builder()
                 .id(habitAssignDto.getHabit().getId())
