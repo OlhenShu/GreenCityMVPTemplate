@@ -1,5 +1,6 @@
 package greencity.mapping;
 
+import greencity.exception.exceptions.NotSavedException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -8,14 +9,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 class MultipartBase64ImageMapperTest {
 
     @InjectMocks
-    private MultipartBase64ImageMapper mapper;
+    MultipartBase64ImageMapper mapper;
 
     @Test
     void convert() throws IOException {
@@ -29,5 +29,15 @@ class MultipartBase64ImageMapperTest {
         assertNotNull(multipartFile);
         assertEquals("image/jpeg", multipartFile.getContentType());
         assertNotNull(multipartFile.getBytes());
+    }
+
+    @Test
+    void convertWithIOException_ShouldThrowNotSavedException() {
+
+        String invalidImage = "data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA\\n\" +\n" +
+                              "                             \"AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO\\n\" +\n" +
+                              "                             \"9TXL0Y4OHwAAAABJRU5ErkJggg==";
+
+        assertThrows(NotSavedException.class, () -> mapper.convert(invalidImage));
     }
 }
