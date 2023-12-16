@@ -4,13 +4,17 @@ import greencity.dto.shoppinglistitem.ShoppingListItemDto;
 import greencity.entity.localization.ShoppingListItemTranslation;
 import greencity.enums.ShoppingListItemStatus;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static greencity.ModelUtils.getShoppingListItemTranslations;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ExtendWith(SpringExtension.class)
 class ShoppingListItemDtoMapperTest {
-
-    private final ShoppingListItemDtoMapper mapper = new ShoppingListItemDtoMapper();
+    @InjectMocks
+    private ShoppingListItemDtoMapper mapper;
 
     @Test
     void convert() {

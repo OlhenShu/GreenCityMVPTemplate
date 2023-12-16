@@ -3,14 +3,18 @@ package greencity.mapping;
 import greencity.dto.search.SearchNewsDto;
 import greencity.entity.EcoNews;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static greencity.ModelUtils.getEcoNews;
 import static greencity.ModelUtils.getSearchNewsDto;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ExtendWith(SpringExtension.class)
 class SearchNewsDtoMapperTest {
-
-    private final SearchNewsDtoMapper mapper = new SearchNewsDtoMapper();
+    @InjectMocks
+    private SearchNewsDtoMapper mapper;
 
     @Test
     void convert() {
