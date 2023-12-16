@@ -26,12 +26,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @ContextConfiguration
 @Import(SecurityConfig.class)
 class LanguageControllerTest {
-
     private MockMvc mockMvc;
-
     @Mock
     LanguageService languageService;
-
     @InjectMocks
     LanguageController languageController;
 
