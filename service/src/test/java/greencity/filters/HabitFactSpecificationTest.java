@@ -80,11 +80,11 @@ class HabitFactSpecificationTest {
         when(criteriaBuilder.equal(idPath, searchCriteria.getValue())).thenReturn(habitIdPredicate);
         when(criteriaBuilder.and(expected, habitIdPredicate)).thenReturn(expected);
 
-
+        searchCriteria = searchCriteriaList.get(2);
         when(criteriaQuery.from(HabitFactTranslation.class)).thenReturn(habitFactTranslationRoot);
         when(criteriaBuilder.conjunction()).thenReturn(expected);
         when(habitFactTranslationRoot.get(HabitFactTranslation_.content)).thenReturn(contentPath);
-        when(criteriaBuilder.like(any(Expression.class), any(String.class))).thenReturn(contentPredicate);
+        when(criteriaBuilder.like(any(Expression.class), eq("%" + searchCriteria.getValue() + "%"))).thenReturn(contentPredicate);
         when(habitFactTranslationRoot.get(HabitFactTranslation_.habitFact)).thenReturn(pathHabitFact);
         when(pathHabitFact.get(HabitFact_.id)).thenReturn(idPath);
         when(root.get(HabitFact_.id)).thenReturn(idPath);
