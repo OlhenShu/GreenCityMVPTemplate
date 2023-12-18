@@ -40,6 +40,7 @@ class SearchServiceImplTest {
     private final String languageCode = "en";
     private final String title = "title";
 
+
     @Test
     void search() {
         List<SearchNewsDto> searchDto = List.of(getSearchNewsDto());
