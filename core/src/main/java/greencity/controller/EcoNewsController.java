@@ -111,7 +111,6 @@ public class EcoNewsController {
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = HttpStatuses.CREATED,
                     response = String.class),
-            @ApiResponse(code = 303, message = HttpStatuses.SEE_OTHER),
             @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
             @ApiResponse(code = 415, message = HttpStatuses.UNSUPPORTED_MEDIA_TYPE)
     })
