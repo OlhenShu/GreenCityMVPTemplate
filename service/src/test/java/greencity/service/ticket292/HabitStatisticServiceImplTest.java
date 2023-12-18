@@ -45,6 +45,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class HabitStatisticServiceImplTest {
 
+
     @Mock
     private HabitStatisticRepo habitStatisticRepo;
 
