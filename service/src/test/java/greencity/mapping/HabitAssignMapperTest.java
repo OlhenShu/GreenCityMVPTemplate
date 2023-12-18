@@ -40,8 +40,7 @@ public class HabitAssignMapperTest {
             .habit(HabitDto.builder()
                 .id(habitAssign.getHabit().getId())
                 .complexity(habitAssign.getHabit().getComplexity())
-                // TODO : assign defaultDuration from habitAssign.getDuration() to habitAssign.getHabit().getDefaultDuration()
-                .defaultDuration(habitAssign.getDuration())
+                .defaultDuration(habitAssign.getHabit().getDefaultDuration())
                 .build())
             .userShoppingListItems(habitAssign.getUserShoppingListItems().stream().map(
                     userShoppingListItem -> UserShoppingListItemAdvanceDto.builder()
