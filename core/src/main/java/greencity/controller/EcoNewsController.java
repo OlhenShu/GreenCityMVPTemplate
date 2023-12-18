@@ -113,6 +113,7 @@ public class EcoNewsController {
                     response = String.class),
             @ApiResponse(code = 303, message = HttpStatuses.SEE_OTHER),
             @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+            @ApiResponse(code = 415, message = HttpStatuses.UNSUPPORTED_MEDIA_TYPE)
     })
     @PostMapping(path = "/uploadImages", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<String[]> uploadImages(
@@ -145,7 +146,6 @@ public class EcoNewsController {
     @ApiOperation(value = "Update eco news")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = HttpStatuses.OK, response = EcoNewsGenericDto.class),
-//            @ApiResponse(code = 303, message = HttpStatuses.SEE_OTHER),
             @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
             @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
