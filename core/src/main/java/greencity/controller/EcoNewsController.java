@@ -68,6 +68,8 @@ public class EcoNewsController {
     @ApiResponses(value = {
         @ApiResponse(code = 201, message = HttpStatuses.CREATED,
             response = EcoNewsGenericDto.class),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
     })
     @PostMapping(consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<EcoNewsGenericDto> save(
@@ -146,6 +148,8 @@ public class EcoNewsController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK, response = EcoNewsGenericDto.class),
         @ApiResponse(code = 303, message = HttpStatuses.SEE_OTHER),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
 
@@ -223,15 +227,21 @@ public class EcoNewsController {
      */
     @ApiOperation(value = "Find all eco news by page.")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
     @GetMapping("/byUserPage")
     @ApiPageable
     public ResponseEntity<PageableAdvancedDto<EcoNewsGenericDto>> getEcoNewsByUserByPage(
-        @ApiIgnore @CurrentUser UserVO user,
-        @ApiIgnore Pageable page) {
-        return ResponseEntity.status(HttpStatus.OK).body(ecoNewsService.findAllByUser(user, page));
+            @ApiIgnore @CurrentUser UserVO user,
+            @ApiIgnore Pageable page) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(ecoNewsService.findAllByUser(user, page));
+        } catch (IllegalArgumentException e) {
+            // Handle the unauthorized case and return a 401 response
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     /**
@@ -300,6 +310,10 @@ public class EcoNewsController {
      * @author Kovaliv Taras
      */
     @ApiOperation(value = "Find all eco news tags")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+    })
     @GetMapping("/tags/all")
     @ApiLocale
     public ResponseEntity<List<TagDto>> findAllEcoNewsTags(@ApiIgnore @ValidLanguage Locale locale) {
@@ -314,6 +328,9 @@ public class EcoNewsController {
      */
     @ApiOperation(value = "Find count of published eco news")
     @GetMapping("/count")
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+    })
     public ResponseEntity<Long> findAmountOfPublishedNews(@RequestParam Long userId) {
         return ResponseEntity.status(HttpStatus.OK).body(ecoNewsService.getAmountOfPublishedNewsByUserId(userId));
     }
