@@ -308,7 +308,8 @@ public class EcoNewsController {
      */
     @ApiOperation(value = "Get three recommended eco news.")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = HttpStatuses.OK)
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
     })
     @GetMapping("/recommended")
     public ResponseEntity<List<EcoNewsDto>> getThreeRecommendedEcoNews(@RequestParam() Long openedEcoNewsId) {
@@ -399,6 +400,10 @@ public class EcoNewsController {
      * @return user liked news or not.
      */
     @ApiOperation(value = "Check if user liked news")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
     @GetMapping("/isLikedByUser")
     public ResponseEntity<Boolean> checkNewsIsLikedByUser(@RequestParam("econewsId") Long econewsId,
                                                           @ApiIgnore @CurrentUser UserVO user) {
