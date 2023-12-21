@@ -287,7 +287,7 @@ public class EcoNewsController {
     @ApiOperation(value = "Get eco news by tags")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = HttpStatuses.OK),
-            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
     })
     @GetMapping("/tags")
     @ApiPageable
@@ -328,7 +328,7 @@ public class EcoNewsController {
     @ApiOperation(value = "Find all eco news tags")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = HttpStatuses.OK),
-            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
     })
     @GetMapping("/tags/all")
     @ApiLocale
@@ -345,7 +345,7 @@ public class EcoNewsController {
     @ApiOperation(value = "Find count of published eco news")
     @GetMapping("/count")
     @ApiResponses(value = {
-            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
     })
     public ResponseEntity<Long> findAmountOfPublishedNews(@RequestParam Long userId) {
         return ResponseEntity.status(HttpStatus.OK).body(ecoNewsService.getAmountOfPublishedNewsByUserId(userId));
@@ -422,7 +422,7 @@ public class EcoNewsController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = HttpStatuses.OK),
             @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(code = 401, message = HttpStatuses.FORBIDDEN),
+            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
             @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND, response = NotFoundException.class)
     })
     @GetMapping("/contentAndSourceForEcoNews/{id}")
