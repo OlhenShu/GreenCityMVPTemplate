@@ -147,7 +147,7 @@ public interface ShoppingListItemService {
      * @param language needed language code.
      * @return {@link UserShoppingListItemDto} with specific language.
      */
-    UserShoppingListItemResponseDto updateUserShopingListItemStatus(Long userId, Long itemId, String language);
+    UserShoppingListItemResponseDto updateUserShoppingListItemStatus(Long userId, Long itemId, String language);
 
     /**
      * Method update status of user shopping list item to do.

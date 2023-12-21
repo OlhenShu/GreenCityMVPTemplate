@@ -390,7 +390,7 @@ public class ShoppingListItemServiceImpl implements ShoppingListItemService {
      */
     @Transactional
     @Override
-    public UserShoppingListItemResponseDto updateUserShopingListItemStatus(Long userId, Long itemId, String language) {
+    public UserShoppingListItemResponseDto updateUserShoppingListItemStatus(Long userId, Long itemId, String language) {
         UserShoppingListItem userShoppingListItem;
         userShoppingListItem = userShoppingListItemRepo.getOne(itemId);
         if (isActive(userShoppingListItem)) {

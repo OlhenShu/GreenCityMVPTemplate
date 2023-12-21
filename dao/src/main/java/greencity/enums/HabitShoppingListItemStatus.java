@@ -1,6 +1,6 @@
 package greencity.enums;
 
-public enum HabitShopingListItemStatus {
+public enum HabitShoppingListItemStatus {
     ACTUAL,
     DELETED
 }

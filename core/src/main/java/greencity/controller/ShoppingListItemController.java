@@ -125,7 +125,7 @@ public class ShoppingListItemController {
         @ApiIgnore @ValidLanguage Locale locale) {
         return ResponseEntity
             .status(HttpStatus.CREATED)
-            .body(shoppingListItemService.updateUserShopingListItemStatus(user.getId(), userShoppingListItemId,
+            .body(shoppingListItemService.updateUserShoppingListItemStatus(user.getId(), userShoppingListItemId,
                 locale.getLanguage()));
     }
 
