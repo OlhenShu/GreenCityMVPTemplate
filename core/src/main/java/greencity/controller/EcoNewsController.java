@@ -227,19 +227,6 @@ public class EcoNewsController {
      * @return PageableDto of {@link EcoNewsDto} instances.
      * @author Danylo Hlynskyi.
      */
-//    @ApiOperation(value = "Find all eco news by page.")
-//    @ApiResponses(value = {
-//        @ApiResponse(code = 200, message = HttpStatuses.OK),
-//        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-//        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
-//    })
-//    @GetMapping("/byUserPage")
-//    @ApiPageable
-//    public ResponseEntity<PageableAdvancedDto<EcoNewsGenericDto>> getEcoNewsByUserByPage(
-//        @ApiIgnore @CurrentUser UserVO user,
-//        @ApiIgnore Pageable page) {
-//        return ResponseEntity.status(HttpStatus.OK).body(ecoNewsService.findAllByUser(user, page));
-//    }
     @ApiOperation(value = "Find all eco news by page.")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = HttpStatuses.OK),
