@@ -89,7 +89,7 @@ class HabitStatisticControllerTest {
                         .principal(ModelUtils.getPrincipal())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content))
-                .andExpect(status().is(201));
+                .andExpect(status().isCreated());
         addHabitStatisticDto =
                 objectMapper.readValue(content, AddHabitStatisticDto.class);
         verify(habitStatisticService).saveByHabitIdAndUserId(eq(existId), nullable(Long.class), eq(addHabitStatisticDto));
@@ -109,7 +109,7 @@ class HabitStatisticControllerTest {
         mockMvc.perform(put(habitStatisticResource + "/{habitId}", existId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content))
-                .andExpect(status().is(200));
+                .andExpect(status().isOk());
         verify(habitStatisticService).update(eq(existId), nullable(Long.class), eq(updateHabitStatisticDto));
     }
 
