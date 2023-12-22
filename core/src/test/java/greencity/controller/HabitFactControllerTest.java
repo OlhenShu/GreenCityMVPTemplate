@@ -41,21 +41,19 @@ class HabitFactControllerTest {
     @Mock
     private HabitFactService habitFactService;
     @Mock
-    ModelMapper mapper;
+    private ModelMapper mapper;
     @Mock
     private Validator mockValidator;
     @InjectMocks
     private HabitFactController habitFactController;
 
     private final String MOCK_URL = "/facts";
-
     List<HabitFactTranslationUpdateDto> dto = Arrays.asList(
             new HabitFactTranslationUpdateDto(FactOfDayStatus.POTENTIAL,
                     new LanguageDTO(1L, "ua"), "українська"),
             new HabitFactTranslationUpdateDto(FactOfDayStatus.POTENTIAL,
-                    new LanguageDTO(2L, "en"), "english"),
-            new HabitFactTranslationUpdateDto(FactOfDayStatus.POTENTIAL,
-                    new LanguageDTO(3L, "ru"), "русский"));
+                    new LanguageDTO(2L, "en"), "english")
+    );
     HabitFactUpdateDto habitFactUpdateDto = new HabitFactUpdateDto(dto,
             new HabitIdRequestDto(1L));
 
