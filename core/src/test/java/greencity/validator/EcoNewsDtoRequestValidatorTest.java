@@ -15,7 +15,6 @@ import java.util.Collections;
 import static greencity.ModelUtils.getAddEcoNewsDtoRequest;
 import static org.junit.jupiter.api.Assertions.*;
 
-
 @ExtendWith(MockitoExtension.class)
 class EcoNewsDtoRequestValidatorTest {
     @InjectMocks
