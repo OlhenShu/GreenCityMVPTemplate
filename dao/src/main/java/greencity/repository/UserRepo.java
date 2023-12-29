@@ -1,9 +1,11 @@
 package greencity.repository;
 
+import greencity.dto.friends.FriendsDto;
 import greencity.dto.habit.HabitVO;
 import greencity.dto.user.UserManagementVO;
 import greencity.dto.user.UserVO;
 import greencity.entity.User;
+import greencity.repository.options.FriendsFilter;
 import greencity.repository.options.UserFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +13,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -141,4 +144,20 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
         + "(SELECT user_id FROM users_friends WHERE friend_id = :userId and status = 'FRIEND')"
         + "UNION (SELECT friend_id FROM users_friends WHERE user_id = :userId and status = 'FRIEND'));")
     List<User> getAllUserFriends(Long userId);
+
+    /**
+     * Get all user friends.
+     * The ID of the user.
+     * @return list of .
+     */
+    @Query(
+        "SELECT new greencity.dto.friends.FriendsSearchDto (u.profilePicturePath, u.name, "
+            + "u.rating, u.city, COUNT(uf)) "
+            + "FROM User u LEFT JOIN u.friends uf "
+            + "WHERE (uf.id IN ( "
+            + "SELECT f.id FROM User u2 LEFT JOIN u2.friends f WHERE u2.id = :userId) "
+            + "OR uf.id IS NULL) AND u.id != :userId AND u.id NOT IN ( "
+            + "SELECT f.id FROM User u2 LEFT JOIN u2.friends f WHERE u2.id = :userId) "
+            + "GROUP BY u.id")
+    Page<FriendsDto> findAllFriendsDto(FriendsFilter friendsFilter, @Param("userId") Long userId, Pageable pageable);
 }
