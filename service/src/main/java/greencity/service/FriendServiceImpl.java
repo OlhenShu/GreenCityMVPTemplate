@@ -1,7 +1,10 @@
 package greencity.service;
 
+import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
 import greencity.dto.user.UserFriendDto;
+import greencity.entity.User;
+import greencity.exception.exceptions.NotFoundException;
 import greencity.repository.UserRepo;
 
 import javax.transaction.Transactional;
@@ -27,19 +30,21 @@ public class FriendServiceImpl implements FriendService {
 
     public PageableDto<UserFriendDto> findAllUsersFriends(Long userId, Pageable pageable) {
 
-        List<UserFriendDto> friends = userRepo.getAllUserFriends(userId)
-                .stream()
+        List<User> friends = userRepo.getAllUserFriends(userId);
+        if (friends.isEmpty()) {
+            throw new NotFoundException(ErrorMessage.NOT_FOUND_ANY_FRIENDS);
+        }
+        List<UserFriendDto> friendsDto = friends.stream()
                 .map(user -> modelMapper.map(user, UserFriendDto.class))
                 .collect(Collectors.toList());
 
         int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), friends.size());
-        Page<UserFriendDto> friendDtoPage = new PageImpl<>(friends.subList(start, end), pageable, friends.size());
+        int end = Math.min((start + pageable.getPageSize()), friendsDto.size());
+        Page<UserFriendDto> friendDtoPage = new PageImpl<>(friendsDto.subList(start, end), pageable, friendsDto.size());
         return new PageableDto<>(
                 friendDtoPage.getContent(),
                 friendDtoPage.getTotalElements(),
                 friendDtoPage.getPageable().getPageNumber(),
                 friendDtoPage.getTotalPages());
     }
-
 }
