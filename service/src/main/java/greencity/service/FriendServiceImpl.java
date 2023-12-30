@@ -12,4 +12,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class FriendServiceImpl implements FriendService {
     private final UserRepo userRepo;
+
+    @Override
+    public void deleteUserFriend(Long friendId) {
+
+    }
 }

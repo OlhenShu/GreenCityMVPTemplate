@@ -7,4 +7,7 @@ package greencity.service;
  * @version 1.0
  */
 public interface FriendService {
+
+    void deleteUserFriend(Long friendId);
+
 }
