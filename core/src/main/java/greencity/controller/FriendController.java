@@ -1,11 +1,15 @@
 package greencity.controller;
 
 import greencity.annotations.CurrentUser;
+import greencity.constant.HttpStatuses;
 import greencity.dto.PageableDto;
 import greencity.dto.user.UserFriendDto;
 import greencity.dto.user.UserVO;
 import greencity.service.FriendService;
+import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +30,21 @@ import springfox.documentation.annotations.ApiIgnore;
 public class FriendController {
     private final FriendService friendService;
 
+    /**
+     * Searches for friends based on specific criteria.
+     *
+     * @param pageable         Pagination information for the result.
+     * @param name             The query used for searching friends.
+     * @param hasSameCity      Flag indicating whether to include only friends from the same city.
+     * @param hasMutualFriends Flag indicating whether to include friends only with mutual connections.
+     * @return A {@link PageableDto} containing a paginated list of {@link UserFriendDto} as search results.
+     */
+    @ApiOperation(value = "Searches for friends based on name, city, mutual friends .")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
     @GetMapping("/not-friends-yet")
     public ResponseEntity<PageableDto<UserFriendDto>> searchFriends(
         @ApiIgnore Pageable pageable,

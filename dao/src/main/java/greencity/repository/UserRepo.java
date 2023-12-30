@@ -5,7 +5,6 @@ import greencity.dto.user.UserFriendDto;
 import greencity.dto.user.UserManagementVO;
 import greencity.dto.user.UserVO;
 import greencity.entity.User;
-import greencity.repository.options.FriendFilter;
 import greencity.repository.options.UserFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -145,10 +144,18 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
     List<User> getAllUserFriends(Long userId);
 
     /**
-    * Nothing.
-    *
-    */
-    @Query("SELECT new greencity.dto.user.UserFriendDto (u.city, COUNT(uf), u.name, u.profilePicturePath, u.rating) "
+     * Retrieves a filtered list of users and their friend-related details based on specified criteria.
+     *
+     * @param nameCriteria      The criteria for filtering user's names.
+     * @param city              The city for filtering users.
+     * @param hasMutualFriends  Flag indicating to include users only with mutual friends.
+     * @param pageable          Pagination information for the resulting list.
+     * @param userId            The unique identifier of the user initiating the query.
+     * @return                  A paginated list of {@link UserFriendDto} containing user details.
+     * @author Denys Liubchenko
+     */
+    @Query(
+        "SELECT new greencity.dto.user.UserFriendDto (u.id ,u.city, COUNT(uf), u.name, u.profilePicturePath, u.rating) "
         + "FROM User u LEFT JOIN u.connections uf "
         + "WHERE (uf.friend.id IN ( "
         + "SELECT f.friend.id FROM User u2 LEFT JOIN u2.connections f WHERE u2.id = :userId AND f.status = 'FRIEND') "
