@@ -32,7 +32,7 @@ public class FriendServiceImpl implements FriendService {
 
         List<User> friends = userRepo.getAllUserFriends(userId);
         if (friends.isEmpty()) {
-            throw new NotFoundException(ErrorMessage.NOT_FOUND_ANY_FRIENDS);
+            throw new NotFoundException(ErrorMessage.NOT_FOUND_ANY_FRIENDS + userId);
         }
         List<UserFriendDto> friendsDto = friends.stream()
                 .map(user -> modelMapper.map(user, UserFriendDto.class))
