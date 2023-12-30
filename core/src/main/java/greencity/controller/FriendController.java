@@ -16,10 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
@@ -39,20 +36,43 @@ public class FriendController {
      * @param hasMutualFriends Flag indicating whether to include friends only with mutual connections.
      * @return A {@link PageableDto} containing a paginated list of {@link UserFriendDto} as search results.
      */
-    @ApiOperation(value = "Searches for friends based on name, city, mutual friends .")
+    @ApiOperation(value = "Searches for friends based on name, city, mutual friends.")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/not-friends-yet")
     public ResponseEntity<PageableDto<UserFriendDto>> searchFriends(
         @ApiIgnore Pageable pageable,
-        @ApiParam(value = "Query to search") @RequestParam String name,
+        @ApiParam(value = "Query to search 1 to 30 characters") @RequestParam String name,
         @RequestParam(required = false, name = "Has same city", defaultValue = "false") Boolean hasSameCity,
         @RequestParam(required = false, name = "Has mutual friends", defaultValue = "false") Boolean hasMutualFriends,
         @ApiIgnore @CurrentUser UserVO userVO) {
         return ResponseEntity.status(HttpStatus.OK).body(
             friendService.searchFriends(pageable, name, userVO, hasSameCity, hasMutualFriends));
+    }
+
+    /**
+     * Adds a new friend relationship between the current user and the specified friend.
+     *
+     * @param friendId The unique identifier of the friend to be added.
+     * @param userVO   The details of the current user.
+     * @return A ResponseEntity indicating the success of the friend addition operation.
+     */
+    @ApiOperation(value = "Add new friend relationship between the current user and the specified friend.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @PostMapping("/{friendId}")
+    public ResponseEntity<ResponseEntity.BodyBuilder> addFriend(
+        @PathVariable Long friendId,
+        @ApiIgnore @CurrentUser UserVO userVO) {
+        friendService.addFriend(userVO.getId(), friendId);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

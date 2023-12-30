@@ -25,4 +25,12 @@ public interface FriendService {
      */
     PageableDto<UserFriendDto> searchFriends(Pageable pageable, String name, UserVO userVO,
                                              Boolean hasSameCity, Boolean hasMutualFriends);
+
+    /**
+     * Establishes a friendship relationship between a user and another user identified by their IDs.
+     *
+     * @param userId       The unique identifier of the user initiating the friendship.
+     * @param friendId The unique identifier of the user to be added as a friend.
+     */
+    void addFriend(Long userId, Long friendId);
 }
