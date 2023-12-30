@@ -1,9 +1,11 @@
 package greencity.repository;
 
 import greencity.dto.habit.HabitVO;
+import greencity.dto.user.UserFriendDto;
 import greencity.dto.user.UserManagementVO;
 import greencity.dto.user.UserVO;
 import greencity.entity.User;
+import greencity.repository.options.FriendFilter;
 import greencity.repository.options.UserFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -141,4 +143,20 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
         + "(SELECT user_id FROM users_friends WHERE friend_id = :userId and status = 'FRIEND')"
         + "UNION (SELECT friend_id FROM users_friends WHERE user_id = :userId and status = 'FRIEND'));")
     List<User> getAllUserFriends(Long userId);
+
+    /**
+    * Nothing.
+    *
+    */
+    @Query("SELECT new greencity.dto.user.UserFriendDto (u.city, COUNT(uf), u.name, u.profilePicturePath, u.rating) "
+        + "FROM User u LEFT JOIN u.connections uf "
+        + "WHERE (uf.friend.id IN ( "
+        + "SELECT f.friend.id FROM User u2 LEFT JOIN u2.connections f WHERE u2.id = :userId AND f.status = 'FRIEND') "
+        + "OR uf.friend.id IS NULL) "
+        + "AND u.id != :userId  "
+        + "AND (:nameCriteria IS NULL OR u.name LIKE :nameCriteria) "
+        + "AND (:city IS NULL OR u.city = :city)"
+        + "GROUP BY u.id HAVING (:hasMutualFriends IS FALSE OR COUNT(uf) > 0)")
+    Page<UserFriendDto> findAllUserFriendDtoByFriendFilter(String nameCriteria, String city, Boolean hasMutualFriends,
+                                                           Pageable pageable, Long userId);
 }

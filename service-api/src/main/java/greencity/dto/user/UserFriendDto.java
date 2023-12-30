@@ -18,4 +18,12 @@ public class UserFriendDto {
     private String name;
     private String profilePicturePath;
     private Double rating;
+
+    public UserFriendDto(String city, Long mutualFriends, String name, String profilePicturePath, Double rating) {
+        this.city = city;
+        this.mutualFriends = mutualFriends;
+        this.name = name;
+        this.profilePicturePath = profilePicturePath;
+        this.rating = rating;
+    }
 }
