@@ -60,6 +60,9 @@ public class FriendServiceImpl implements FriendService {
             listOfUsers.getTotalPages());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void addFriend(Long userId, Long friendId) {
         validateUserExist(userId);
@@ -68,7 +71,7 @@ public class FriendServiceImpl implements FriendService {
         if (user.getConnections().stream().anyMatch(c -> Objects.equals(c.getFriend().getId(), friendId))) {
             throw new BadRequestException(ErrorMessage.USER_ALREADY_HAS_CONNECTION);
         }
-        userRepo.addFriend(userId, friendId, LocalDateTime.now());
+        userRepo.addFriend(userId, friendId);
     }
 
     private void validateUserExist(Long userId) {

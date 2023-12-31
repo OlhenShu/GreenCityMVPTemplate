@@ -174,13 +174,12 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
      *
      * @param userId            The unique identifier of the user initiating the query.
      * @param friendId          The unique identifier of the friend to sent request.
-     * @param dateTimeOfRequest The date and time of request.
      *
      * @author Denys Liubchenko
      */
     @Modifying
     @Transactional
     @Query(nativeQuery = true, value = "INSERT INTO users_friends "
-        + "(user_id, friend_id, status, created_date) VALUES (:userId, :friendId, 'REQUEST', :dateTimeOfRequest);")
-    void addFriend(Long userId, Long friendId, LocalDateTime dateTimeOfRequest);
+        + "(user_id, friend_id, status, created_date) VALUES (:userId, :friendId, 'REQUEST', NOW());")
+    void addFriend(Long userId, Long friendId);
 }
