@@ -8,6 +8,6 @@ package greencity.service;
  */
 public interface FriendService {
 
-    void deleteUserFriend(Long friendId);
+    void deleteUserFriend(Long userId, Long friendId);
 
 }
