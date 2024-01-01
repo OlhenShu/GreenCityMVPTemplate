@@ -47,8 +47,8 @@ public class FriendController {
     public ResponseEntity<PageableDto<UserFriendDto>> searchFriends(
         @ApiIgnore Pageable pageable,
         @ApiParam(value = "Query to search 1 to 30 characters") @RequestParam String name,
-        @RequestParam(required = false, name = "Has same city", defaultValue = "false") Boolean hasSameCity,
-        @RequestParam(required = false, name = "Has mutual friends", defaultValue = "false") Boolean hasMutualFriends,
+        @RequestParam(required = false, name = "hasSameCity", defaultValue = "false") Boolean hasSameCity,
+        @RequestParam(required = false, name = "hasMutualFriends", defaultValue = "false") Boolean hasMutualFriends,
         @ApiIgnore @CurrentUser UserVO userVO) {
         return ResponseEntity.status(HttpStatus.OK).body(
             friendService.searchFriends(pageable, name, userVO, hasSameCity, hasMutualFriends));
