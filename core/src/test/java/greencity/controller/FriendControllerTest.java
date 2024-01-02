@@ -5,6 +5,7 @@ import greencity.converters.UserArgumentResolver;
 import greencity.dto.PageableDto;
 import greencity.dto.user.UserFriendDto;
 import greencity.dto.user.UserVO;
+import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.service.FriendService;
 import greencity.service.UserService;
@@ -47,7 +48,7 @@ public class FriendControllerTest {
     @Mock
     private ModelMapper modelMapper;
     private MockMvc mockMvc;
-    private UserVO userVO = ModelUtils.getUserVO();
+    private final UserVO userVO = ModelUtils.getUserVO();
 
     @BeforeEach
     void setup() {

@@ -9,12 +9,11 @@ import greencity.entity.UserFriend;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.repository.UserRepo;
-import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -23,7 +22,7 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class FriendServiceImpl implements FriendService {
     private final UserRepo userRepo;
@@ -45,7 +44,8 @@ public class FriendServiceImpl implements FriendService {
         Page<UserFriendDto> listOfUsers = userRepo.findAllUserFriendDtoByFriendFilter(
             replaceCriteria(name), city, hasMutualFriends, pageable, userVO.getId());
 
-        User user = userRepo.findById(userVO.getId()).get();
+        User user = userRepo.findById(userVO.getId())
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + userVO.getId()));
         Map<Long, String> connectionStatuses = user.getConnections().stream()
             .collect(Collectors.toMap(
                 connection -> connection.getFriend().getId(),
@@ -64,12 +64,19 @@ public class FriendServiceImpl implements FriendService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional
     public void addFriend(Long userId, Long friendId) {
         validateUserExist(userId);
         validateUserExist(friendId);
-        User user = userRepo.findById(userId).get();
-        if (user.getConnections().stream().anyMatch(c -> Objects.equals(c.getFriend().getId(), friendId))) {
-            throw new BadRequestException(ErrorMessage.USER_ALREADY_HAS_CONNECTION);
+        if (Objects.equals(userId, friendId)) {
+            throw new BadRequestException(ErrorMessage.OWN_USER_ID);
+        }
+        User user = userRepo.findById(userId)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + userId));
+        String status = user.getConnections().stream().filter(c -> Objects.equals(c.getFriend().getId(), friendId))
+            .findAny().map(UserFriend::getStatus).orElse(null);
+        if (status != null) {
+            throw new BadRequestException(String.format(ErrorMessage.USER_ALREADY_HAS_CONNECTION, status));
         }
         userRepo.addFriend(userId, friendId);
     }
@@ -80,12 +87,6 @@ public class FriendServiceImpl implements FriendService {
         }
     }
 
-    /**
-     * Returns a String criteria for search.
-     *
-     * @param criteria String for search.
-     * @return String criteria not be {@literal null}.
-     */
     private String replaceCriteria(String criteria) {
         criteria = Optional.ofNullable(criteria).orElseGet(() -> "");
         criteria = criteria.trim();

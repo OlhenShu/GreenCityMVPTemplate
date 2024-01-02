@@ -70,8 +70,7 @@ public class FriendController {
     })
     @PostMapping("/{friendId}")
     public ResponseEntity<ResponseEntity.BodyBuilder> addFriend(
-        @PathVariable Long friendId,
-        @ApiIgnore @CurrentUser UserVO userVO) {
+        @PathVariable Long friendId, @ApiIgnore @CurrentUser UserVO userVO) {
         friendService.addFriend(userVO.getId(), friendId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
