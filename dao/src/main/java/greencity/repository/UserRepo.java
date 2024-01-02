@@ -142,13 +142,12 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
     List<User> getAllUserFriends(Long userId);
 
     @Query(nativeQuery = true, value = "SELECT EXISTS (SELECT 1 FROM users_friends " +
-            "WHERE ((user_id = :userId AND friend_id = :friendId) OR (user_id = :friendId AND friend_id = :userId)) " +
+            "WHERE (user_id = :userId AND friend_id = :friendId) " +
             "AND status = 'FRIEND')")
     boolean isFriend(Long userId, Long friendId);
 
     @Modifying
     @Transactional
-    @Query(nativeQuery = true, value = "DELETE FROM users_friends WHERE (user_id = :userId AND friend_id = :friendId)"
-            + " OR (user_id = :friendId AND friend_id = :userId)")
+    @Query(nativeQuery = true, value = "DELETE FROM users_friends WHERE (user_id = :userId AND friend_id = :friendId)")
     void deleteUserFriend(Long userId, Long friendId);
 }
