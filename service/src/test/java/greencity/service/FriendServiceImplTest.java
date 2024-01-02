@@ -33,7 +33,7 @@ public class FriendServiceImplTest {
     @InjectMocks
     private FriendServiceImpl friendService;
 
-    private UserVO userVO = ModelUtils.getUserVO();
+    private final UserVO userVO = ModelUtils.getUserVO();
 
     @Test
     void searchFriendsTest() {
@@ -149,17 +149,6 @@ public class FriendServiceImplTest {
                 PageRequest.of(0, 10), "t_e%s\\t'", userVO, false, false));
     }
 
-    private String replaceCriteria(String criteria) {
-        criteria = Optional.ofNullable(criteria).orElseGet(() -> "");
-        criteria = criteria.trim();
-        criteria = criteria.replace("_", "\\_");
-        criteria = criteria.replace("%", "\\%");
-        criteria = criteria.replace("\\", "\\\\");
-        criteria = criteria.replace("'", "\\'");
-        criteria = "%" + criteria + "%";
-        return criteria;
-    }
-
     @Test
     void addFriendTest() {
         User user = ModelUtils.getUser();
@@ -219,5 +208,23 @@ public class FriendServiceImplTest {
 
         assertThrows(BadRequestException.class, () -> friendService.addFriend(1L, 2L));
         assertThrows(BadRequestException.class, () -> friendService.addFriend(1L, 3L));
+    }
+
+    @Test
+    void addFriendWhenUserTryingToConnectToHimselfThrowsBadRequestExceptionTest() {
+        when(userRepo.existsById(anyLong())).thenReturn(true);
+
+        assertThrows(BadRequestException.class, () -> friendService.addFriend(1L, 1L));
+    }
+
+    private String replaceCriteria(String criteria) {
+        criteria = Optional.ofNullable(criteria).orElseGet(() -> "");
+        criteria = criteria.trim();
+        criteria = criteria.replace("_", "\\_");
+        criteria = criteria.replace("%", "\\%");
+        criteria = criteria.replace("\\", "\\\\");
+        criteria = criteria.replace("'", "\\'");
+        criteria = "%" + criteria + "%";
+        return criteria;
     }
 }
