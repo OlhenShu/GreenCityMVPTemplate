@@ -19,6 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of {@link FriendService}.
+ */
 @Slf4j
 @Service
 @Transactional(readOnly = true)
@@ -27,8 +30,10 @@ public class FriendServiceImpl implements FriendService {
     private final UserRepo userRepo;
     private final ModelMapper modelMapper;
 
+    /**
+     * {@inheritDoc}
+     */
     public PageableDto<UserFriendDto> findAllUsersFriends(Long userId, Pageable pageable) {
-
         List<User> friends = userRepo.getAllUserFriends(userId);
         if (friends.isEmpty()) {
             throw new NotFoundException(ErrorMessage.NOT_FOUND_ANY_FRIENDS + userId);
@@ -37,9 +42,7 @@ public class FriendServiceImpl implements FriendService {
                 .map(user -> modelMapper.map(user, UserFriendDto.class))
                 .collect(Collectors.toList());
 
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), friendsDto.size());
-        Page<UserFriendDto> friendDtoPage = new PageImpl<>(friendsDto.subList(start, end), pageable, friendsDto.size());
+        Page<UserFriendDto> friendDtoPage = new PageImpl<>(friendsDto, pageable, friendsDto.size());
         return new PageableDto<>(
                 friendDtoPage.getContent(),
                 friendDtoPage.getTotalElements(),
