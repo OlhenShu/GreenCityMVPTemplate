@@ -1,8 +1,6 @@
 package greencity.service;
 
 import greencity.dto.PageableDto;
-import greencity.dto.habit.HabitAssignDto;
-import greencity.dto.habit.HabitAssignManagementDto;
 import greencity.dto.user.UserFriendDto;
 import org.springframework.data.domain.Pageable;
 
