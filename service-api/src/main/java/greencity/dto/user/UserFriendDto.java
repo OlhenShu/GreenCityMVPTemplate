@@ -38,4 +38,13 @@ public class UserFriendDto {
         this.profilePicturePath = profilePicturePath;
         this.rating = rating;
     }
+
+    public UserFriendDto(
+        Long id, String city,  String name, String profilePicturePath, Double rating) {
+        this.id = id;
+        this.city = city;
+        this.name = name;
+        this.profilePicturePath = profilePicturePath;
+        this.rating = rating;
+    }
 }

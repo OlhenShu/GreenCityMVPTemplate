@@ -4,14 +4,13 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
 import greencity.dto.user.UserFriendDto;
 import greencity.dto.user.UserVO;
-import greencity.entity.User;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.repository.UserRepo;
-import java.util.Map;
-import greencity.entity.UserFriend;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +27,8 @@ public class FriendServiceImpl implements FriendService {
 
     @Override
     public PageableDto<UserFriendDto> getAllFriendsByDifferentParameters(
-        Pageable pageable, String name, UserVO userVO, Boolean hasSameCity, Boolean hasMutualFriends) {
+        Pageable pageable, String name, UserVO userVO, Boolean hasSameCity,
+        Double highestPersonalRate, ZonedDateTime dateTimeOfAddingFriend) {
         validateUserExist(userVO.getId());
         if (name.isEmpty() || name.length() >= 30) {
             throw new BadRequestException(ErrorMessage.INVALID_LENGTH_OF_QUERY_NAME);
@@ -37,16 +37,11 @@ public class FriendServiceImpl implements FriendService {
         if (hasSameCity) {
             city = userVO.getCity();
         }
+        if (dateTimeOfAddingFriend == null) {
+            dateTimeOfAddingFriend = ZonedDateTime.now().minusWeeks(1);
+        }
         Page<UserFriendDto> listOfUsers = userRepo.findUserFriendDtoByFriendFilterOfUser(
-            replaceCriteria(name), city, pageable, userVO.getId());
-
-        User user = userRepo.findById(userVO.getId()).get();
-        Map<Long, String> connectionStatuses = user.getConnections().stream()
-            .collect(Collectors.toMap(
-                connection -> connection.getFriend().getId(),
-                UserFriend::getStatus));
-        listOfUsers.forEach(userFriendDto -> userFriendDto.setFriendStatus(
-            Optional.ofNullable(connectionStatuses.get(userFriendDto.getId())).orElse("NOT_FRIEND")));
+            replaceCriteria(name), city, highestPersonalRate, dateTimeOfAddingFriend, pageable, userVO.getId());
 
         return new PageableDto<>(
             listOfUsers.getContent(),

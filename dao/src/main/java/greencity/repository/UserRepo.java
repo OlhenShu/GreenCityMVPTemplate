@@ -6,6 +6,8 @@ import greencity.dto.user.UserManagementVO;
 import greencity.dto.user.UserVO;
 import greencity.entity.User;
 import greencity.repository.options.UserFilter;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -143,15 +145,35 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
         + "UNION (SELECT friend_id FROM users_friends WHERE user_id = :userId and status = 'FRIEND'));")
     List<User> getAllUserFriends(Long userId);
 
-    @Query("SELECT new greencity.dto.user.UserFriendDto ("
-        + "u.id ,u.city, COUNT(uc), u.name, u.profilePicturePath, u.rating) "
-        + "FROM User u LEFT JOIN u.connections uc "
-        + "LEFT JOIN EcoNews.ecoNewsComments e ON e.user.id = u.id OR e.user.id = :userId "
-        + "WHERE uc.status = 'FRIEND' "
-        + "AND (:nameCriteria IS NULL OR u.name LIKE :nameCriteria) "
-        + "AND (:city IS NULL OR u.city = :city) "
-        + "GROUP BY u.id "
-        + "ORDER BY u.rating DESC")
-    Page<UserFriendDto> findUserFriendDtoByFriendFilterOfUser(String nameCriteria, String city,
-                                                              Pageable pageable, Long userId);
+//    @Query("SELECT new greencity.dto.user.UserFriendDto ("
+//        + "u.id ,u.city, COUNT(uc), u.name, u.profilePicturePath, u.rating) "
+//        + "FROM User u LEFT JOIN u.connections uc "
+//        + "WHERE uc.status = 'FRIEND' "
+//        + "AND (:highestPersonalRate IS NULL OR u.rating <= :highestPersonalRate) "
+//        + "AND (uc.createdDate >= cast(:dateTimeOfAddingFriend as timestamp )) "
+//        + "AND (:nameCriteria IS NULL OR u.name LIKE :nameCriteria) "
+//        + "AND (:city IS NULL OR u.city = :city) "
+//        + "AND u.id != :userId "
+//        + "GROUP BY u.id "
+//        + "ORDER BY u.rating DESC ")
+//        //+ "(SELECT COUNT(ec.ecoNews.id) FROM EcoNewsComment ec WHERE ec.user.id = :userId AND ec.ecoNews.id IN ("
+//        //+ "SELECT ec.ecoNews.id FROM EcoNewsComment ec WHERE ec.user.id = u.id)) DESC")
+//    Page<UserFriendDto> findUserFriendDtoByFriendFilterOfUser(
+//        String nameCriteria, String city, Double highestPersonalRate,
+//        ZonedDateTime dateTimeOfAddingFriend, Pageable pageable, Long userId);
+@Query("SELECT new greencity.dto.user.UserFriendDto ("
+    + "uf.friend.id ,uf.friend.city, uf.friend.name, uf.friend.profilePicturePath, uf.friend.rating) "
+    + "FROM UserFriend uf "
+    + "WHERE uf.status = 'FRIEND' "
+    + "AND (:highestPersonalRate IS NULL OR uf.friend.rating <= :highestPersonalRate) "
+    + "AND (uf.createdDate >= cast(:dateTimeOfAddingFriend as timestamp )) "
+    + "AND (:nameCriteria IS NULL OR uf.friend.name LIKE :nameCriteria) "
+    + "AND (:city IS NULL OR uf.friend.city = :city) "
+    + "AND uf.user.id = :userId "
+    + "ORDER BY uf.friend.rating DESC")
+//+ "(SELECT COUNT(ec.ecoNews.id) FROM EcoNewsComment ec WHERE ec.user.id = :userId AND ec.ecoNews.id IN ("
+//+ "SELECT ec.ecoNews.id FROM EcoNewsComment ec WHERE ec.user.id = u.id)) DESC")
+Page<UserFriendDto> findUserFriendDtoByFriendFilterOfUser(
+    String nameCriteria, String city, Double highestPersonalRate,
+    ZonedDateTime dateTimeOfAddingFriend, Pageable pageable, Long userId);
 }

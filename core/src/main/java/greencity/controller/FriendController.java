@@ -11,6 +11,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -33,12 +35,6 @@ public class FriendController {
 
     /**
      *
-     *
-     * @param pageable         Pagination information for the result.
-     * @param name             The query used for searching friends.
-     * @param hasSameCity      Flag indicating whether to include only friends from the same city.
-     * @param hasMutualFriends Flag indicating whether to include friends only with mutual connections.
-     * @return A {@link PageableDto} containing a paginated list of {@link UserFriendDto} as search results.
      */
     @ApiOperation(value = "")
     @ApiResponses(value = {
@@ -53,9 +49,11 @@ public class FriendController {
         @ApiIgnore Pageable pageable,
         @ApiParam(value = "Query to search 1 to 30 characters") @RequestParam String name,
         @RequestParam(required = false, name = "hasSameCity", defaultValue = "false") Boolean hasSameCity,
-        @RequestParam(required = false, name = "hasMutualFriends", defaultValue = "false") Boolean hasMutualFriends,
+        @RequestParam(required = false, name = "highestPersonalRate") Double highestPersonalRate,
+        @RequestParam(required = false, name = "dateTimeOfAddingFriend") ZonedDateTime dateTimeOfAddingFriend,
         @ApiIgnore @CurrentUser UserVO userVO) {
         return ResponseEntity.status(HttpStatus.OK).body(
-            friendService.getAllFriendsByDifferentParameters(pageable, name, userVO, hasSameCity, hasMutualFriends));
+            friendService.getAllFriendsByDifferentParameters(
+                pageable, name, userVO, hasSameCity, highestPersonalRate, dateTimeOfAddingFriend));
     }
 }
