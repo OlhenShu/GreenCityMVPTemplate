@@ -15,8 +15,8 @@ public interface FriendService {
      * Method to find {@code UserFriend} by userId.
      *
      * @param userId        {@code User} id.
-     * @param pageable  {@code UserFriendDto}.
-     * @return {@link PageableDto}.
+     * @param pageable - instance of {@link Pageable}.
+     * @return {@link UserFriendDto}.
      */
     PageableDto<UserFriendDto> findAllUsersFriends(Long userId, Pageable pageable);
 }
