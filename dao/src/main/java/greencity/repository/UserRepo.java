@@ -1,6 +1,7 @@
 package greencity.repository;
 
 import greencity.dto.habit.HabitVO;
+import greencity.dto.user.UserFriendDto;
 import greencity.dto.user.UserManagementVO;
 import greencity.dto.user.UserVO;
 import greencity.entity.User;
@@ -141,4 +142,16 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
         + "(SELECT user_id FROM users_friends WHERE friend_id = :userId and status = 'FRIEND')"
         + "UNION (SELECT friend_id FROM users_friends WHERE user_id = :userId and status = 'FRIEND'));")
     List<User> getAllUserFriends(Long userId);
+
+    @Query("SELECT new greencity.dto.user.UserFriendDto ("
+        + "u.id ,u.city, COUNT(uc), u.name, u.profilePicturePath, u.rating) "
+        + "FROM User u LEFT JOIN u.connections uc "
+        + "LEFT JOIN EcoNews.ecoNewsComments e ON e.user.id = u.id OR e.user.id = :userId "
+        + "WHERE uc.status = 'FRIEND' "
+        + "AND (:nameCriteria IS NULL OR u.name LIKE :nameCriteria) "
+        + "AND (:city IS NULL OR u.city = :city) "
+        + "GROUP BY u.id "
+        + "ORDER BY u.rating DESC")
+    Page<UserFriendDto> findUserFriendDtoByFriendFilterOfUser(String nameCriteria, String city,
+                                                              Pageable pageable, Long userId);
 }
