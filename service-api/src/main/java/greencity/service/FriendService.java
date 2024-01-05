@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
  */
 public interface FriendService {
     /**
-     * Method to find {@code User} by habitAssignId, userId and specific.
+     * Method to find {@code UserFriend} by userId.
      *
      * @param userId        {@code User} id.
      * @param pageable  {@code UserFriendDto}.
