@@ -3,6 +3,7 @@ package greencity.service;
 import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
 import greencity.dto.user.UserFriendDto;
+import greencity.dto.user.UserFriendFilterDto;
 import greencity.dto.user.UserVO;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -40,8 +42,12 @@ public class FriendServiceImpl implements FriendService {
         if (dateTimeOfAddingFriend == null) {
             dateTimeOfAddingFriend = ZonedDateTime.now().minusWeeks(1);
         }
+        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+
         Page<UserFriendDto> listOfUsers = userRepo.findUserFriendDtoByFriendFilterOfUser(
-            replaceCriteria(name), city, highestPersonalRate, dateTimeOfAddingFriend, pageable, userVO.getId());
+            replaceCriteria(name), city, highestPersonalRate, dateTimeOfAddingFriend, pageable, userVO.getId())
+            .map(filterDto -> new UserFriendDto(filterDto.getId(), filterDto.getCity(), filterDto.getName(),
+                filterDto.getProfilePicturePath(), filterDto.getRating()));
 
         return new PageableDto<>(
             listOfUsers.getContent(),
