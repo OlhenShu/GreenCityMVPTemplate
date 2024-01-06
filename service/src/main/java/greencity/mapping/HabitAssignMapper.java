@@ -41,7 +41,7 @@ public class HabitAssignMapper extends AbstractConverter<HabitAssignDto, HabitAs
             .habit(Habit.builder()
                 .id(dto.getHabit().getId())
                 .complexity(dto.getHabit().getComplexity())
-                .defaultDuration(dto.getDuration())
+                .defaultDuration(dto.getHabit().getDefaultDuration())
                 .build())
             .userShoppingListItems(listOfShoppingListItem)
             .build();
