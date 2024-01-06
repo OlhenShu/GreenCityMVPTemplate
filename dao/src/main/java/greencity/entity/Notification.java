@@ -15,6 +15,7 @@ import org.hibernate.annotations.CreationTimestamp;
 @Builder
 public class Notification {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
