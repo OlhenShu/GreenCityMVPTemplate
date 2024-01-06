@@ -291,7 +291,6 @@ public class ShoppingListItemServiceImpl implements ShoppingListItemService {
     /**
      * {@inheritDoc}
      */
-    @Transactional
     @Override
     public List<UserShoppingListItemResponseDto> getUserShoppingList(Long userId, Long habitId, String language) {
         Optional<HabitAssign> habitAssign = habitAssignRepo.findByHabitIdAndUserId(habitId, userId);
@@ -405,6 +404,34 @@ public class ShoppingListItemServiceImpl implements ShoppingListItemService {
         return updatedUserShoppingListItem;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Transactional
+    @Override
+    public List<UserShoppingListItemResponseDto> updateUserShoppingListItemStatus(Long userId,
+                                                                                  Long userShoppingListItemId,
+                                                                                  String language,
+                                                                                  String status) {
+        String statusUpperCase = status.toUpperCase();
+        List<UserShoppingListItem> userShoppingListItems =
+                userShoppingListItemRepo.getAllByUserShoppingListIdAndUserId(userShoppingListItemId, userId);
+        if (userShoppingListItems == null || userShoppingListItems.isEmpty()) {
+            throw new NotFoundException(ErrorMessage.USER_SHOPPING_LIST_ITEM_NOT_FOUND_BY_USER_ID);
+        }
+        if (Arrays.stream(ShoppingListItemStatus.values()).noneMatch(s -> s.name().equalsIgnoreCase(statusUpperCase))) {
+            throw new BadRequestException(ErrorMessage.INCORRECT_INPUT_ITEM_STATUS);
+        }
+        userShoppingListItems.forEach(u -> u.setStatus(ShoppingListItemStatus.valueOf(statusUpperCase)));
+        userShoppingListItemRepo.saveAll(userShoppingListItems);
+        List<UserShoppingListItemResponseDto> userShoppingListItemResponseDtoList =
+                userShoppingListItems.stream()
+                        .map(u -> modelMapper.map(u, UserShoppingListItemResponseDto.class))
+                        .collect(Collectors.toList());
+        userShoppingListItemResponseDtoList.forEach(u -> setTextForUserShoppingListItem(u, language));
+        return userShoppingListItemResponseDtoList;
+    }
+
     private boolean isActive(UserShoppingListItem userShoppingListItem) {
         try {
             if (ShoppingListItemStatus.ACTIVE.equals(userShoppingListItem.getStatus())) {
@@ -421,34 +448,6 @@ public class ShoppingListItemServiceImpl implements ShoppingListItemService {
         userShoppingListItem.setStatus(ShoppingListItemStatus.DONE);
         userShoppingListItem.setDateCompleted(LocalDateTime.now());
         userShoppingListItemRepo.save(userShoppingListItem);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Transactional
-    @Override
-    public List<UserShoppingListItemResponseDto> updateUserShoppingListItemStatus(Long userId,
-        Long userShoppingListItemId,
-        String language,
-        String status) {
-        String statusUpperCase = status.toUpperCase();
-        List<UserShoppingListItem> userShoppingListItems =
-            userShoppingListItemRepo.getAllByUserShoppingListIdAndUserId(userShoppingListItemId, userId);
-        if (userShoppingListItems == null || userShoppingListItems.isEmpty()) {
-            throw new NotFoundException(ErrorMessage.USER_SHOPPING_LIST_ITEM_NOT_FOUND_BY_USER_ID);
-        }
-        if (Arrays.stream(ShoppingListItemStatus.values()).noneMatch(s -> s.name().equalsIgnoreCase(statusUpperCase))) {
-            throw new BadRequestException(ErrorMessage.INCORRECT_INPUT_ITEM_STATUS);
-        }
-        userShoppingListItems.forEach(u -> u.setStatus(ShoppingListItemStatus.valueOf(statusUpperCase)));
-        userShoppingListItemRepo.saveAll(userShoppingListItems);
-        List<UserShoppingListItemResponseDto> userShoppingListItemResponseDtoList =
-            userShoppingListItems.stream()
-                .map(u -> modelMapper.map(u, UserShoppingListItemResponseDto.class))
-                .collect(Collectors.toList());
-        userShoppingListItemResponseDtoList.forEach(u -> setTextForUserShoppingListItem(u, language));
-        return userShoppingListItemResponseDtoList;
     }
 
     /**
