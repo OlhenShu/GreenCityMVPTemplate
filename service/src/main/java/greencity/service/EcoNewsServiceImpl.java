@@ -317,7 +317,6 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     public void delete(Long id, UserVO user) {
         EcoNewsVO ecoNewsVO = findById(id);
         if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(ecoNewsVO.getAuthor().getId())) {
-//            throw new BadRequestException(ErrorMessage.USER_HAS_NO_PERMISSION);
             throw new UserHasNoPermissionToAccessException(ErrorMessage.USER_HAS_NO_PERMISSION);
         }
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
