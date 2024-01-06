@@ -6,6 +6,7 @@ import lombok.*;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.*;
 
 @Entity
 @Table(name = "events")
@@ -37,5 +38,13 @@ public class Event {
 
     @Column
     private String titleImage;
+
+//    @NotNull
+//    @OrderBy("finishDate ASC")
+//    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
+//    private List<EventDateLocation> dates = new ArrayList<>();
+
+    @Column
+    private boolean isOpen = true;
 
 }

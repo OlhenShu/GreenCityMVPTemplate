@@ -20,7 +20,13 @@
             <column name="title_image" type="VARCHAR(255)">
                 <constraints nullable="true"/>
             </column>
+            <column name="is_open" type="BOOLEAN">
+                <constraints nullable="true"/>
+            </column>
         </createTable>
+<!--        &lt;!&ndash; Adding index for 'finishDate' column in the 'events_dates_locations' table &ndash;&gt;-->
+<!--        <createIndex tableName="events_dates_locations" indexName="idx_finish_date" unique="false">-->
+<!--            <column name="finishDate"/>-->
+<!--        </createIndex>-->
     </changeSet>
-
 </databaseChangeLog>
