@@ -11,7 +11,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="organizer_id" type="BIGINT">
-                <constraints foreignKeyName="FK_events_users" references="users (id)"/>
+                <constraints foreignKeyName="FK_events_organizer" references="users (id)"/>
             </column>
             <column name="creation_date" type="DATE"/>
             <column name="description" type="VARCHAR(1000)">
@@ -24,9 +24,5 @@
                 <constraints nullable="true"/>
             </column>
         </createTable>
-<!--        &lt;!&ndash; Adding index for 'finishDate' column in the 'events_dates_locations' table &ndash;&gt;-->
-<!--        <createIndex tableName="events_dates_locations" indexName="idx_finish_date" unique="false">-->
-<!--            <column name="finishDate"/>-->
-<!--        </createIndex>-->
     </changeSet>
 </databaseChangeLog>
