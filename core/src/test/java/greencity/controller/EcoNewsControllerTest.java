@@ -11,6 +11,7 @@ import greencity.service.FileService;
 import greencity.service.TagsService;
 import greencity.service.UserService;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,11 +27,14 @@ import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 import java.util.Collections;
@@ -38,6 +42,7 @@ import java.util.List;
 
 import static greencity.ModelUtils.getPrincipal;
 import static greencity.ModelUtils.getUserVO;
+import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -315,4 +320,31 @@ class EcoNewsControllerTest {
         // Verify the expected behavior
         verify(fileService, times(1)).delete(testImagePath);
     }
+
+    @Test
+    void testUploadImages() throws Exception {
+        // Prepare test data
+        MultipartFile[] testImages = {
+                new MockMultipartFile("image1.jpg", new byte[0]),
+                new MockMultipartFile("image2.jpg", new byte[0]),
+                // Add more mock files as needed
+        };
+
+        String[] expectedResponse = {"image1.jpg", "image2.jpg"};
+
+        // Mock the behavior of the ecoNewsService.uploadImages method
+        when(ecoNewsService.uploadImages(testImages)).thenReturn(expectedResponse);
+
+        // Perform the test
+        ResponseEntity<String[]> response = ecoNewsController.uploadImages(testImages);
+
+        // Verify the expected behavior
+        verify(ecoNewsService, times(1)).uploadImages(testImages);
+        Assertions.assertArrayEquals(expectedResponse, response.getBody());
+        assert(response.getStatusCode() == HttpStatus.CREATED);
+    }
+
+
+
+
 }
