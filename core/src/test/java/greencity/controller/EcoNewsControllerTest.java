@@ -7,6 +7,7 @@ import greencity.dto.user.UserVO;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.service.EcoNewsService;
+import greencity.service.FileService;
 import greencity.service.TagsService;
 import greencity.service.UserService;
 import lombok.SneakyThrows;
@@ -59,6 +60,9 @@ class EcoNewsControllerTest {
     private ModelMapper modelMapper;
     @Mock
     private ObjectMapper objectMapper;
+
+    @Mock
+    private FileService fileService;
 
     private Principal principal = getPrincipal();
 
@@ -300,5 +304,15 @@ class EcoNewsControllerTest {
             .andExpect(status().isNotFound());
 
         verify(ecoNewsService).getContentAndSourceForEcoNewsById(1L);
+    }
+
+    @Test
+    void testDeleteImage() {
+        // Test data
+        String testImagePath = "path/to/image.jpg";
+        // Perform the test
+        ecoNewsController.deleteImage(testImagePath);
+        // Verify the expected behavior
+        verify(fileService, times(1)).delete(testImagePath);
     }
 }
