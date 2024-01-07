@@ -146,6 +146,17 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
         + "UNION (SELECT friend_id FROM users_friends WHERE user_id = :userId and status = 'FRIEND'));")
     List<User> getAllUserFriends(Long userId);
 
+    /**
+     * Retrieves a paginated list of friends' details with specific filtering criteria.
+     *
+     * @param nameCriteria          The criteria for filtering friend names (can be null).
+     * @param city                  The city used for filtering friends (can be null).
+     * @param highestPersonalRate   The maximum rating allowed for friends in the result set.
+     * @param dateTimeOfAddingFriend The date when friends were added, filtering based on this timestamp.
+     * @param pageable              Pagination information for the resulting list.
+     * @param userId                The unique identifier of the user whose friends are being fetched.
+     * @return                      A paginated list of {@link UserFriendFilterDto} containing friend details.
+     */
     @Query(value = "SELECT new greencity.dto.user.UserFriendFilterDto ("
         + "uf.friend.id ,uf.friend.city, uf.friend.name, uf.friend.profilePicturePath, uf.friend.rating, "
         + "(SELECT COUNT(ec.ecoNews.id) FROM EcoNewsComment ec WHERE ec.user.id = :userId AND ec.ecoNews.id IN ("
@@ -158,14 +169,14 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
         + "AND (:city IS NULL OR uf.friend.city = :city) "
         + "AND uf.user.id = :userId "
         + "ORDER BY uf.friend.rating DESC, mutualEcoNews DESC ",
-    countQuery = "SELECT COUNT(*) "
-        + "FROM UserFriend uf "
-        + "WHERE uf.status = 'FRIEND' "
-        + "AND (:highestPersonalRate IS NULL OR uf.friend.rating <= :highestPersonalRate) "
-        + "AND (uf.createdDate >= cast(:dateTimeOfAddingFriend as timestamp )) "
-        + "AND (:nameCriteria IS NULL OR uf.friend.name LIKE :nameCriteria) "
-        + "AND (:city IS NULL OR uf.friend.city = :city) "
-        + "AND uf.user.id = :userId ")
+        countQuery = "SELECT COUNT(*) "
+            + "FROM UserFriend uf "
+            + "WHERE uf.status = 'FRIEND' "
+            + "AND (:highestPersonalRate IS NULL OR uf.friend.rating <= :highestPersonalRate) "
+            + "AND (uf.createdDate >= cast(:dateTimeOfAddingFriend as timestamp )) "
+            + "AND (:nameCriteria IS NULL OR uf.friend.name LIKE :nameCriteria) "
+            + "AND (:city IS NULL OR uf.friend.city = :city) "
+            + "AND uf.user.id = :userId ")
     Page<UserFriendFilterDto> findUserFriendDtoByFriendFilterOfUser(
         String nameCriteria, String city, Double highestPersonalRate,
         ZonedDateTime dateTimeOfAddingFriend, Pageable pageable, Long userId);

@@ -3,13 +3,10 @@ package greencity.service;
 import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
 import greencity.dto.user.UserFriendDto;
-import greencity.dto.user.UserFriendFilterDto;
 import greencity.dto.user.UserVO;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.repository.UserRepo;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -27,6 +24,9 @@ import org.springframework.stereotype.Service;
 public class FriendServiceImpl implements FriendService {
     private final UserRepo userRepo;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PageableDto<UserFriendDto> getAllFriendsByDifferentParameters(
         Pageable pageable, String name, UserVO userVO, Boolean hasSameCity,

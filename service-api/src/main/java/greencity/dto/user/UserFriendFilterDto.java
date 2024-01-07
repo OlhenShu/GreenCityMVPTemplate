@@ -14,11 +14,11 @@ public class UserFriendFilterDto extends UserFriendDto {
     /**
      * Constructor.
      *
-     * @param id                  {@link Long} id
-     * @param city                {@link String} city
-     * @param name                {@link String} name
-     * @param profilePicturePath  {@link String} profilePicturePath
-     * @param rating              {@link Double} rating
+     * @param id                     {@link Long} id
+     * @param city                   {@link String} city
+     * @param name                   {@link String} name
+     * @param profilePicturePath     {@link String} profilePicturePath
+     * @param rating                 {@link Double} rating
      * @param mutualCommentedEcoNews {@link Long} mutualCommentedEcoNews
      */
     public UserFriendFilterDto(

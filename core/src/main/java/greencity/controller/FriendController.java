@@ -16,6 +16,7 @@ import java.time.ZonedDateTime;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -34,7 +35,15 @@ public class FriendController {
     private final FriendService friendService;
 
     /**
+     * Retrieves a paginated list of friends' details with specific filtering criteria.
      *
+     * @param pageable               Pagination information for the resulting list.
+     * @param name                   The criteria for filtering friend names (can be null).
+     * @param userVO                 User, which friends are being fetched.
+     * @param hasSameCity            Whether to filter friends by the same city as the user.
+     * @param highestPersonalRate    The maximum rating allowed for friends in the result set.
+     * @param dateTimeOfAddingFriend The date when friends were added, filtering based on this timestamp.
+     * @return                       A paginated list of {@link UserFriendDto} containing friend details.
      */
     @ApiOperation(value = "")
     @ApiResponses(value = {
@@ -50,7 +59,8 @@ public class FriendController {
         @ApiParam(value = "Query to search 1 to 30 characters") @RequestParam String name,
         @RequestParam(required = false, name = "hasSameCity", defaultValue = "false") Boolean hasSameCity,
         @RequestParam(required = false, name = "highestPersonalRate") Double highestPersonalRate,
-        @RequestParam(required = false, name = "dateTimeOfAddingFriend") ZonedDateTime dateTimeOfAddingFriend,
+        @RequestParam(required = false, name = "dateTimeOfAddingFriend")
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime dateTimeOfAddingFriend,
         @ApiIgnore @CurrentUser UserVO userVO) {
         return ResponseEntity.status(HttpStatus.OK).body(
             friendService.getAllFriendsByDifferentParameters(
