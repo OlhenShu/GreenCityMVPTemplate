@@ -1,15 +1,17 @@
-package greencity.service;
+package greencity.dto.event;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import greencity.dto.event.EventDateLocationDto;
+import lombok.*;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.util.List;
 
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@Builder
 public class UpdateEventDto {
-
     @NotNull
     private Long id;
 
@@ -30,5 +32,4 @@ public class UpdateEventDto {
 
     @JsonProperty(value = "open")
     private Boolean isOpen;
-
 }

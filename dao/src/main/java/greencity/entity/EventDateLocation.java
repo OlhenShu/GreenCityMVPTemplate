@@ -13,7 +13,6 @@ import java.time.ZonedDateTime;
 @Getter
 @Builder
 public class EventDateLocation {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,5 +29,4 @@ public class EventDateLocation {
 
     @Embedded
     private Coordinates coordinates;
-
 }

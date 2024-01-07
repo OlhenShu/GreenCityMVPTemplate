@@ -1,6 +1,5 @@
 package greencity.entity;
 
-
 import lombok.*;
 
 import javax.persistence.*;
@@ -16,7 +15,6 @@ import java.util.*;
 @Setter
 @Builder
 public class Event {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -46,5 +44,4 @@ public class Event {
 
     @Column
     private boolean isOpen = true;
-
 }

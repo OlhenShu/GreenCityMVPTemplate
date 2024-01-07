@@ -27,6 +27,13 @@ import springfox.documentation.annotations.ApiIgnore;
 public class FriendController {
     private final FriendService friendService;
 
+    /**
+     * Deletes a friend of the current user.
+     *
+     * @param friendId The ID of the friend to be deleted.
+     * @param userVO   The current user making the request.
+     * @return ResponseEntity indicating the success or failure of the operation.
+     */
     @ApiOperation(value = "Delete/unfriend user's friend")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = HttpStatuses.OK),
@@ -41,5 +48,4 @@ public class FriendController {
         friendService.deleteUserFriend(userVO.getId(), friendId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
-
 }
