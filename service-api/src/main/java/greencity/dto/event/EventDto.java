@@ -2,6 +2,7 @@ package greencity.dto.event;
 
 import greencity.dto.tag.TagUaEnDto;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.util.List;
 
@@ -10,6 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 @EqualsAndHashCode
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class EventDto {
     Long id;
     String creationDate;

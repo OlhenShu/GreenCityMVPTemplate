@@ -1,6 +1,7 @@
 package greencity.dto.event;
 
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.time.ZonedDateTime;
 
@@ -9,6 +10,7 @@ import java.time.ZonedDateTime;
 @Getter
 @Setter
 @EqualsAndHashCode
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class EventDateLocationDto {
     Long id;
     AddressDto coordinates;
