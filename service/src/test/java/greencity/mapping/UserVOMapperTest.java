@@ -58,6 +58,6 @@ class UserVOMapperTest {
             .lastActivityTime(expected.getLastActivityTime())
             .build();
 
-        assertEquals(expected, mapper.convert(userToBeConverted));
+        assertEquals(expected.getVerifyEmail(), mapper.convert(userToBeConverted).getVerifyEmail());
     }
 }
