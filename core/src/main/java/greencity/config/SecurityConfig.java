@@ -229,7 +229,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 USER_SHOPPING_LIST + "/{shoppingListItemId}/status/{status}",
                 USER_SHOPPING_LIST + "/{userShoppingListItemId}",
                 "/user/profilePicture",
-                "/user/deleteProfilePicture")
+                "/user/deleteProfilePicture",
+                "/friends/{friendId}/acceptRequest",
+                "/friends/{friendId}/declineRequest")
             .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.DELETE,
                 ECONEWS_COMMENTS,

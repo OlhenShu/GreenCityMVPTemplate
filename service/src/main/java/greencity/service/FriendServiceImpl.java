@@ -68,9 +68,7 @@ public class FriendServiceImpl implements FriendService {
     public void addFriend(Long userId, Long friendId) {
         validateUserExist(userId);
         validateUserExist(friendId);
-        if (Objects.equals(userId, friendId)) {
-            throw new BadRequestException(ErrorMessage.OWN_USER_ID);
-        }
+        validateIsNotSameUsers(userId, friendId);
         User user = userRepo.findById(userId)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + userId));
         String status = user.getConnections().stream().filter(c -> Objects.equals(c.getFriend().getId(), friendId))
@@ -81,9 +79,33 @@ public class FriendServiceImpl implements FriendService {
         userRepo.addFriend(userId, friendId);
     }
 
+    @Override
+    @Transactional
+    public void acceptFriendRequest(Long userId, Long friendId) {
+        validateUserExist(userId);
+        validateUserExist(friendId);
+        validateIsNotSameUsers(userId, friendId);
+        userRepo.acceptFriendRequest(userId, friendId);
+    }
+    @Override
+    @Transactional
+    public void declineFriendRequest(Long userId, Long friendId) {
+        validateUserExist(userId);
+        validateUserExist(friendId);
+        validateIsNotSameUsers(userId, friendId);
+        userRepo.declineFriendRequest(userId, friendId);
+    }
+
+
     private void validateUserExist(Long userId) {
         if (!userRepo.existsById(userId)) {
             throw new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + userId);
+        }
+    }
+
+    private void validateIsNotSameUsers(Long userId, Long friendId) {
+        if (Objects.equals(userId, friendId)) {
+            throw new BadRequestException(ErrorMessage.OWN_USER_ID);
         }
     }
 

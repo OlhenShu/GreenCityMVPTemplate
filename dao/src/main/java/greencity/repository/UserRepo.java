@@ -6,7 +6,6 @@ import greencity.dto.user.UserManagementVO;
 import greencity.dto.user.UserVO;
 import greencity.entity.User;
 import greencity.repository.options.UserFilter;
-import java.time.LocalDateTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -178,8 +177,20 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
      * @author Denys Liubchenko
      */
     @Modifying
-    @Transactional
     @Query(nativeQuery = true, value = "INSERT INTO users_friends "
         + "(user_id, friend_id, status, created_date) VALUES (:userId, :friendId, 'REQUEST', NOW());")
     void addFriend(Long userId, Long friendId);
+
+    @Modifying
+    @Transactional
+    @Query(nativeQuery = true,
+            value = "UPDATE users_friends SET status = 'FRIEND' WHERE user_id = :userId AND friend_id = :friendId")
+    void acceptFriendRequest(Long userId, Long friendId);
+
+    @Modifying
+    @Transactional
+    @Query(nativeQuery = true,
+            value = "UPDATE users_friends SET status = 'DECLINED' WHERE user_id = :userId AND friend_id = :friendId")
+    void declineFriendRequest(Long userId, Long friendId);
+
 }

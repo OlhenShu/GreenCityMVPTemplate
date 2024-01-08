@@ -33,4 +33,6 @@ public interface FriendService {
      * @param friendId The unique identifier of the user to be added as a friend.
      */
     void addFriend(Long userId, Long friendId);
+    void acceptFriendRequest(Long userId, Long friendId);
+    void declineFriendRequest(Long userId, Long friendId);
 }
