@@ -185,6 +185,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/friends")
             .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.POST,
+                    "/events/create",
                 "/category",
                 "/econews",
                 "/econews/like",
