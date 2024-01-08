@@ -20,7 +20,6 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
     @NotNull
     private String title;
 
@@ -28,14 +27,11 @@ public class Event {
     @JoinColumn(name = "organizer_id", referencedColumnName = "id")
     private User organizer;
 
-    @Column
     private LocalDate creationDate;
 
-    @Column
     @NotNull
     private String description;
 
-    @Column
     private String titleImage;
 
     @NotNull
@@ -43,6 +39,17 @@ public class Event {
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
     private List<EventDateLocation> dates = new ArrayList<>();
 
-    @Column
     private boolean isOpen = true;
+
+    @ElementCollection
+    @CollectionTable(name = "events_image", joinColumns = @JoinColumn(name = "event_id"))
+    @Column(name = "image_url")
+    private List<String> images;
+
+
+    @ManyToMany
+    @JoinTable(name = "events_tags",
+            joinColumns = @JoinColumn(name = "event_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    private List<Tag> tags;
 }
