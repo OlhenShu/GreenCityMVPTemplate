@@ -1,9 +1,7 @@
 package greencity.dto.notification;
 
 import greencity.dto.user.AuthorDto;
-import greencity.dto.user.UserForListDto;
 import java.time.ZonedDateTime;
-import java.util.Set;
 import lombok.*;
 
 @NoArgsConstructor
@@ -17,8 +15,6 @@ public class NotificationDto {
 
     private AuthorDto author;
 
-    private Set<UserForListDto> receivers;
-
     private String title;
 
     private String shortDescription;
@@ -26,4 +22,16 @@ public class NotificationDto {
     private Boolean isRead = false;
 
     private ZonedDateTime creationDate;
+
+    /**
+     * Constructor with parameters.
+     * @param id                id of the notification.
+     * @param title             title of the notification.
+     * @param isRead            is notification read.
+     */
+    public NotificationDto(Long id,String title, Boolean isRead) {
+        this.id = id;
+        this.title = title;
+        this.isRead = isRead;
+    }
 }

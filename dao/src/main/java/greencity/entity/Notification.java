@@ -5,6 +5,7 @@ import java.util.Set;
 import javax.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.mapping.ToOne;
 
 @Entity
 @Table(name = "notifications")
@@ -13,6 +14,7 @@ import org.hibernate.annotations.CreationTimestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString(exclude = "receivers")
 public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
