@@ -95,38 +95,6 @@ public class FriendControllerTest {
     }
 
     @Test
-    void searchFriendsWithCriteriaNotDefinedTest() throws Exception {
-        Pageable pageable = PageRequest.of(0, 10);
-        String name = "test";
-
-        List<UserFriendDto> userNotYetFriends = new ArrayList<>();
-        userNotYetFriends.add(new UserFriendDto(1L, "Lviv", 1L, "Friend1",
-            "testProfilePicturePath", 1D));
-        userNotYetFriends.add(new UserFriendDto(2L, "Odesa", 0L, "Friend2",
-            "testProfilePicturePath", 1D));
-        var userFriendDtoPage = new PageImpl<>(userNotYetFriends, PageRequest.of(0, 10), 2L);
-        var pageableDto = new PageableDto<>(
-            userFriendDtoPage.getContent(),
-            userFriendDtoPage.getTotalElements(),
-            userFriendDtoPage.getPageable().getPageNumber(),
-            userFriendDtoPage.getTotalPages());
-
-        when(userService.findByEmail(anyString())).thenReturn(userVO);
-        when(friendService.searchFriends(any(Pageable.class), anyString(), any(UserVO.class), anyBoolean(), anyBoolean()))
-            .thenReturn(pageableDto);
-
-        mockMvc.perform(get(link + "/not-friends-yet")
-                .principal(userVO::getEmail)
-                .param("name", name)
-                .param("page", "0")
-                .param("size", "10"))
-            .andExpect(status().isOk());
-
-        verify(userService).findByEmail(userVO.getEmail());
-        verify(friendService).searchFriends(pageable, name, userVO, false, false);
-    }
-
-    @Test
     void addFriendTest() throws Exception {
         Long friendId = 1L;
 

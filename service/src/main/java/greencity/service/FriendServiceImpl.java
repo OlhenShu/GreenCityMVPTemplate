@@ -33,7 +33,6 @@ public class FriendServiceImpl implements FriendService {
     @Override
     public PageableDto<UserFriendDto> searchFriends(Pageable pageable, String name, UserVO userVO,
                                                     Boolean hasSameCity, Boolean hasMutualFriends) {
-        validateUserExist(userVO.getId());
         if (name.isEmpty() || name.length() >= 30) {
             throw new BadRequestException(ErrorMessage.INVALID_LENGTH_OF_QUERY_NAME);
         }
@@ -66,7 +65,6 @@ public class FriendServiceImpl implements FriendService {
     @Override
     @Transactional
     public void addFriend(Long userId, Long friendId) {
-        validateUserExist(userId);
         validateUserExist(friendId);
         if (Objects.equals(userId, friendId)) {
             throw new BadRequestException(ErrorMessage.OWN_USER_ID);

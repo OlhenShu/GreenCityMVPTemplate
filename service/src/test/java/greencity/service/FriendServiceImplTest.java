@@ -68,8 +68,7 @@ public class FriendServiceImplTest {
         Page<UserFriendDto> userFriendDtos = new PageImpl<>(userNotYetFriends, PageRequest.of(0, 10), 2L);
 
         when(userRepo.findById(anyLong())).thenReturn(Optional.of(user));
-        when(userRepo.existsById(anyLong())).thenReturn(true);
-        when(userRepo.findAllUserFriendDtoByFriendFilter(anyString(), anyObject(), anyBoolean(), any(Pageable.class), anyLong()))
+        when(userRepo.findAllUserFriendDtoByFriendFilter(anyString(), any(), anyBoolean(), any(Pageable.class), anyLong()))
             .thenReturn(userFriendDtos);
 
         var response = friendService.searchFriends(
@@ -116,7 +115,6 @@ public class FriendServiceImplTest {
         Page<UserFriendDto> userFriendDtos = new PageImpl<>(userNotYetFriends, PageRequest.of(0, 10), 1L);
 
         when(userRepo.findById(anyLong())).thenReturn(Optional.of(user));
-        when(userRepo.existsById(anyLong())).thenReturn(true);
         when(userRepo.findAllUserFriendDtoByFriendFilter(anyString(), any(), anyBoolean(), any(Pageable.class), anyLong()))
             .thenReturn(userFriendDtos);
 
@@ -133,20 +131,10 @@ public class FriendServiceImplTest {
 
     @Test
     void searchFriendsWhenNameIsOutOfBoundsThrowsBadRequestExceptionTest() {
-        when(userRepo.existsById(anyLong())).thenReturn(true);
-
         assertThrows(BadRequestException.class, () -> friendService.searchFriends(
             PageRequest.of(0, 10), "", userVO, false, false));
         assertThrows(BadRequestException.class, () -> friendService.searchFriends(
             PageRequest.of(0, 10), "1111111111111111111111111111111", userVO, false, false));
-    }
-
-    @Test
-    void searchFriendsWhenUserNotFoundThrowsNotFoundExceptionTest() {
-        when(userRepo.existsById(anyLong())).thenReturn(false);
-
-        assertThrows(NotFoundException.class, () -> friendService.searchFriends(
-                PageRequest.of(0, 10), "t_e%s\\t'", userVO, false, false));
     }
 
     @Test
