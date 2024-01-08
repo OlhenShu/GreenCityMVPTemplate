@@ -4,9 +4,6 @@ import greencity.ModelUtils;
 import greencity.dto.user.UserFriendDto;
 import greencity.dto.user.UserFriendFilterDto;
 import greencity.dto.user.UserVO;
-import greencity.entity.User;
-import greencity.entity.UserFriend;
-import greencity.entity.UserFriendPK;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.repository.UserRepo;
@@ -46,7 +43,6 @@ public class FriendServiceImplTest {
         Page<UserFriendFilterDto> userFriendDtos = new PageImpl<>(friends, PageRequest.of(0, 10), 2L);
         ZonedDateTime dateTimeOfAddingFriend = ZonedDateTime.now().minusWeeks(1);
 
-        when(userRepo.existsById(anyLong())).thenReturn(true);
         when(userRepo.findUserFriendDtoByFriendFilterOfUser(anyString(), any(), anyDouble(), any(
             ZonedDateTime.class), any(Pageable.class), anyLong()))
             .thenReturn(userFriendDtos);
@@ -77,7 +73,6 @@ public class FriendServiceImplTest {
         Page<UserFriendFilterDto> userFriendDtos = new PageImpl<>(friends, PageRequest.of(0, 10), 1L);
         ZonedDateTime dateTimeOfAddingFriend = ZonedDateTime.now().minusWeeks(1);
 
-        when(userRepo.existsById(anyLong())).thenReturn(true);
         when(userRepo.findUserFriendDtoByFriendFilterOfUser(anyString(), any(), anyDouble(), any(
             ZonedDateTime.class), any(Pageable.class), anyLong()))
             .thenReturn(userFriendDtos);
@@ -103,9 +98,7 @@ public class FriendServiceImplTest {
         friends.add(new UserFriendFilterDto(2L, "Lviv", "Friend2",
             "picturePath", 21D, 1L));
         Page<UserFriendFilterDto> userFriendDtos = new PageImpl<>(friends, PageRequest.of(0, 10), 1L);
-        //ZonedDateTime dateTimeOfAddingFriend = ZonedDateTime.now().minusWeeks(1);
 
-        when(userRepo.existsById(anyLong())).thenReturn(true);
         when(userRepo.findUserFriendDtoByFriendFilterOfUser(anyString(), any(), anyDouble(), any(
             ZonedDateTime.class), any(Pageable.class), anyLong()))
             .thenReturn(userFriendDtos);
@@ -126,23 +119,12 @@ public class FriendServiceImplTest {
 
     @Test
     void getAllFriendsByDifferentParametersWhenNameIsOutOfBoundsThrowsBadRequestExceptionTest() {
-        when(userRepo.existsById(anyLong())).thenReturn(true);
-
         assertThrows(BadRequestException.class, () -> friendService.getAllFriendsByDifferentParameters(
             PageRequest.of(0, 10), "",
             userVO, false, 210D, ZonedDateTime.now()));
         assertThrows(BadRequestException.class, () -> friendService.getAllFriendsByDifferentParameters(
             PageRequest.of(0, 10), "1111111111111111111111111111111",
             userVO, false, 210D, ZonedDateTime.now()));
-    }
-
-    @Test
-    void getAllFriendsByDifferentParametersWhenUserNotFoundThrowsNotFoundExceptionTest() {
-        when(userRepo.existsById(anyLong())).thenReturn(false);
-
-        assertThrows(NotFoundException.class, () -> friendService.getAllFriendsByDifferentParameters(
-            PageRequest.of(0, 10),
-            "t_e%s\\t'", userVO, false, 210D, ZonedDateTime.now()));
     }
 
     private String replaceCriteria(String criteria) {

@@ -31,7 +31,6 @@ public class FriendServiceImpl implements FriendService {
     public PageableDto<UserFriendDto> getAllFriendsByDifferentParameters(
         Pageable pageable, String name, UserVO userVO, Boolean hasSameCity,
         Double highestPersonalRate, ZonedDateTime dateTimeOfAddingFriend) {
-        validateUserExist(userVO.getId());
         if (name.isEmpty() || name.length() >= 30) {
             throw new BadRequestException(ErrorMessage.INVALID_LENGTH_OF_QUERY_NAME);
         }
@@ -54,12 +53,6 @@ public class FriendServiceImpl implements FriendService {
             listOfUsers.getTotalElements(),
             listOfUsers.getPageable().getPageNumber(),
             listOfUsers.getTotalPages());
-    }
-
-    private void validateUserExist(Long userId) {
-        if (!userRepo.existsById(userId)) {
-            throw new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + userId);
-        }
     }
 
     private String replaceCriteria(String criteria) {

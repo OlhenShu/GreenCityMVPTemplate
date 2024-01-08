@@ -4,7 +4,6 @@ import greencity.dto.PageableDto;
 import greencity.dto.user.UserFriendDto;
 import greencity.dto.user.UserFriendFilterDto;
 import greencity.dto.user.UserVO;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import org.springframework.data.domain.Pageable;
 
