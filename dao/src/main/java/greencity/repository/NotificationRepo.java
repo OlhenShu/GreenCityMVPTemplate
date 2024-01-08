@@ -18,6 +18,6 @@ public interface NotificationRepo extends JpaRepository<Notification, Long> {
     @Query("SELECT new greencity.dto.notification.NotificationDto("
         + "n.id, n.author.id, n.author.name, n.title, n.shortDescription, n.isRead, n.creationDate) "
         + "FROM Notification n LEFT JOIN n.receivers r "
-        + "WHERE r.id = :userId")
+        + "WHERE r.id = :userId ORDER BY n.creationDate DESC")
     Page<NotificationDto> findAllReceivedNotificationDtoByUserId(Long userId, Pageable page);
 }

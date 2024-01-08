@@ -17,16 +17,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepo notificationRepo;
-    private final UserRepo userRepo;
 
     /**
      * {@inheritDoc}
      */
     @Override
     public PageableDto<NotificationDto> findAllByUser(Long userId, Pageable page) {
-        if (!userRepo.existsById(userId)) {
-            throw new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + userId);
-        }
         Page<NotificationDto> notificationDtoPage = notificationRepo
             .findAllReceivedNotificationDtoByUserId(userId, page);
         return new PageableDto<>(
