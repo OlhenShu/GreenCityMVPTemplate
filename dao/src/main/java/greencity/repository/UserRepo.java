@@ -1,17 +1,20 @@
 package greencity.repository;
 
 import greencity.dto.habit.HabitVO;
+import greencity.dto.user.RecommendFriendDto;
 import greencity.dto.user.UserFriendDto;
 import greencity.dto.user.UserManagementVO;
 import greencity.dto.user.UserVO;
 import greencity.entity.User;
 import greencity.repository.options.UserFilter;
+import javax.persistence.Tuple;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -144,25 +147,29 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
     List<User> getAllUserFriends(Long userId);
 
     /**
-     * Retrieves a filtered list of users and their friend-related details based on specified criteria.
+     * Retrieves a paginated list of recommended friends for a given user, considering mutual habits and mutual friends,
+     * ordered by the count of mutual friends in descending order, followed by the prioritized city, and then
+     * by the count of mutual habits in descending order.
      *
-     * @param city              The city for filtering users.
-     * @param hasMutualFriends  Flag indicating to include users only with mutual friends.
-     * @param pageable          Pagination information for the resulting list.
-     * @param userId            The unique identifier of the user initiating the query.
-     * @return                  A paginated list of {@link UserFriendDto} containing user details.
-     * @author Denys Liubchenko
+     * @param userId   The ID of the user for whom friend recommendations are sought.
+     * @param pageable Pageable object defining the page size, page number, and sorting criteria for the result set.
+     * @param city     The city used for prioritizing recommendations.
+     * @return A paginated list of RecommendFriendDto objects representing recommended friends.
      */
-    @Query("SELECT new greencity.dto.user.UserFriendDto("
-        + "u.id ,u.city, COUNT(uc), u.name, u.profilePicturePath, u.rating) "
-        + "FROM User u LEFT JOIN u.connections uc "
-        + "WHERE (uc.friend.id IN "
-        + "(SELECT u2c.friend.id FROM User u2 "
-        + "LEFT JOIN u2.connections u2c WHERE u2.id = :userId AND u2c.status = 'FRIEND') "
-        + "OR uc.friend.id IS NULL) "
-        + "AND u.id != :userId  "
-        + "AND (:city IS NULL OR u.city = :city)"
-        + "GROUP BY u.id HAVING (:hasMutualFriends IS FALSE OR COUNT(uc) > 0)")
-    Page<UserFriendDto> findAllUserFriendDtoByFriendFilter(String city, Boolean hasMutualFriends, Boolean hasSameHabit,
-                                                           Pageable pageable, Long userId);
+    @Query(value = "SELECT new greencity.dto.user.RecommendFriendDto(u.id,u.city,u.name,u.profilePicturePath,u.rating,"
+        + "(SELECT count(ha1.habit.id) from HabitAssign ha1 WHERE ha1.user.id = :userId "
+        + "AND (ha1.status = 'INPROGRESS' OR ha1.status = 'ACQUIRED') AND ha1.habit.id IN "
+        + "(SELECT ha2.habit.id from HabitAssign ha2 WHERE (ha2.user.id = u.id))) as mutualHabits, "
+        + "(SELECT COUNT(uf1.friend.id) from UserFriend uf1 JOIN UserFriend uf2 ON uf1.friend.id = uf2.friend.id "
+        + "WHERE uf1.user.id = :userId AND uf2.user.id = u.id AND uf1.status = 'FRIEND' "
+        + "AND uf2.status = 'FRIEND') as mutualFriends)"
+        + "FROM User u WHERE u.id != :userId AND NOT EXISTS "
+        + "(SELECT 1 FROM User u4 LEFT JOIN UserFriend uc ON u4.id = uc.user.id "
+        + "WHERE uc.friend.id = :userId AND u.id = u4.id)"
+        + "GROUP BY u.id, u.city, u.name, u.profilePicturePath, u.rating ORDER BY mutualFriends DESC, "
+        + "CASE WHEN u.city = :city THEN 0 ELSE 1 END, mutualHabits DESC",
+           countQuery = "SELECT COUNT(*) FROM User u WHERE u.id != :userId AND NOT EXISTS "
+        + "(SELECT 1 FROM User u4 LEFT JOIN UserFriend uc ON u4.id = uc.user.id "
+        + "WHERE uc.friend.id = :userId AND u.id = u4.id)")
+    Page<RecommendFriendDto> findAllRecommendedFriends(Long userId,Pageable pageable,String city);
 }

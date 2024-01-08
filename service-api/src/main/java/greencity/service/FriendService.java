@@ -1,6 +1,7 @@
 package greencity.service;
 
 import greencity.dto.PageableDto;
+import greencity.dto.user.RecommendFriendDto;
 import greencity.dto.user.UserFriendDto;
 import greencity.dto.user.UserVO;
 import org.springframework.data.domain.Pageable;
@@ -13,12 +14,12 @@ import org.springframework.data.domain.Pageable;
  */
 public interface FriendService {
     /**
-     * Method to retrieve a paginated list of recommended friends for the specified user.
+     * Retrieves a paginated list of recommended friends for a given user within a specified paging configuration.
      *
-     * @param user     the user object containing information about the user for whom recommended friends are to be fetched
-     * @param pageable object specifying pagination information
-     * @return a {@link PageableDto} containing {@link UserFriendDto} objects representing recommended friends
+     * @param user     The UserVO object representing the user for whom friend recommendations are sought.
+     * @param pageable Pageable object defining the page size, page number, and sorting criteria for the result set.
+     * @return A {@link PageableDto} with {@link RecommendFriendDto} objects representing recommended friends
      * @author Nikita Malov
      */
-    PageableDto<UserFriendDto> getRecommendedFriends(UserVO user, Pageable pageable);
+    PageableDto<RecommendFriendDto> getRecommendedFriends(UserVO user, Pageable pageable);
 }
