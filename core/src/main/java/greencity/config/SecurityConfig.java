@@ -123,7 +123,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/econews/tags",
                 "/econews/tags/all",
                 "/econews/recommended",
-                "/econews/{id}",
+                "/econews/{id:[0-9]+}",
                 "/econews/countLikes/{econewsId}",
                 "/econews/comments/count/comments/{ecoNewsId}",
                 "/econews/comments/count/replies/{parentCommentId}",
