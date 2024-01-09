@@ -27,7 +27,7 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-
+import static greencity.ModelUtils.getUserVO;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
@@ -48,7 +48,7 @@ public class FriendControllerTest {
     @Mock
     private ModelMapper modelMapper;
     private MockMvc mockMvc;
-    private final UserVO userVO = ModelUtils.getUserVO();
+    private final UserVO userVO = getUserVO();
 
     @BeforeEach
     void setup() {
@@ -193,5 +193,26 @@ public class FriendControllerTest {
         verify(userService).findByEmail(userVO.getEmail());
         verify(friendService).getAllFriendsByDifferentParameters(
             eq(pageable), eq(name), eq(userVO), eq(false), eq(null), eq(null));
+    }
+
+    @Test
+    void getRecommendedFriends() throws Exception {
+        UserVO userVO = getUserVO();
+        when(userService.findByEmail(anyString())).thenReturn(userVO);
+        int pageNumber = 5;
+        int pageSize = 20;
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+        mockMvc
+            .perform(
+                get(link +"/recommended")
+                    .param("page", String.valueOf(pageNumber))
+                    .param("size", String.valueOf(pageSize))
+                    .principal(userVO::getEmail)
+            )
+            .andExpect(status().isOk());
+
+        verify(userService).findByEmail(userVO.getEmail());
+        verify(friendService).getRecommendedFriends(userVO, pageable);
     }
 }

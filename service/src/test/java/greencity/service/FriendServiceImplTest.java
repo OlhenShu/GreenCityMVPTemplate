@@ -1,6 +1,8 @@
 package greencity.service;
 
 import greencity.ModelUtils;
+import greencity.dto.PageableDto;
+import greencity.dto.user.RecommendFriendDto;
 import greencity.dto.user.UserFriendDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.User;
@@ -24,6 +26,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import static greencity.ModelUtils.getUser;
+import static greencity.ModelUtils.getUserVO;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
@@ -36,14 +40,14 @@ public class FriendServiceImplTest {
     @InjectMocks
     private FriendServiceImpl friendService;
 
-    private final UserVO userVO = ModelUtils.getUserVO();
+    private final UserVO userVO = getUserVO();
 
     @Test
     void searchFriendsTest() {
-        User user = ModelUtils.getUser();
-        User friend1 = ModelUtils.getUser();
+        User user = getUser();
+        User friend1 = getUser();
         friend1.setId(2L);
-        User friend2 = ModelUtils.getUser();
+        User friend2 = getUser();
         friend2.setId(4L);
         Set<UserFriend> userFriends = new HashSet<>();
         UserFriend userFriend1 = UserFriend.builder()
@@ -89,10 +93,10 @@ public class FriendServiceImplTest {
     @Test
     void searchFriendsWithHasSameCityFlagTest() {
         userVO.setCity("Lviv");
-        User user = ModelUtils.getUser();
-        User friend1 = ModelUtils.getUser();
+        User user = getUser();
+        User friend1 = getUser();
         friend1.setId(2L);
-        User friend2 = ModelUtils.getUser();
+        User friend2 = getUser();
         friend2.setId(4L);
         Set<UserFriend> userFriends = new HashSet<>();
         UserFriend userFriend1 = UserFriend.builder()
@@ -142,8 +146,8 @@ public class FriendServiceImplTest {
 
     @Test
     void addFriendTest() {
-        User user = ModelUtils.getUser();
-        User friend = ModelUtils.getUser();
+        User user = getUser();
+        User friend = getUser();
         friend.setId(3L);
         Set<UserFriend> userFriends = new HashSet<>();
         UserFriend userFriend = UserFriend.builder()
@@ -173,10 +177,10 @@ public class FriendServiceImplTest {
 
     @Test
     void addFriendWhenUserAlreadyHasConnectionThrowsBadRequestExceptionTest() {
-        User user = ModelUtils.getUser();
-        User friend2 = ModelUtils.getUser();
+        User user = getUser();
+        User friend2 = getUser();
         friend2.setId(2L);
-        User friend3 = ModelUtils.getUser();
+        User friend3 = getUser();
         friend3.setId(3L);
         Set<UserFriend> userFriends = new HashSet<>();
 
@@ -346,6 +350,24 @@ public class FriendServiceImplTest {
         assertThrows(BadRequestException.class, () -> friendService.getAllFriendsByDifferentParameters(
             PageRequest.of(0, 10), "1111111111111111111111111111111",
             userVO, false, 210D, ZonedDateTime.now()));
+    }
+
+    @Test
+    void getRecommendedFriends(){
+        UserVO userVO = getUserVO();
+        User user = getUser();
+        PageRequest pageable = PageRequest.of(0, 5);
+        RecommendFriendDto recommendFriendDto =
+            new RecommendFriendDto(user.getId(), user.getCity(), user.getName(), user.getProfilePicturePath()
+                , user.getRating(), 0L, 0L);
+
+        when(userRepo.findAllRecommendedFriends(userVO.getId(), pageable,userVO.getCity())).
+            thenReturn(new PageImpl<>(List.of(recommendFriendDto),pageable,1));
+
+        var actual = friendService.getRecommendedFriends(userVO,pageable);
+        verify(userRepo).findAllRecommendedFriends(userVO.getId(), pageable,userVO.getCity());
+        var expected = new PageableDto<>(List.of(recommendFriendDto), 1, 0, 1);
+        assertEquals(expected,actual);
     }
 
     private String replaceCriteria(String criteria) {
