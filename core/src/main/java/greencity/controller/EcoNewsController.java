@@ -117,6 +117,7 @@ public class EcoNewsController {
             @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
             @ApiResponse(code = 415, message = HttpStatuses.UNSUPPORTED_MEDIA_TYPE)
+            @ApiResponse(code = 303, message = HttpStatuses.SEE_OTHER),
     })
     @PostMapping(path = "/uploadImages", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<String[]> uploadImages(
@@ -153,6 +154,7 @@ public class EcoNewsController {
             @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
             @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+            @ApiResponse(code = 303, message = HttpStatuses.SEE_OTHER),
     })
 
     @PutMapping(path = "/update", consumes = {MediaType.APPLICATION_JSON_UTF8_VALUE,
@@ -411,6 +413,7 @@ public class EcoNewsController {
             @ApiResponse(code = 200, message = HttpStatuses.OK),
             @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
             @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND, response = NotFoundException.class)
     })
     @GetMapping("/contentAndSourceForEcoNews/{id}")
