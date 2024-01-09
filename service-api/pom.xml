@@ -94,9 +94,5 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
-        <dependency>
-            <groupId>greencity</groupId>
-            <artifactId>dao</artifactId>
-        </dependency>
     </dependencies>
 </project>
