@@ -3,6 +3,7 @@ package greencity.entity;
 import greencity.enums.NotificationSourceType;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.mapping.ToOne;
 
 import javax.persistence.*;
 import java.time.ZonedDateTime;
@@ -15,6 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString(exclude = "receivers")
 public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

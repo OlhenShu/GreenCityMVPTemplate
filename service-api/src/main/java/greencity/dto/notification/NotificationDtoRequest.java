@@ -3,10 +3,9 @@ package greencity.dto.notification;
 import greencity.dto.user.AuthorDto;
 import greencity.dto.user.UserForListDto;
 import greencity.enums.NotificationSourceType;
-import lombok.*;
-
 import java.time.ZonedDateTime;
 import java.util.Set;
+import lombok.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
