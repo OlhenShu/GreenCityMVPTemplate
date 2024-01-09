@@ -1,25 +1,23 @@
 package greencity.repository;
 
 import greencity.dto.habit.HabitVO;
-import greencity.dto.user.RecommendFriendDto;
-import greencity.dto.user.UserFriendDto;
-import greencity.dto.user.UserManagementVO;
-import greencity.dto.user.UserVO;
+import greencity.dto.user.*;
 import greencity.entity.User;
 import greencity.repository.options.UserFilter;
+import java.sql.Timestamp;
+import java.time.ZonedDateTime;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import greencity.dto.user.UserFriendFilterDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.sql.Timestamp;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
@@ -232,4 +230,39 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
         + "(SELECT 1 FROM User u4 LEFT JOIN UserFriend uc ON u4.id = uc.user.id "
         + "WHERE uc.friend.id = :userId AND u.id = u4.id)")
     Page<RecommendFriendDto> findAllRecommendedFriends(Long userId,Pageable pageable,String city);
+
+    /**
+     * Retrieves a paginated list of friends' details with specific filtering criteria.
+     *
+     * @param nameCriteria          The criteria for filtering friend names (can be null).
+     * @param city                  The city used for filtering friends (can be null).
+     * @param highestPersonalRate   The maximum rating allowed for friends in the result set.
+     * @param dateTimeOfAddingFriend The date when friends were added, filtering based on this timestamp.
+     * @param pageable              Pagination information for the resulting list.
+     * @param userId                The unique identifier of the user whose friends are being fetched.
+     * @return                      A paginated list of {@link UserFriendFilterDto} containing friend details.
+     */
+    @Query(value = "SELECT new greencity.dto.user.UserFriendFilterDto ("
+        + "uf.friend.id ,uf.friend.city, uf.friend.name, uf.friend.profilePicturePath, uf.friend.rating, "
+        + "(SELECT COUNT(ec.ecoNews.id) FROM EcoNewsComment ec WHERE ec.user.id = :userId AND ec.ecoNews.id IN ("
+        + "SELECT ec.ecoNews.id FROM EcoNewsComment ec WHERE ec.user.id = uf.friend.id)) as mutualEcoNews) "
+        + "FROM UserFriend uf "
+        + "WHERE uf.status = 'FRIEND' "
+        + "AND (:highestPersonalRate IS NULL OR uf.friend.rating <= :highestPersonalRate) "
+        + "AND (uf.createdDate >= cast(:dateTimeOfAddingFriend as timestamp )) "
+        + "AND (:nameCriteria IS NULL OR uf.friend.name LIKE :nameCriteria) "
+        + "AND (:city IS NULL OR uf.friend.city = :city) "
+        + "AND uf.user.id = :userId "
+        + "ORDER BY uf.friend.rating DESC, mutualEcoNews DESC ",
+        countQuery = "SELECT COUNT(*) "
+            + "FROM UserFriend uf "
+            + "WHERE uf.status = 'FRIEND' "
+            + "AND (:highestPersonalRate IS NULL OR uf.friend.rating <= :highestPersonalRate) "
+            + "AND (uf.createdDate >= cast(:dateTimeOfAddingFriend as timestamp )) "
+            + "AND (:nameCriteria IS NULL OR uf.friend.name LIKE :nameCriteria) "
+            + "AND (:city IS NULL OR uf.friend.city = :city) "
+            + "AND uf.user.id = :userId ")
+    Page<UserFriendFilterDto> findUserFriendDtoByFriendFilterOfUser(
+        String nameCriteria, String city, Double highestPersonalRate,
+        ZonedDateTime dateTimeOfAddingFriend, Pageable pageable, Long userId);
 }

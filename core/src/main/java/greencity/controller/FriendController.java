@@ -14,13 +14,19 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import java.time.ZonedDateTime;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/friends")
@@ -121,5 +127,38 @@ public class FriendController {
         return ResponseEntity.ok(
             friendService.getRecommendedFriends(user,
                 PageRequest.of(pageable.getPageNumber(), pageable.getPageSize())));
+    }
+
+    /**
+     * Retrieves a paginated list of friends' details with specific filtering criteria.
+     *
+     * @param pageable               Pagination information for the resulting list.
+     * @param name                   The criteria for filtering friend names (can be null).
+     * @param userVO                 User, which friends are being fetched.
+     * @param hasSameCity            Whether to filter friends by the same city as the user.
+     * @param highestPersonalRate    The maximum rating allowed for friends in the result set.
+     * @param dateTimeOfAddingFriend The date when friends were added, filtering based on this timestamp.
+     * @return                       A paginated list of {@link UserFriendDto} containing friend details.
+     */
+    @ApiOperation(value = "")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @ApiPageable
+    @GetMapping()
+    public ResponseEntity<PageableDto<UserFriendDto>> getAllFriendsByDifferentParameters(
+        @ApiIgnore Pageable pageable,
+        @ApiParam(value = "Query to search 1 to 30 characters") @RequestParam String name,
+        @RequestParam(required = false, name = "hasSameCity", defaultValue = "false") Boolean hasSameCity,
+        @RequestParam(required = false, name = "highestPersonalRate") Double highestPersonalRate,
+        @RequestParam(required = false, name = "dateTimeOfAddingFriend")
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime dateTimeOfAddingFriend,
+        @ApiIgnore @CurrentUser UserVO userVO) {
+        return ResponseEntity.status(HttpStatus.OK).body(
+            friendService.getAllFriendsByDifferentParameters(
+                pageable, name, userVO, hasSameCity, highestPersonalRate, dateTimeOfAddingFriend));
     }
 }

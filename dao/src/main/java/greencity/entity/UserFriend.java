@@ -2,6 +2,7 @@ package greencity.entity;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import lombok.*;
@@ -33,5 +34,5 @@ public class UserFriend {
 
     @NotNull
     @Column(name = "created_date", nullable = false)
-    private LocalDateTime createdDate;
+    private ZonedDateTime createdDate;
 }

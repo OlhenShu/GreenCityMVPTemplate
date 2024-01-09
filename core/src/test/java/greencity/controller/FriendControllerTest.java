@@ -4,9 +4,11 @@ import greencity.ModelUtils;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.PageableDto;
 import greencity.dto.user.UserFriendDto;
+import greencity.dto.user.UserFriendFilterDto;
 import greencity.dto.user.UserVO;
 import greencity.service.FriendService;
 import greencity.service.UserService;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -116,5 +118,80 @@ public class FriendControllerTest {
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         verify(friendService).deleteUserFriend(eq(1L), eq(2L));
+    }
+
+    @Test
+    void searchMyFriendsWithAllCriteriaTest() throws Exception {
+        Pageable pageable = PageRequest.of(0, 10);
+        String name = "test";
+        Boolean hasSameCity = true;
+        Double highestPersonalRate = 210D;
+        ZonedDateTime dateTimeOfAddingFriend = ZonedDateTime.parse("2017-10-01T01:00+02:00");
+
+        List<UserFriendDto> friends = new ArrayList<>();
+        friends.add(new UserFriendFilterDto(2L, "Lviv", "Friend2",
+            "picturePath", 21D, 1L));
+        friends.add(new UserFriendFilterDto(3L, "Odesa", "Friend3",
+            "picturePath", 25D, 0L));
+
+        var userFriendDtoPage = new PageImpl<>(friends, PageRequest.of(0, 10), 2L);
+        var pageableDto = new PageableDto<>(
+            userFriendDtoPage.getContent(),
+            userFriendDtoPage.getTotalElements(),
+            userFriendDtoPage.getPageable().getPageNumber(),
+            userFriendDtoPage.getTotalPages());
+
+        when(userService.findByEmail(anyString())).thenReturn(userVO);
+        when(friendService.getAllFriendsByDifferentParameters(any(Pageable.class), anyString(), any(UserVO.class),
+            anyBoolean(), anyDouble(), any(ZonedDateTime.class)))
+            .thenReturn(pageableDto);
+
+        mockMvc.perform(get(link)
+                .principal(userVO::getEmail)
+                .param("name", name)
+                .param("hasSameCity", String.valueOf(hasSameCity))
+                .param("highestPersonalRate", String.valueOf(highestPersonalRate))
+                .param("dateTimeOfAddingFriend", "2017-10-01T01:00+02:00")
+                .param("page", "0")
+                .param("size", "10"))
+            .andExpect(status().isOk());
+
+        verify(userService).findByEmail(userVO.getEmail());
+        verify(friendService).getAllFriendsByDifferentParameters(
+            pageable, name, userVO, hasSameCity, highestPersonalRate, dateTimeOfAddingFriend);
+    }
+
+    @Test
+    void searchFriendsWithCriteriaNotDefinedTest() throws Exception {
+        Pageable pageable = PageRequest.of(0, 10);
+        String name = "test";
+
+        List<UserFriendDto> friends = new ArrayList<>();
+        friends.add(new UserFriendFilterDto(2L, "Lviv", "Friend2",
+            "picturePath", 21D, 1L));
+        friends.add(new UserFriendFilterDto(3L, "Odesa", "Friend3",
+            "picturePath", 25D, 0L));
+
+        var userFriendDtoPage = new PageImpl<>(friends, PageRequest.of(0, 10), 2L);
+        var pageableDto = new PageableDto<>(
+            userFriendDtoPage.getContent(),
+            userFriendDtoPage.getTotalElements(),
+            userFriendDtoPage.getPageable().getPageNumber(),
+            userFriendDtoPage.getTotalPages());
+
+        when(userService.findByEmail(anyString())).thenReturn(userVO);
+        when(friendService.getAllFriendsByDifferentParameters(any(Pageable.class), anyString(), any(UserVO.class),
+            anyBoolean(), any(), any())).thenReturn(pageableDto);
+
+        mockMvc.perform(get(link)
+                .principal(userVO::getEmail)
+                .param("name", name)
+                .param("page", "0")
+                .param("size", "10"))
+            .andExpect(status().isOk());
+
+        verify(userService).findByEmail(userVO.getEmail());
+        verify(friendService).getAllFriendsByDifferentParameters(
+            eq(pageable), eq(name), eq(userVO), eq(false), eq(null), eq(null));
     }
 }
