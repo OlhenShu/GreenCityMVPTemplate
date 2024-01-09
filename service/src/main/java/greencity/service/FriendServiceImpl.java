@@ -97,6 +97,19 @@ public class FriendServiceImpl implements FriendService {
         userRepo.deleteUserFriend(userId, friendId);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PageableDto<RecommendFriendDto> getRecommendedFriends(UserVO user, Pageable pageable) {
+        var recommendedFriends = userRepo.findAllRecommendedFriends(user.getId(),
+            pageable,user.getCity());
+        return new PageableDto<>(recommendedFriends.stream().collect(Collectors.toList()),
+            recommendedFriends.getNumberOfElements(),
+            recommendedFriends.getNumber(),
+            recommendedFriends.getTotalPages());
+    }
+
     private void checkIfFriends(Long userId, Long friendId) {
         if (!userRepo.isFriend(userId, friendId)) {
             throw new NotDeletedException(ErrorMessage.NOT_FOUND_ANY_FRIENDS + friendId);
@@ -118,18 +131,5 @@ public class FriendServiceImpl implements FriendService {
         criteria = criteria.replace("'", "\\'");
         criteria = "%" + criteria + "%";
         return criteria;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public PageableDto<RecommendFriendDto> getRecommendedFriends(UserVO user, Pageable pageable) {
-        var recommendedFriends = userRepo.findAllRecommendedFriends(user.getId(),
-            pageable,user.getCity());
-        return new PageableDto<>(recommendedFriends.stream().collect(Collectors.toList()),
-            recommendedFriends.getNumberOfElements(),
-            recommendedFriends.getNumber(),
-            recommendedFriends.getTotalPages());
     }
 }
