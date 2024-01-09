@@ -12,6 +12,7 @@ import lombok.*;
 @Builder
 @EqualsAndHashCode
 public class NotificationDtoResponse {
+    private Long id;
     private AuthorDto author;
     private String title;
     private ZonedDateTime creationDate;
