@@ -31,4 +31,5 @@ public class EventDateLocation {
     @Embedded
     private Coordinates coordinates;
 
+    private String onlineLink;
 }

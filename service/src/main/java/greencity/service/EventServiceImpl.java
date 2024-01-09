@@ -40,6 +40,11 @@ public class EventServiceImpl implements EventService {
         event.setCreationDate(LocalDate.now());
         event.setOrganizer(modelMapper.map(userVO, User.class));
 
+        event.setDates(event.getDates()
+                .stream()
+                .map(date->date.setEvent(event))
+                .collect(Collectors.toList()));
+
         List<TagVO> tagsVO = tagsService.findTagsByNamesAndType(addEventDto.getTags(), TagType.EVENT);
         event.setTags(modelMapper.map(tagsVO, TypeUtils.parameterize(List.class, Tag.class)));
 

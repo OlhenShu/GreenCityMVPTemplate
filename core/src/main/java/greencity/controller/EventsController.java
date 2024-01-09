@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.security.Principal;
 import java.util.List;
 
 @Validated
@@ -47,7 +46,8 @@ public class EventsController {
             @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
     })
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping(value = "/create")
+    @PostMapping(value = "/create",
+            consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<EventDto> save(
             @ApiParam(value = SwaggerExampleModel.ADD_EVENT, required = true)
             @RequestPart AddEventDto addEventDto,
