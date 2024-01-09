@@ -1,10 +1,12 @@
 package greencity.repository;
 
 import greencity.dto.habit.HabitVO;
+import greencity.dto.user.UserFriendDto;
 import greencity.dto.user.UserManagementVO;
 import greencity.dto.user.UserVO;
 import greencity.entity.User;
 import greencity.repository.options.UserFilter;
+import java.time.LocalDateTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -141,4 +143,43 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
         + "(SELECT user_id FROM users_friends WHERE friend_id = :userId and status = 'FRIEND')"
         + "UNION (SELECT friend_id FROM users_friends WHERE user_id = :userId and status = 'FRIEND'));")
     List<User> getAllUserFriends(Long userId);
+
+    /**
+     * Retrieves a filtered list of users and their friend-related details based on specified criteria.
+     *
+     * @param nameCriteria      The criteria for filtering user's names.
+     * @param city              The city for filtering users.
+     * @param hasMutualFriends  Flag indicating to include users only with mutual friends.
+     * @param pageable          Pagination information for the resulting list.
+     * @param userId            The unique identifier of the user initiating the query.
+     * @return                  A paginated list of {@link UserFriendDto} containing user details.
+     * @author Denys Liubchenko
+     */
+    @Query("SELECT new greencity.dto.user.UserFriendDto ("
+        + "u.id ,u.city, COUNT(uc), u.name, u.profilePicturePath, u.rating) "
+        + "FROM User u LEFT JOIN u.connections uc "
+        + "WHERE (uc.friend.id IN "
+        + "(SELECT u2c.friend.id FROM User u2 "
+        + "LEFT JOIN u2.connections u2c WHERE u2.id = :userId AND u2c.status = 'FRIEND') "
+        + "OR uc.friend.id IS NULL) "
+        + "AND u.id != :userId  "
+        + "AND (:nameCriteria IS NULL OR u.name LIKE :nameCriteria) "
+        + "AND (:city IS NULL OR u.city = :city)"
+        + "GROUP BY u.id HAVING (:hasMutualFriends IS FALSE OR COUNT(uc) > 0)")
+    Page<UserFriendDto> findAllUserFriendDtoByFriendFilter(String nameCriteria, String city, Boolean hasMutualFriends,
+                                                           Pageable pageable, Long userId);
+
+    /**
+     * Sends a friend request from one user to another.
+     *
+     * @param userId            The unique identifier of the user initiating the query.
+     * @param friendId          The unique identifier of the friend to sent request.
+     *
+     * @author Denys Liubchenko
+     */
+    @Modifying
+    @Transactional
+    @Query(nativeQuery = true, value = "INSERT INTO users_friends "
+        + "(user_id, friend_id, status, created_date) VALUES (:userId, :friendId, 'REQUEST', NOW());")
+    void addFriend(Long userId, Long friendId);
 }
