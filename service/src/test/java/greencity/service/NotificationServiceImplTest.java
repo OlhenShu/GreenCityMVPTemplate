@@ -2,10 +2,10 @@ package greencity.service;
 
 import greencity.ModelUtils;
 import greencity.dto.PageableDto;
-import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.NotificationDtoResponse;
 import greencity.dto.user.UserVO;
+import greencity.enums.NotificationSourceType;
 import greencity.repository.NotificationRepo;
-import greencity.repository.UserRepo;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,18 +33,20 @@ public class NotificationServiceImplTest {
 
     @Test
     public void findAllByUserTest() {
-        List<NotificationDto> notificationDtoList = new ArrayList<>();
+        List<NotificationDtoResponse> notificationDtoList = new ArrayList<>();
         notificationDtoList.add(
-            new NotificationDto(2L, 2L, "name1", "title", "shortDescription", true, ZonedDateTime.now()));
+            new NotificationDtoResponse(2L, 2L, "name1", "title",
+                NotificationSourceType.NEWS_LIKED, 1L, false, ZonedDateTime.now()));
         notificationDtoList.add(
-            new NotificationDto(3L, 3L, "name2", "title", "shortDescription", true, ZonedDateTime.now()));
-        Page<NotificationDto> notificationDtoPage = new PageImpl<>(notificationDtoList, PageRequest.of(0, 10), 2L);
+            new NotificationDtoResponse(3L, 1L, "name2", "title",
+                NotificationSourceType.NEWS_COMMENTED, 23L, true, ZonedDateTime.now()));
+        Page<NotificationDtoResponse> notificationDtoPage = new PageImpl<>(notificationDtoList, PageRequest.of(0, 10), 2L);
 
         when(notificationRepo.findAllReceivedNotificationDtoByUserId(anyLong(), any(Pageable.class)))
             .thenReturn(notificationDtoPage);
 
-        PageableDto<NotificationDto> pageableDto = notificationService.findAllByUser(userVO.getId(), PageRequest.of(0, 10));
-        PageableDto<NotificationDto> expectedPageableDto = new PageableDto<>(notificationDtoList, 2L, 0, 1);
+        PageableDto<NotificationDtoResponse> pageableDto = notificationService.findAllByUser(userVO.getId(), PageRequest.of(0, 10));
+        PageableDto<NotificationDtoResponse> expectedPageableDto = new PageableDto<>(notificationDtoList, 2L, 0, 1);
 
         verify(notificationRepo).findAllReceivedNotificationDtoByUserId(userVO.getId(), PageRequest.of(0, 10));
         assertEquals(expectedPageableDto, pageableDto);

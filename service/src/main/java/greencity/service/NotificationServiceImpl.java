@@ -1,11 +1,8 @@
 package greencity.service;
 
-import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
-import greencity.dto.notification.NotificationDto;
-import greencity.exception.exceptions.NotFoundException;
+import greencity.dto.notification.NotificationDtoResponse;
 import greencity.repository.NotificationRepo;
-import greencity.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,8 +19,8 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
-    public PageableDto<NotificationDto> findAllByUser(Long userId, Pageable page) {
-        Page<NotificationDto> notificationDtoPage = notificationRepo
+    public PageableDto<NotificationDtoResponse> findAllByUser(Long userId, Pageable page) {
+        Page<NotificationDtoResponse> notificationDtoPage = notificationRepo
             .findAllReceivedNotificationDtoByUserId(userId, page);
         return new PageableDto<>(
             notificationDtoPage.getContent(),

@@ -3,9 +3,8 @@ package greencity.controller;
 import greencity.annotations.ApiPageable;
 import greencity.annotations.CurrentUser;
 import greencity.constant.HttpStatuses;
-import greencity.dto.PageableAdvancedDto;
 import greencity.dto.PageableDto;
-import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.NotificationDtoResponse;
 import greencity.dto.user.UserVO;
 import greencity.service.NotificationService;
 import io.swagger.annotations.ApiOperation;
@@ -27,11 +26,11 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     /**
-     * Method that returns page of {@link NotificationDto} received by user with specified id.
+     * Method that returns page of {@link NotificationDtoResponse} received by user with specified id.
      *
      * @param user  user id.
      * @param page  {@link Pageable} object.
-     * @return      page of {@link NotificationDto}.
+     * @return      page of {@link NotificationDtoResponse}.
      */
     @ApiOperation(value = "Find page of notifications by authorised user.")
     @ApiResponses(value = {
@@ -40,7 +39,7 @@ public class NotificationController {
     })
     @GetMapping
     @ApiPageable
-    public ResponseEntity<PageableDto<NotificationDto>> findAll(
+    public ResponseEntity<PageableDto<NotificationDtoResponse>> findAll(
         @ApiIgnore @CurrentUser UserVO user, @ApiIgnore Pageable page) {
         return ResponseEntity.status(HttpStatus.OK).body(notificationService.findAllByUser(user.getId(), page));
     }

@@ -3,8 +3,9 @@ package greencity.controller;
 import greencity.ModelUtils;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.PageableDto;
-import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.NotificationDtoResponse;
 import greencity.dto.user.UserVO;
+import greencity.enums.NotificationSourceType;
 import greencity.service.NotificationService;
 import greencity.service.UserService;
 import java.time.ZonedDateTime;
@@ -53,11 +54,13 @@ public class NotificationControllerTest {
 
     @Test
     void findAllByUserTest() throws Exception {
-        List<NotificationDto> notificationDtoList = new ArrayList<>();
+        List<NotificationDtoResponse> notificationDtoList = new ArrayList<>();
         notificationDtoList.add(
-            new NotificationDto(2L, 2L, "name1", "title", "shortDescription", true, ZonedDateTime.now()));
+            new NotificationDtoResponse(2L, 2L, "name1", "title",
+                NotificationSourceType.NEWS_LIKED, 1L, false, ZonedDateTime.now()));
         notificationDtoList.add(
-            new NotificationDto(3L, 3L, "name2", "title", "shortDescription", true, ZonedDateTime.now()));
+            new NotificationDtoResponse(3L, 1L, "name2", "title",
+                NotificationSourceType.NEWS_COMMENTED, 23L, true, ZonedDateTime.now()));
 
         when(userService.findByEmail(anyString())).thenReturn(userVO);
         when(notificationService.findAllByUser(userVO.getId(), PageRequest.of(0, 10)))

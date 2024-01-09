@@ -1,16 +1,16 @@
 package greencity.service;
 
 import greencity.dto.PageableDto;
-import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.NotificationDtoResponse;
 import org.springframework.data.domain.Pageable;
 
 public interface NotificationService {
     /**
-     * Method that returns page of {@link NotificationDto} received by user with specified id.
+     * Method that returns page of {@link NotificationDtoResponse} received by user with specified id.
      *
      * @param userId    user id.
      * @param page      {@link Pageable} object.
-     * @return          page of {@link NotificationDto}.
+     * @return          page of {@link NotificationDtoResponse}.
      */
-    PageableDto<NotificationDto> findAllByUser(Long userId, Pageable page);
+    PageableDto<NotificationDtoResponse> findAllByUser(Long userId, Pageable page);
 }
