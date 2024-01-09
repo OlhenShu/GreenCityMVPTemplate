@@ -141,11 +141,24 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
             + "UNION (SELECT friend_id FROM users_friends WHERE user_id = :userId and status = 'FRIEND'));")
     List<User> getAllUserFriends(Long userId);
 
-    @Query(nativeQuery = true, value = "SELECT EXISTS (SELECT 1 FROM users_friends " +
-            "WHERE (user_id = :userId AND friend_id = :friendId) " +
-            "AND status = 'FRIEND')")
+    /**
+     * Checks if a friendship exists between two users.
+     *
+     * @param userId   The ID of the first user.
+     * @param friendId The ID of the second user.
+     * @return {@code true} if a friendship exists, {@code false} otherwise.
+     */
+    @Query(nativeQuery = true, value = "SELECT EXISTS (SELECT 1 FROM users_friends "
+            + "WHERE (user_id = :userId AND friend_id = :friendId) "
+            + "AND status = 'FRIEND')")
     boolean isFriend(Long userId, Long friendId);
 
+    /**
+     * Deletes the friendship between two users.
+     *
+     * @param userId   The ID of the user initiating the friendship deletion.
+     * @param friendId The ID of the user who is the friend to be removed.
+     */
     @Modifying
     @Transactional
     @Query(nativeQuery = true, value = "DELETE FROM users_friends WHERE (user_id = :userId AND friend_id = :friendId)")
