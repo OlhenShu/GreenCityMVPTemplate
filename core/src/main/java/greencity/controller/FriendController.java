@@ -18,6 +18,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/friends")
@@ -72,6 +76,29 @@ public class FriendController {
     public ResponseEntity<ResponseEntity.BodyBuilder> addFriend(
         @PathVariable Long friendId, @ApiIgnore @CurrentUser UserVO userVO) {
         friendService.addFriend(userVO.getId(), friendId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * Deletes a new friend relationship between the current user and the specified friend.
+     *
+     * @param friendId The unique identifier of the friend to be added.
+     * @param userVO   The details of the current user.
+     * @return A ResponseEntity indicating the success of the friend connection delete operation.
+     */
+    @ApiOperation(value = "Delete/unfriend user's friend")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @DeleteMapping("/{friendId}")
+    public ResponseEntity<ResponseEntity.BodyBuilder> deleteUserFriend(
+            @ApiParam("friendId of current User cannot be empty.") @PathVariable Long friendId,
+            @ApiIgnore @CurrentUser UserVO userVO) {
+        friendService.deleteUserFriend(userVO.getId(), friendId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

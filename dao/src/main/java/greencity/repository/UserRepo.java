@@ -6,7 +6,6 @@ import greencity.dto.user.UserManagementVO;
 import greencity.dto.user.UserVO;
 import greencity.entity.User;
 import greencity.repository.options.UserFilter;
-import java.time.LocalDateTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -182,4 +181,27 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
     @Query(nativeQuery = true, value = "INSERT INTO users_friends "
         + "(user_id, friend_id, status, created_date) VALUES (:userId, :friendId, 'REQUEST', NOW());")
     void addFriend(Long userId, Long friendId);
+
+    /**
+     * Checks if users have friend connection
+     *
+     * @param userId            The unique identifier of the user initiating the query.
+     * @param friendId          The unique identifier of the friend to sent request.
+     */
+    @Query(nativeQuery = true, value = "SELECT EXISTS (SELECT 1 FROM users_friends "
+        + "WHERE ((user_id = :userId AND friend_id = :friendId) OR (user_id = :friendId AND friend_id = :userId)) "
+        + "AND status = 'FRIEND')")
+    boolean isFriend(Long userId, Long friendId);
+
+    /**
+     * Delete friend connection between users
+     *
+     * @param userId            The unique identifier of the user initiating the query.
+     * @param friendId          The unique identifier of the friend to sent request.
+     */
+    @Modifying
+    @Transactional
+    @Query(nativeQuery = true, value = "DELETE FROM users_friends WHERE (user_id = :userId AND friend_id = :friendId)"
+        + " OR (user_id = :friendId AND friend_id = :userId)")
+    void deleteUserFriend(Long userId, Long friendId);
 }

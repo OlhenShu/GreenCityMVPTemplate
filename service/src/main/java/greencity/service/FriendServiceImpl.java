@@ -8,6 +8,7 @@ import greencity.entity.User;
 import greencity.entity.UserFriend;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
+import greencity.exception.exceptions.NotDeletedException;
 import greencity.repository.UserRepo;
 import java.util.Map;
 import java.util.Objects;
@@ -77,6 +78,28 @@ public class FriendServiceImpl implements FriendService {
             throw new BadRequestException(String.format(ErrorMessage.USER_ALREADY_HAS_CONNECTION, status));
         }
         userRepo.addFriend(userId, friendId);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void deleteUserFriend(Long userId, Long friendId) {
+        if (userId.equals(friendId)) {
+            throw new BadRequestException(ErrorMessage.OWN_USER_ID + friendId);
+        }
+        if (!userRepo.existsById(friendId)) {
+            throw new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + friendId);
+        }
+        checkIfFriends(userId, friendId);
+        userRepo.deleteUserFriend(userId, friendId);
+    }
+
+    private void checkIfFriends(Long userId, Long friendId) {
+        if (!userRepo.isFriend(userId, friendId)) {
+            throw new NotDeletedException(ErrorMessage.NOT_FOUND_ANY_FRIENDS + friendId);
+        }
     }
 
     private void validateUserExist(Long userId) {

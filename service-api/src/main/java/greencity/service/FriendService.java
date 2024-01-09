@@ -5,12 +5,6 @@ import greencity.dto.user.UserFriendDto;
 import greencity.dto.user.UserVO;
 import org.springframework.data.domain.Pageable;
 
-/**
- * Provides the interface to manage {@link UserFriendDto} entity.
- *
- * @author Denys Liubchenko
- * @version 1.0
- */
 public interface FriendService {
     /**
      * Method that returns PageableDto of UserFriendDto by name, city, mutual friends.
@@ -21,7 +15,6 @@ public interface FriendService {
      * @param hasSameCity      {@link Boolean} hasSameCity
      * @param hasMutualFriends {@link Boolean} hasMutualFriends
      * @return {@link PageableDto} of {@link UserFriendDto}
-     * @author Denys Liubchenko
      */
     PageableDto<UserFriendDto> searchFriends(Pageable pageable, String name, UserVO userVO,
                                              Boolean hasSameCity, Boolean hasMutualFriends);
@@ -33,4 +26,12 @@ public interface FriendService {
      * @param friendId The unique identifier of the user to be added as a friend.
      */
     void addFriend(Long userId, Long friendId);
+
+    /**
+     * Deletes a friendship relationship between a user and another user identified by their IDs.
+     *
+     * @param userId       The unique identifier of the user initiating the friendship.
+     * @param friendId The unique identifier of the user to be added as a friend.
+     */
+    void deleteUserFriend(Long userId, Long friendId);
 }

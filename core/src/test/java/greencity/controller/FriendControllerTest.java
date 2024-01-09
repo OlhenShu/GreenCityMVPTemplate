@@ -5,13 +5,10 @@ import greencity.converters.UserArgumentResolver;
 import greencity.dto.PageableDto;
 import greencity.dto.user.UserFriendDto;
 import greencity.dto.user.UserVO;
-import greencity.exception.exceptions.BadRequestException;
-import greencity.exception.handler.CustomExceptionHandler;
 import greencity.service.FriendService;
 import greencity.service.UserService;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,9 +16,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.test.web.servlet.MockMvc;
@@ -106,5 +104,17 @@ public class FriendControllerTest {
 
         verify(userService).findByEmail(userVO.getEmail());
         verify(friendService).addFriend(userVO.getId(), friendId);
+    }
+
+    @Test
+    public void testDeleteUserFriend() {
+        UserVO userVO = new UserVO();
+        userVO.setId(1L);
+
+        ResponseEntity<ResponseEntity.BodyBuilder> responseEntity =
+                friendController.deleteUserFriend(2L, userVO);
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        verify(friendService).deleteUserFriend(eq(1L), eq(2L));
     }
 }
