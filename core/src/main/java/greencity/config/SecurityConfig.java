@@ -183,7 +183,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/habit/search",
                 "/habit/{habitId}/friends/profile-pictures",
                 "/friends",
-                "/friends/not-friends-yet")
+                "/friends/not-friends-yet",
+                "/friends/recommended")
             .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.POST,
                 "/category",

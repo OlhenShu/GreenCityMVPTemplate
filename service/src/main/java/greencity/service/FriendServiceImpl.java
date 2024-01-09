@@ -2,24 +2,25 @@ package greencity.service;
 
 import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
+import greencity.dto.user.RecommendFriendDto;
 import greencity.dto.user.UserFriendDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.User;
 import greencity.entity.UserFriend;
 import greencity.exception.exceptions.BadRequestException;
-import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.NotDeletedException;
+import greencity.exception.exceptions.NotFoundException;
 import greencity.repository.UserRepo;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -117,5 +118,18 @@ public class FriendServiceImpl implements FriendService {
         criteria = criteria.replace("'", "\\'");
         criteria = "%" + criteria + "%";
         return criteria;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PageableDto<RecommendFriendDto> getRecommendedFriends(UserVO user, Pageable pageable) {
+        var recommendedFriends = userRepo.findAllRecommendedFriends(user.getId(),
+            pageable,user.getCity());
+        return new PageableDto<>(recommendedFriends.stream().collect(Collectors.toList()),
+            recommendedFriends.getNumberOfElements(),
+            recommendedFriends.getNumber(),
+            recommendedFriends.getTotalPages());
     }
 }
