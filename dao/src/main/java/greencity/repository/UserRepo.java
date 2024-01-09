@@ -183,7 +183,7 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
     void addFriend(Long userId, Long friendId);
 
     /**
-     * Checks if users have friend connection
+     * Checks if users have friend connection.
      *
      * @param userId            The unique identifier of the user initiating the query.
      * @param friendId          The unique identifier of the friend to sent request.
@@ -194,7 +194,7 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
     boolean isFriend(Long userId, Long friendId);
 
     /**
-     * Delete friend connection between users
+     * Delete friend connection between users.
      *
      * @param userId            The unique identifier of the user initiating the query.
      * @param friendId          The unique identifier of the friend to sent request.
