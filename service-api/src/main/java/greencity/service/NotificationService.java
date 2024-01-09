@@ -1,6 +1,6 @@
 package greencity.service;
 
-import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.ShortNotificationDtoResponse;
 import java.util.List;
 
 
@@ -9,11 +9,12 @@ import java.util.List;
  */
 public interface NotificationService {
     /**
-     * Retrieves the latest three notifications for a specific receiver as NotificationDto objects.
+     * Retrieves the latest three notifications for a specific receiver as {@link ShortNotificationDtoResponse} objects.
      *
      * @param receiverId The ID of the receiver for whom notifications are retrieved.
-     * @return A list of NotificationDto objects representing the latest three notifications for the given receiver.
+     * @return A list of {@link ShortNotificationDtoResponse} objects representing the latest
+     *         three notifications for the given receiver.
      * @author Nikita Malov
      */
-    List<NotificationDto> getTheLatestThreeNotifications(Long receiverId);
+    List<ShortNotificationDtoResponse> getTheLatestThreeNotifications(Long receiverId);
 }

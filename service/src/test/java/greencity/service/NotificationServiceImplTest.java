@@ -1,7 +1,7 @@
 package greencity.service;
 
 import greencity.ModelUtils;
-import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.ShortNotificationDtoResponse;
 import greencity.dto.user.UserVO;
 import greencity.repository.NotificationRepo;
 import java.util.List;
@@ -29,8 +29,8 @@ public class NotificationServiceImplTest {
     @Test
     public void getTheLatestThreeNotifications() {
        var expected = List.of(
-           new NotificationDto(1L,"title", true),
-           new NotificationDto(2L,"title", true)
+           new ShortNotificationDtoResponse(1L,"title", true),
+           new ShortNotificationDtoResponse(2L,"title", true)
        );
 
         when(notificationRepo.findTop3ByReceiversIdOrderByCreationDate(anyLong(), any(Pageable.class)))

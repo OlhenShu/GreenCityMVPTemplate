@@ -1,6 +1,6 @@
 package greencity.service;
 
-import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.ShortNotificationDtoResponse;
 import greencity.repository.NotificationRepo;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
-    public List<NotificationDto> getTheLatestThreeNotifications(Long receiverId) {
+    public List<ShortNotificationDtoResponse> getTheLatestThreeNotifications(Long receiverId) {
         return notificationRepo.findTop3ByReceiversIdOrderByCreationDate(receiverId, PageRequest.of(0,3));
     }
 }
