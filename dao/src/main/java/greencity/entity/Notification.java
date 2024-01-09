@@ -1,10 +1,12 @@
 package greencity.entity;
 
-import java.time.ZonedDateTime;
-import java.util.Set;
-import javax.persistence.*;
+import greencity.enums.NotificationSourceType;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+
+import javax.persistence.*;
+import java.time.ZonedDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "notifications")
@@ -21,23 +23,20 @@ public class Notification {
     @ManyToOne
     private User author;
 
-    @ManyToMany
-    @JoinTable(
-        name = "notifications_users",
-        joinColumns = @JoinColumn(name = "notification_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private Set<User> receivers;
-
     @Column(nullable = false)
     private String title;
 
     @Column(nullable = false)
-    private String shortDescription;
-
-    @Column(nullable = false)
-    private Boolean isRead = false;
-
-    @Column(nullable = false)
     @CreationTimestamp
     private ZonedDateTime creationDate;
+
+    @Enumerated(value = EnumType.STRING)
+    @Column(nullable = false)
+    private NotificationSourceType sourceType;
+
+    @Column(nullable = false)
+    private Long sourceId;
+
+    @OneToMany(mappedBy = "notification")
+    private List<NotifiedUser> notifiedUsers;
 }
