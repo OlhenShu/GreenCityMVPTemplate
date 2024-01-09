@@ -6,6 +6,7 @@ import greencity.dto.event.EventDto;
 import greencity.dto.tag.TagVO;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
+import greencity.entity.EventDateLocation;
 import greencity.entity.Tag;
 import greencity.entity.User;
 import greencity.enums.TagType;
@@ -37,6 +38,11 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventDto save(AddEventDto addEventDto, UserVO userVO, List<MultipartFile> images) {
         Event event = modelMapper.map(addEventDto, Event.class);
+        List<EventDateLocation> eventDateLocations = addEventDto.getDatesLocations()
+                .stream()
+                .map(date -> modelMapper.map(date, EventDateLocation.class))
+                .collect(Collectors.toList());
+        event.setDates(eventDateLocations);
         event.setCreationDate(LocalDate.now());
         event.setOrganizer(modelMapper.map(userVO, User.class));
 

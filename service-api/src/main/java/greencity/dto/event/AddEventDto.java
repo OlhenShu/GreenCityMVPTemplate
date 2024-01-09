@@ -14,6 +14,6 @@ public class AddEventDto {
     String title;
     String description;
     boolean open;
-    List<EventDateLocationDto> dates;
+    List<EventDateLocationDto> datesLocations;
     List<String> tags;
 }
