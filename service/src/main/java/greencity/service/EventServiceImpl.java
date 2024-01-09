@@ -52,7 +52,11 @@ public class EventServiceImpl implements EventService {
 
         Event updatedEvent = eventRepo.save(eventToUpdate);
 
-        return modelMapper.map(updatedEvent, EventDto.class);
+        return buildEventDto(updatedEvent);
+    }
+
+    private EventDto buildEventDto(Event event) {
+        return modelMapper.map(event, EventDto.class);
     }
 
     private ZonedDateTime findLastEventDateTime(Event event) {

@@ -22,7 +22,7 @@ public class UpdateEventDto {
     private String description;
 
     @Max(7)
-    private List<EventDateLocationDto> datesLocations;
+    private List<EventDateLocationDto> dates;
 
     private String titleImage;
 
