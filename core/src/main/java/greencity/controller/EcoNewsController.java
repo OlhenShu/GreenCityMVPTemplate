@@ -116,7 +116,7 @@ public class EcoNewsController {
                     response = String.class),
             @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-            @ApiResponse(code = 415, message = HttpStatuses.UNSUPPORTED_MEDIA_TYPE)
+            @ApiResponse(code = 415, message = HttpStatuses.UNSUPPORTED_MEDIA_TYPE),
             @ApiResponse(code = 303, message = HttpStatuses.SEE_OTHER),
     })
     @PostMapping(path = "/uploadImages", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
@@ -153,7 +153,7 @@ public class EcoNewsController {
             @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
             @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND),
             @ApiResponse(code = 303, message = HttpStatuses.SEE_OTHER),
     })
 
