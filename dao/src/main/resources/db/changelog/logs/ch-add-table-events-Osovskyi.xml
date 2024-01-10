@@ -20,7 +20,7 @@
             <column name="title_image" type="VARCHAR(255)">
                 <constraints nullable="true"/>
             </column>
-            <column name="is_open" type="BOOLEAN">
+            <column name="open" type="BOOLEAN">
                 <constraints nullable="true"/>
             </column>
         </createTable>

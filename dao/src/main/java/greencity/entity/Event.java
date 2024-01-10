@@ -43,5 +43,11 @@ public class Event {
     private List<EventDateLocation> dates = new ArrayList<>();
 
     @Column
-    private boolean isOpen = true;
+    private Boolean open = true;
+
+    @ManyToMany
+    @JoinTable(name = "events_tags",
+            joinColumns = @JoinColumn(name = "event_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    private List<Tag> tags;
 }

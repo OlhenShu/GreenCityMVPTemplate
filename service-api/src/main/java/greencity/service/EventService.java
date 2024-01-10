@@ -6,6 +6,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface EventService {
     /**
+     * Retrieves an event by its unique identifier.
+     *
+     * @param id The unique identifier of the event.
+     * @return The event DTO if found, or null if no event with the given identifier exists.
+     */
+    EventDto getById(Long id);
+
+    /**
      * Updates an existing event with the provided data.
      *
      * @param eventDto The data to update the event.

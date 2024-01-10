@@ -10,7 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-@Builder
+@EqualsAndHashCode
 public class UpdateEventDto {
     @NotNull
     private Long id;
@@ -22,7 +22,7 @@ public class UpdateEventDto {
     private String description;
 
     @Max(7)
-    private List<EventDateLocationDto> dates;
+    private List<EventDateLocationDto> datesLocations;
 
     private String titleImage;
 
@@ -30,6 +30,8 @@ public class UpdateEventDto {
 
     private List<String> imagesToDelete;
 
+    List<String> tags;
+
     @JsonProperty(value = "open")
-    private Boolean isOpen;
+    private Boolean open;
 }

@@ -6,8 +6,10 @@ import greencity.dto.event.EventDto;
 import greencity.dto.event.UpdateEventDto;
 import greencity.entity.EventDateLocation;
 import greencity.entity.Event;
+import greencity.entity.Tag;
 import greencity.entity.User;
 import greencity.enums.Role;
+import greencity.enums.TagType;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
@@ -15,12 +17,14 @@ import greencity.repository.EventRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.ZonedDateTime;
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -31,6 +35,14 @@ public class EventServiceImpl implements EventService {
     private final EventRepo eventRepo;
     private final ModelMapper modelMapper;
     private final RestClient restClient;
+    private final TagsService tagsService;
+
+    @Override
+    public EventDto getById(Long eventId) {
+        Event event =
+                eventRepo.findById(eventId).orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND));
+        return buildEventDto(event);
+    }
 
     @Override
     @Transactional
@@ -71,8 +83,15 @@ public class EventServiceImpl implements EventService {
         if (updateEventDto.getDescription() != null) {
             toUpdate.setDescription(updateEventDto.getDescription());
         }
-        if (updateEventDto.getIsOpen() != null) {
-            toUpdate.setOpen(updateEventDto.getIsOpen());
+        if (updateEventDto.getOpen() != null) {
+            toUpdate.setOpen(updateEventDto.getOpen());
+        }
+
+        if (updateEventDto.getTags() != null) {
+            toUpdate.setTags(modelMapper.map(tagsService
+                            .findTagsWithAllTranslationsByNamesAndType(updateEventDto.getTags(), TagType.EVENT),
+                    new TypeToken<List<Tag>>() {
+                    }.getType()));
         }
     }
 }

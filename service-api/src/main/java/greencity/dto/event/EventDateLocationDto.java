@@ -1,5 +1,6 @@
 package greencity.dto.event;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import java.time.ZonedDateTime;
@@ -8,11 +9,13 @@ import java.time.ZonedDateTime;
 @AllArgsConstructor
 @Getter
 @Setter
-@Builder
+@EqualsAndHashCode
 public class EventDateLocationDto {
     private Long id;
-    private Long eventId;
+    private AddressDto coordinates;
+    @JsonIgnore
+    private EventDto event;
     private ZonedDateTime startDate;
     private ZonedDateTime finishDate;
-    private CoordinatesDto coordinates;
+    private String onlineLink;
 }

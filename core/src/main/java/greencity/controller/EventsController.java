@@ -11,10 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -27,6 +24,24 @@ import java.security.Principal;
 @RequiredArgsConstructor
 public class EventsController {
     private final EventService eventService;
+
+    /**
+     * Retrieves an event by its unique identifier.
+     *
+     * @param eventId The unique identifier of the event.
+     * @return A ResponseEntity with the event DTO if found (HTTP 200),
+     *         or an empty body with an appropriate HTTP status if not found.
+     */
+    @ApiOperation(value = "Get the event")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/{eventId}")
+    public ResponseEntity<EventDto> getEvent(@PathVariable Long eventId) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getById(eventId));
+    }
 
     /**
      * Handles the HTTP PUT request to update an event.
