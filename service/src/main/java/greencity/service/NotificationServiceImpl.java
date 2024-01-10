@@ -20,7 +20,6 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 @Slf4j
 public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepo notificationRepo;
@@ -31,6 +30,7 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional(readOnly = true)
     public List<ShortNotificationDtoResponse> getTheLatestThreeNotifications(Long receiverId) {
         return notificationRepo.findTop3ByReceiversIdOrderByCreationDate(receiverId, PageRequest.of(0, 3));
     }
@@ -39,6 +39,7 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional
     public NotificationDtoResponse createNewNotification(Long authorId, NewNotificationDtoRequest request) {
         User author = userRepo.findById(authorId)
                 .orElseThrow(() -> new NotFoundException("User with current id not found"));
