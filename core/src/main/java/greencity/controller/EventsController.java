@@ -25,7 +25,7 @@ import java.util.List;
 
 @Validated
 @RestController
-@RequestMapping("/events")
+@RequestMapping("/event")
 @RequiredArgsConstructor
 public class EventsController {
 
