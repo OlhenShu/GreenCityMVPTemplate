@@ -145,7 +145,7 @@ public class FriendController {
         @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @ApiPageable
-    @GetMapping()
+    @GetMapping("/search")
     public ResponseEntity<PageableDto<UserFriendDto>> getAllFriendsByDifferentParameters(
         @ApiIgnore Pageable pageable,
         @ApiParam(value = "Query to search 1 to 30 characters") @RequestParam String name,

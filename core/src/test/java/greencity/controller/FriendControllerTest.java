@@ -124,7 +124,7 @@ public class FriendControllerTest {
     }
 
     @Test
-    void searchMyFriendsWithAllCriteriaTest() throws Exception {
+    void getAllFriendsByDifferentParametersWithAllCriteriaTest() throws Exception {
         Pageable pageable = PageRequest.of(0, 10);
         String name = "test";
         Boolean hasSameCity = true;
@@ -149,7 +149,7 @@ public class FriendControllerTest {
             anyBoolean(), anyDouble(), any(ZonedDateTime.class)))
             .thenReturn(pageableDto);
 
-        mockMvc.perform(get(link)
+        mockMvc.perform(get(link + "/search")
                 .principal(userVO::getEmail)
                 .param("name", name)
                 .param("hasSameCity", String.valueOf(hasSameCity))
@@ -165,7 +165,7 @@ public class FriendControllerTest {
     }
 
     @Test
-    void searchFriendsWithCriteriaNotDefinedTest() throws Exception {
+    void getAllFriendsByDifferentParametersWithCriteriaNotDefinedTest() throws Exception {
         Pageable pageable = PageRequest.of(0, 10);
         String name = "test";
 
@@ -186,7 +186,7 @@ public class FriendControllerTest {
         when(friendService.getAllFriendsByDifferentParameters(any(Pageable.class), anyString(), any(UserVO.class),
             anyBoolean(), any(), any())).thenReturn(pageableDto);
 
-        mockMvc.perform(get(link)
+        mockMvc.perform(get(link + "/search")
                 .principal(userVO::getEmail)
                 .param("name", name)
                 .param("page", "0")
