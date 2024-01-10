@@ -183,7 +183,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/habit/search",
                 "/habit/{habitId}/friends/profile-pictures",
                 "/friends",
-                "/friends/not-friends-yet")
+                "/friends/not-friends-yet",
                 "/habit/{habitId}/friends/profile-pictures",
                 "/notifications/latest")
             .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)

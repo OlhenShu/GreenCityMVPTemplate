@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class FriendServiceImpl implements FriendService {
     private final UserRepo userRepo;
+    private final NotificationService notificationService;
 
     /**
      * {@inheritDoc}
@@ -76,6 +77,7 @@ public class FriendServiceImpl implements FriendService {
         if (status != null) {
             throw new BadRequestException(String.format(ErrorMessage.USER_ALREADY_HAS_CONNECTION, status));
         }
+        //notificationService.createNewNotification(userId, )
         userRepo.addFriend(userId, friendId);
     }
 
