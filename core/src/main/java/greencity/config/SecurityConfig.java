@@ -181,7 +181,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/habit/assign/{habitAssignId}",
                 "/habit/tags/search",
                 "/habit/search",
-                "/habit/{habitId}/friends/profile-pictures")
+                "/habit/{habitId}/friends/profile-pictures",
+                "/friends",
+                "/friends/not-friends-yet",
+                "/friends/recommended")
             .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.POST,
                 "/category",
@@ -203,7 +206,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 USER_SHOPPING_LIST,
                 "/user/{userId}/habit",
                 "/habit/custom",
-                "/custom/shopping-list-items/{userId}/{habitId}/custom-shopping-list-items")
+                "/custom/shopping-list-items/{userId}/{habitId}/custom-shopping-list-items",
+                "/friends/{friendId:[0-9]+}")
             .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.PUT,
                 "/habit/statistic/{id}",
