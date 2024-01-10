@@ -62,4 +62,13 @@ public interface FriendService {
     PageableDto<UserFriendDto> getAllFriendsByDifferentParameters(
         Pageable pageable, String name, UserVO userVO, Boolean hasSameCity, Double highestPersonalRate,
         ZonedDateTime dateTimeOfAddingFriend);
+
+    /**
+     * Method returns all user's friends {@code User} by userId.
+     *
+     * @param userId        {@code User} id.
+     * @param pageable - instance of {@link Pageable}.
+     * @return {@link UserFriendDto}.
+     */
+    PageableDto<UserFriendDto> findAllUsersFriends(Long userId, Pageable pageable);
 }

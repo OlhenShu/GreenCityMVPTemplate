@@ -17,6 +17,9 @@ import greencity.constant.ErrorMessage;
 import greencity.exception.exceptions.NotDeletedException;
 import greencity.dto.user.UserFriendFilterDto;
 import org.junit.jupiter.api.Test;
+
+import org.junit.jupiter.api.Test;
+import org.modelmapper.ModelMapper;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -31,10 +34,16 @@ import static greencity.ModelUtils.getUserVO;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class FriendServiceImplTest {
+    @Mock
+    private ModelMapper modelMapper;
     @Mock
     private UserRepo userRepo;
     @InjectMocks
@@ -379,5 +388,40 @@ public class FriendServiceImplTest {
         criteria = criteria.replace("'", "\\'");
         criteria = "%" + criteria + "%";
         return criteria;
+    }
+
+    @Test
+    public void findAllUsersFriends() {
+        User user = new User();
+        user.setId(1L);
+        UserFriendDto userFriendDto = new UserFriendDto();
+
+        int pageNumber = 0;
+        int pageSize = 10;
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        List<UserFriendDto> friendDtoList = Collections.singletonList(new UserFriendDto());
+        Page<UserFriendDto> friendDtoPage = new PageImpl<>(friendDtoList, pageable, friendDtoList.size());
+        PageableDto<UserFriendDto> userFriendPageableDto = new PageableDto<>(
+                friendDtoPage.getContent(),
+                friendDtoPage.getTotalElements(),
+                friendDtoPage.getPageable().getPageNumber(),
+                friendDtoPage.getTotalPages());
+        List<User> users = new ArrayList<>(List.of(user));
+
+        when(userRepo.getAllUserFriends(userVO.getId())).thenReturn(users);
+        when(modelMapper.map(user, UserFriendDto.class)).thenReturn(userFriendDto);
+        assertEquals(userFriendPageableDto, friendService.findAllUsersFriends(userVO.getId(), pageable));
+        verify(userRepo, times(1)).getAllUserFriends(userVO.getId());
+    }
+
+    @Test
+    public void findAllUsersFriendsByUserWithoutFriends() {
+        int pageNumber = 0;
+        int pageSize = 10;
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+        when(userRepo.getAllUserFriends(userVO.getId())).thenReturn(new ArrayList<>());
+        assertThrows(NotFoundException.class, () -> friendService.findAllUsersFriends(userVO.getId(), pageable));
+        verify(userRepo, times(1)).getAllUserFriends(userVO.getId());
     }
 }
