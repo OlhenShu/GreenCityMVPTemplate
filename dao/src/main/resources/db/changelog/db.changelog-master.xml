@@ -177,5 +177,7 @@
     <include file="db/changelog/logs/ch-drop-news-subscribers-table-Bokalo.xml"/>
     <include file="db/changelog/logs/ch-drop-user-friends-table-Bokalo.xml"/>
     <include file="db/changelog/logs/ch-add-table-users-friends-Liubchenko.xml"/>
+    <include file="db/changelog/logs/ch-add-table-notifications-Liubchenko.xml"/>
+    <include file="db/changelog/logs/ch-change-table-notification-and-add-table-notified-users-Kizerov.xml"/>
 </databaseChangeLog>
 
