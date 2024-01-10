@@ -140,7 +140,7 @@ public class FriendController {
      * @param dateTimeOfAddingFriend The date when friends were added, filtering based on this timestamp.
      * @return                       A paginated list of {@link UserFriendDto} containing friend details.
      */
-    @ApiOperation(value = "")
+    @ApiOperation(value = "Retrieves a paginated list of friends' details with specific filtering criteria.")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
