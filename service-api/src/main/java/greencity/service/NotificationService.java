@@ -1,8 +1,10 @@
 package greencity.service;
 
+import greencity.dto.PageableDto;
 import greencity.dto.notification.NewNotificationDtoRequest;
 import greencity.dto.notification.NotificationDtoResponse;
 import greencity.dto.notification.ShortNotificationDtoResponse;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -11,6 +13,14 @@ import java.util.List;
  * Service handling operations related to notifications.
  */
 public interface NotificationService {
+    /**
+     * Method that returns page of {@link NotificationDtoResponse} received by user with specified id.
+     *
+     * @param userId    user id.
+     * @param page      {@link Pageable} object.
+     * @return          page of {@link NotificationDtoResponse}.
+     */
+    PageableDto<NotificationDtoResponse> findAllByUser(Long userId, Pageable page);
     /**
      * Retrieves the latest three notifications for a specific receiver as {@link ShortNotificationDtoResponse} objects.
      *

@@ -1,5 +1,6 @@
 package greencity.service;
 
+import greencity.dto.PageableDto;
 import greencity.dto.notification.NewNotificationDtoRequest;
 import greencity.dto.notification.NotificationDtoResponse;
 import greencity.dto.notification.ShortNotificationDtoResponse;
@@ -11,7 +12,9 @@ import greencity.repository.NotificationRepo;
 import greencity.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +36,21 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional(readOnly = true)
     public List<ShortNotificationDtoResponse> getTheLatestThreeNotifications(Long receiverId) {
         return notificationRepo.findTop3ByReceiversIdOrderByCreationDate(receiverId, PageRequest.of(0, 3));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PageableDto<NotificationDtoResponse> findAllByUser(Long userId, Pageable page) {
+        Page<NotificationDtoResponse> notificationDtoPage = notificationRepo
+            .findAllReceivedNotificationDtoByUserId(userId, page);
+        return new PageableDto<>(
+            notificationDtoPage.getContent(),
+            notificationDtoPage.getTotalElements(),
+            notificationDtoPage.getPageable().getPageNumber(),
+            notificationDtoPage.getTotalPages()
+        );
     }
 
     /**
