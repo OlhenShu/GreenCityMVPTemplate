@@ -36,6 +36,7 @@ public class EventServiceImpl implements EventService {
     private final ModelMapper modelMapper;
     private final RestClient restClient;
     private final TagsService tagsService;
+    private final GoogleApiService googleApiService;
 
     @Override
     public EventDto getById(Long eventId) {
@@ -60,7 +61,7 @@ public class EventServiceImpl implements EventService {
         if (findLastEventDateTime(eventToUpdate).isBefore(ZonedDateTime.now())) {
             throw new BadRequestException(ErrorMessage.EVENT_IS_FINISHED);
         }
-        enhanceWithNewData(eventToUpdate, eventDto);
+        updatedEventWithNewData(eventToUpdate, eventDto);
 
         Event updatedEvent = eventRepo.save(eventToUpdate);
 
@@ -76,7 +77,7 @@ public class EventServiceImpl implements EventService {
                 .max(event.getDates().stream().map(EventDateLocation::getFinishDate).collect(Collectors.toList()));
     }
 
-    private void enhanceWithNewData(Event toUpdate, UpdateEventDto updateEventDto) {
+    private void updatedEventWithNewData(Event toUpdate, UpdateEventDto updateEventDto) {
         if (updateEventDto.getTitle() != null) {
             toUpdate.setTitle(updateEventDto.getTitle());
         }
@@ -86,12 +87,18 @@ public class EventServiceImpl implements EventService {
         if (updateEventDto.getOpen() != null) {
             toUpdate.setOpen(updateEventDto.getOpen());
         }
-
         if (updateEventDto.getTags() != null) {
             toUpdate.setTags(modelMapper.map(tagsService
                             .findTagsWithAllTranslationsByNamesAndType(updateEventDto.getTags(), TagType.EVENT),
                     new TypeToken<List<Tag>>() {
                     }.getType()));
+        }
+
+        if (updateEventDto.getDatesLocations() != null) {
+            toUpdate.setDates(updateEventDto.getDatesLocations().stream()
+                    .map(d -> modelMapper.map(d, EventDateLocation.class))
+                    .peek(d -> d.setEvent(toUpdate))
+                    .collect(Collectors.toList()));
         }
     }
 }

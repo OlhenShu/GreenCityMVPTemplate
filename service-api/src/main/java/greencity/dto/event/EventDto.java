@@ -17,9 +17,10 @@ public class EventDto {
     private String titleImage;
     @Max(7)
     private List<EventDateLocationDto> dates;
-    private boolean open;
-    private boolean isFavorite;
-    private boolean isSubscribed;
+    private Boolean open;
+    private Boolean isFavorite;
+    private Boolean isSubscribed;
+    @Max(5)
     private List<String> additionalImages;
     private List<TagUaEnDto> tags;
 }
