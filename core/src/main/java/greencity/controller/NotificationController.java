@@ -47,21 +47,39 @@ public class NotificationController {
     }
 
     /**
+     * Marks the latest unread notifications as read for the authenticated user.
+     *
+     * @param userVO The authenticated user's value object.
+     * @return ResponseEntity with status 200 if successful, 401 if unauthorized, or 404 if not found.
+     */
+    @ApiOperation(value = "Mark as read latest unread notifications")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @PatchMapping("/mark-as-read/")
+    public ResponseEntity<Void> markAsReadLatestNotification(@ApiIgnore @CurrentUser UserVO userVO) {
+        notifiedUserService.readLatestNotification(userVO.getId());
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
      * Method that returns page of {@link NotificationDtoResponse} received by user with specified id.
      *
-     * @param user  user id.
-     * @param page  {@link Pageable} object.
-     * @return      page of {@link NotificationDtoResponse}.
+     * @param user user id.
+     * @param page {@link Pageable} object.
+     * @return page of {@link NotificationDtoResponse}.
      */
     @ApiOperation(value = "Find page of notifications by authorised user.")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
     })
     @GetMapping
     @ApiPageable
     public ResponseEntity<PageableDto<NotificationDtoResponse>> findAll(
-        @ApiIgnore @CurrentUser UserVO user, @ApiIgnore Pageable page) {
+            @ApiIgnore @CurrentUser UserVO user, @ApiIgnore Pageable page) {
         return ResponseEntity.status(HttpStatus.OK).body(notificationService.findAllByUser(user.getId(), page));
     }
 

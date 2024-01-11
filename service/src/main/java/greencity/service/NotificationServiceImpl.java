@@ -9,6 +9,7 @@ import greencity.entity.User;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.mapping.NotificationDtoResponseMapper;
 import greencity.repository.NotificationRepo;
+import greencity.repository.NotifiedUserRepo;
 import greencity.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ import java.util.List;
 @Slf4j
 public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepo notificationRepo;
+    private final NotifiedUserRepo notifiedUserRepo;
     private final UserRepo userRepo;
     private final NotificationDtoResponseMapper mapper;
 

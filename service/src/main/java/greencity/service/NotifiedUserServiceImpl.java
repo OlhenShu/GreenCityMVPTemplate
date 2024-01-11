@@ -1,5 +1,6 @@
 package greencity.service;
 
+import greencity.entity.Notification;
 import greencity.entity.NotifiedUser;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
@@ -8,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -30,5 +34,27 @@ public class NotifiedUserServiceImpl implements NotifiedUserService {
         log.info("Set flag isRead: {}", notifiedUser.getIsRead());
         notifiedUserRepo.save(notifiedUser);
         log.info("Successfully update status");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void readLatestNotification(Long userId) {
+        List<Notification> unreadNotificationsForUser = notifiedUserRepo.findTop3UnreadNotificationsForUser(userId);
+        if (unreadNotificationsForUser.isEmpty()) {
+            throw new NotFoundException("Not found unread notifications for current user");
+        }
+
+        List<Long> notificationsIds = unreadNotificationsForUser.stream()
+                .map(Notification::getId)
+                .collect(Collectors.toList());
+
+        List<NotifiedUser> notifiedUsersToUpdate = notifiedUserRepo.findByUserIdAndNotificationIdIn(userId, notificationsIds);
+
+        notifiedUsersToUpdate.forEach(notifiedUser -> notifiedUser.setIsRead(true));
+
+        notifiedUserRepo.saveAll(notifiedUsersToUpdate);
+        log.info("Updated statuses for latest 3 unread notification");
     }
 }
