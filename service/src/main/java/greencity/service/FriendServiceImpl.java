@@ -77,7 +77,7 @@ public class FriendServiceImpl implements FriendService {
         if (status != null) {
             throw new BadRequestException(String.format(ErrorMessage.USER_ALREADY_HAS_CONNECTION, status));
         }
-        //notificationService.createNewNotification(userId, )
+        notificationService.friendRequestNotification(userId, friendId);
         userRepo.addFriend(userId, friendId);
     }
 

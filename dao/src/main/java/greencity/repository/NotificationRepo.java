@@ -20,4 +20,5 @@ public interface NotificationRepo extends JpaRepository<Notification, Long> {
         + "FROM Notification n LEFT JOIN n.notifiedUsers nu "
         + "WHERE nu.user.id = :receiverId ORDER BY n.creationDate desc")
     List<ShortNotificationDtoResponse> findTop3ByReceiversIdOrderByCreationDate(Long receiverId, Pageable pageable);
+
 }

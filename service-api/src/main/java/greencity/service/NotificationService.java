@@ -30,4 +30,14 @@ public interface NotificationService {
      * @author Kizerov Dmytro
      */
     NotificationDtoResponse createNewNotification(Long authorId, NewNotificationDtoRequest request);
+    /**
+     * Sends a friend request to the specified user with
+     *
+     * @param authorId the ID of the author for the notification
+     * @param friendId  the object containing data to create the notification
+     * @author Klopov Dmytro
+     */
+    void friendRequestNotification(Long authorId, Long friendId);
+
+    NotificationDtoResponse findById(Long notificationId);
 }

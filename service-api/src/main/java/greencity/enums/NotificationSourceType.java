@@ -6,5 +6,4 @@ public enum NotificationSourceType {
     COMMENT_REPLY,
     FRIEND_REQUEST
 
-    //TODO: add another enums
 }

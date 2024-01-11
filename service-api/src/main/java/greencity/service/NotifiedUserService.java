@@ -8,4 +8,5 @@ public interface NotifiedUserService {
      * @param notificationId The ID of the notification to mark as read.
      */
     void markAsReadNotification(Long userId, Long notificationId);
+    void notifyUser(Long userId, Long notification);
 }
