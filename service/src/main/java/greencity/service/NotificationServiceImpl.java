@@ -31,6 +31,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final UserRepo userRepo;
     private final NotificationDtoResponseMapper mapper;
 
+
     /**
      * {@inheritDoc}
      */
@@ -66,20 +67,25 @@ public class NotificationServiceImpl implements NotificationService {
     public void friendRequestNotification(Long authorId, Long friendId) {
         User author = validateUserExist(authorId);
         Notification savedNotification = notificationRepo.save(createFriendNotification(author));
-        notifiedUserService.notifyUser(friendId, savedNotification.getId());
+        notifiedUserService.notifyUser(friendId, mapper.convert(savedNotification));
 
     }
 
     @Override
     public NotificationDtoResponse findById(Long notificationId) {
         Notification notification =
-                notificationRepo.findById(notificationId).orElseThrow(() -> new NotFoundException(""));
+                notificationRepo.findById(notificationId)
+                        .orElseThrow(
+                                () -> new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND_BY_ID + notificationId)
+                        );
         return mapper.convert(notification);
     }
 
     private User validateUserExist(Long userId) {
         return userRepo.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + userId));
+                .orElseThrow(
+                        () -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + userId)
+                );
     }
 
     private Notification createFriendNotification(User author) {

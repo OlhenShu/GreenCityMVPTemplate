@@ -1,5 +1,7 @@
 package greencity.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import greencity.constant.ErrorMessage;
 import greencity.dto.notification.NotificationDtoResponse;
 import greencity.entity.Notification;
 import greencity.entity.NotifiedUser;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class NotifiedUserServiceImpl implements NotifiedUserService {
     private final NotifiedUserRepo notifiedUserRepo;
     private final UserRepo userRepo;
+    private final ObjectMapper objectMapper;
 
 
     /**
@@ -39,12 +42,13 @@ public class NotifiedUserServiceImpl implements NotifiedUserService {
     }
 
     @Override
-    public void notifyUser(Long userId, Long notificationId) {
-        User user = userRepo.findById(userId).orElseThrow(() -> new NotFoundException("Notified user or notification not found"));
+    public void notifyUser(Long userId, NotificationDtoResponse notificationDtoResponse) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + userId));
         NotifiedUser notifiedUser = NotifiedUser.builder()
-                .id(notificationId)
+                .id(notificationDtoResponse.getId())
                 .user(user)
-                .notification(new Notification())
+                .notification(objectMapper.convertValue(notificationDtoResponse, Notification.class))
                 .isRead(false)
                 .build();
         notifiedUserRepo.save(notifiedUser);
