@@ -1,23 +1,23 @@
 package greencity.repository;
 
 import greencity.dto.habit.HabitVO;
-import greencity.dto.user.UserManagementVO;
-import greencity.dto.user.UserVO;
+import greencity.dto.user.*;
 import greencity.entity.User;
 import greencity.repository.options.UserFilter;
+import java.sql.Timestamp;
+import java.time.ZonedDateTime;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import greencity.dto.user.UserFriendFilterDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.sql.Timestamp;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
@@ -37,7 +37,7 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
      * @return list of all {@link UserManagementVO}
      */
     @Query(" SELECT new greencity.dto.user.UserManagementVO(u.id, u.name, u.email, u.userCredo, u.role, u.userStatus) "
-            + " FROM User u ")
+        + " FROM User u ")
     Page<UserManagementVO> findAllManagementVo(UserFilter filter, Pageable pageable);
 
     /**
@@ -81,12 +81,12 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
     @Modifying
     @Transactional
     @Query("UPDATE User SET userStatus = CASE "
-            + "WHEN (:userStatus = 'DEACTIVATED') THEN 1 "
-            + "WHEN (:userStatus = 'ACTIVATED') THEN 2 "
-            + "WHEN (:userStatus = 'CREATED') THEN 3 "
-            + "WHEN (:userStatus = 'BLOCKED') THEN 4 "
-            + "ELSE 0 END "
-            + "WHERE id = :userId")
+        + "WHEN (:userStatus = 'DEACTIVATED') THEN 1 "
+        + "WHEN (:userStatus = 'ACTIVATED') THEN 2 "
+        + "WHEN (:userStatus = 'CREATED') THEN 3 "
+        + "WHEN (:userStatus = 'BLOCKED') THEN 4 "
+        + "ELSE 0 END "
+        + "WHERE id = :userId")
     void updateUserStatus(Long userId, String userStatus);
 
     /**
@@ -96,7 +96,7 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
      * @return {@link Date}
      */
     @Query(nativeQuery = true,
-            value = "SELECT last_activity_time FROM users WHERE id=:userId")
+        value = "SELECT last_activity_time FROM users WHERE id=:userId")
     Optional<Timestamp> findLastActivityTimeById(Long userId);
 
     /**
@@ -120,25 +120,26 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
      * @return List of friends.
      */
     @Query(nativeQuery = true, value = "SELECT * FROM ((SELECT user_id FROM users_friends AS uf "
-            + "WHERE uf.friend_id = :userId AND uf.status = 'FRIEND' AND "
-            + "(SELECT count(*) FROM habit_assign ha WHERE ha.habit_id = :habitId AND ha.user_id = uf.user_id "
-            + "AND ha.status = 'INPROGRESS') = 1) "
-            + "UNION "
-            + "(SELECT friend_id FROM users_friends AS uf "
-            + "WHERE uf.user_id = :userId AND uf.status = 'FRIEND' AND "
-            + "(SELECT count(*) FROM habit_assign ha WHERE ha.habit_id = :habitId AND ha.user_id = uf.friend_id "
-            + "AND ha.status = 'INPROGRESS') = 1)) as ui JOIN users as u ON user_id = u.id")
+        + "WHERE uf.friend_id = :userId AND uf.status = 'FRIEND' AND "
+        + "(SELECT count(*) FROM habit_assign ha WHERE ha.habit_id = :habitId AND ha.user_id = uf.user_id "
+        + "AND ha.status = 'INPROGRESS') = 1) "
+        + "UNION "
+        + "(SELECT friend_id FROM users_friends AS uf "
+        + "WHERE uf.user_id = :userId AND uf.status = 'FRIEND' AND "
+        + "(SELECT count(*) FROM habit_assign ha WHERE ha.habit_id = :habitId AND ha.user_id = uf.friend_id "
+        + "AND ha.status = 'INPROGRESS') = 1)) as ui JOIN users as u ON user_id = u.id")
     List<User> getFriendsAssignedToHabit(Long userId, Long habitId);
 
     /**
      * Get all user friends.
      *
      * @param userId The ID of the user.
+     *
      * @return list of {@link User}.
      */
     @Query(nativeQuery = true, value = "SELECT * FROM users WHERE id IN ( "
-            + "(SELECT user_id FROM users_friends WHERE friend_id = :userId and status = 'FRIEND')"
-            + "UNION (SELECT friend_id FROM users_friends WHERE user_id = :userId and status = 'FRIEND'));")
+        + "(SELECT user_id FROM users_friends WHERE friend_id = :userId and status = 'FRIEND')"
+        + "UNION (SELECT friend_id FROM users_friends WHERE user_id = :userId and status = 'FRIEND'));")
     List<User> getAllUserFriends(Long userId);
 
     @Query(nativeQuery = true, value = "SELECT EXISTS (SELECT 1 FROM users_friends " +
@@ -146,8 +147,76 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
             "AND status = 'FRIEND')")
     boolean isFriend(Long userId, Long friendId);
 
+    /**
+     * Delete friend connection between users.
+     *
+     * @param userId            The unique identifier of the user initiating the query.
+     * @param friendId          The unique identifier of the friend to sent request.
+     */
     @Modifying
     @Transactional
     @Query(nativeQuery = true, value = "DELETE FROM users_friends WHERE (user_id = :userId AND friend_id = :friendId)")
     void deleteUserFriend(Long userId, Long friendId);
+
+    /**
+     * Retrieves a paginated list of recommended friends for a given user, considering mutual habits and mutual friends,
+     * ordered by the count of mutual friends in descending order, followed by the prioritized city, and then
+     * by the count of mutual habits in descending order.
+     *
+     * @param userId   The ID of the user for whom friend recommendations are sought.
+     * @param pageable Pageable object defining the page size, page number, and sorting criteria for the result set.
+     * @param city     The city used for prioritizing recommendations.
+     * @return A paginated list of RecommendFriendDto objects representing recommended friends.
+     */
+    @Query(value = "SELECT new greencity.dto.user.RecommendFriendDto(u.id,u.city,u.name,u.profilePicturePath,u.rating,"
+        + "(SELECT count(ha1.habit.id) from HabitAssign ha1 WHERE ha1.user.id = :userId "
+        + "AND (ha1.status = 'INPROGRESS' OR ha1.status = 'ACQUIRED') AND ha1.habit.id IN "
+        + "(SELECT ha2.habit.id from HabitAssign ha2 WHERE (ha2.user.id = u.id))) as mutualHabits, "
+        + "(SELECT COUNT(uf1.friend.id) from UserFriend uf1 JOIN UserFriend uf2 ON uf1.friend.id = uf2.friend.id "
+        + "WHERE uf1.user.id = :userId AND uf2.user.id = u.id AND uf1.status = 'FRIEND' "
+        + "AND uf2.status = 'FRIEND') as mutualFriends)"
+        + "FROM User u WHERE u.id != :userId AND NOT EXISTS "
+        + "(SELECT 1 FROM User u4 LEFT JOIN UserFriend uc ON u4.id = uc.user.id "
+        + "WHERE uc.friend.id = :userId AND u.id = u4.id)"
+        + "GROUP BY u.id, u.city, u.name, u.profilePicturePath, u.rating ORDER BY mutualFriends DESC, "
+        + "CASE WHEN u.city = :city THEN 0 ELSE 1 END, mutualHabits DESC",
+           countQuery = "SELECT COUNT(*) FROM User u WHERE u.id != :userId AND NOT EXISTS "
+        + "(SELECT 1 FROM User u4 LEFT JOIN UserFriend uc ON u4.id = uc.user.id "
+        + "WHERE uc.friend.id = :userId AND u.id = u4.id)")
+    Page<RecommendFriendDto> findAllRecommendedFriends(Long userId,Pageable pageable,String city);
+
+    /**
+     * Retrieves a paginated list of friends' details with specific filtering criteria.
+     *
+     * @param nameCriteria          The criteria for filtering friend names (can be null).
+     * @param city                  The city used for filtering friends (can be null).
+     * @param highestPersonalRate   The maximum rating allowed for friends in the result set.
+     * @param dateTimeOfAddingFriend The date when friends were added, filtering based on this timestamp.
+     * @param pageable              Pagination information for the resulting list.
+     * @param userId                The unique identifier of the user whose friends are being fetched.
+     * @return                      A paginated list of {@link UserFriendFilterDto} containing friend details.
+     */
+    @Query(value = "SELECT new greencity.dto.user.UserFriendFilterDto ("
+        + "uf.friend.id ,uf.friend.city, uf.friend.name, uf.friend.profilePicturePath, uf.friend.rating, "
+        + "(SELECT COUNT(ec.ecoNews.id) FROM EcoNewsComment ec WHERE ec.user.id = :userId AND ec.ecoNews.id IN ("
+        + "SELECT ec.ecoNews.id FROM EcoNewsComment ec WHERE ec.user.id = uf.friend.id)) as mutualEcoNews) "
+        + "FROM UserFriend uf "
+        + "WHERE uf.status = 'FRIEND' "
+        + "AND (:highestPersonalRate IS NULL OR uf.friend.rating <= :highestPersonalRate) "
+        + "AND (uf.createdDate >= cast(:dateTimeOfAddingFriend as timestamp )) "
+        + "AND (:nameCriteria IS NULL OR uf.friend.name LIKE :nameCriteria) "
+        + "AND (:city IS NULL OR uf.friend.city = :city) "
+        + "AND uf.user.id = :userId "
+        + "ORDER BY uf.friend.rating DESC, mutualEcoNews DESC ",
+        countQuery = "SELECT COUNT(*) "
+            + "FROM UserFriend uf "
+            + "WHERE uf.status = 'FRIEND' "
+            + "AND (:highestPersonalRate IS NULL OR uf.friend.rating <= :highestPersonalRate) "
+            + "AND (uf.createdDate >= cast(:dateTimeOfAddingFriend as timestamp )) "
+            + "AND (:nameCriteria IS NULL OR uf.friend.name LIKE :nameCriteria) "
+            + "AND (:city IS NULL OR uf.friend.city = :city) "
+            + "AND uf.user.id = :userId ")
+    Page<UserFriendFilterDto> findUserFriendDtoByFriendFilterOfUser(
+        String nameCriteria, String city, Double highestPersonalRate,
+        ZonedDateTime dateTimeOfAddingFriend, Pageable pageable, Long userId);
 }

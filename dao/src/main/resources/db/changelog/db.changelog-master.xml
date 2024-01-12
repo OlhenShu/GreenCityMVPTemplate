@@ -178,11 +178,10 @@
     <include file="db/changelog/logs/ch-drop-user-friends-table-Bokalo.xml"/>
     <include file="db/changelog/logs/ch-add-table-users-friends-Liubchenko.xml"/>
     <include file="db/changelog/logs/ch-add-table-events-Osovskyi.xml"/>
-<!--    <include file="db/changelog/logs/ch-add-table-events_dates_locations-Osovskyi.xml"/>-->
     <include file="db/changelog/logs/ch-add-table-events-image-Proskurina.xml"/>
     <include file="db/changelog/logs/ch-add-table-events-tags-Proskurina.xml"/>
-<!--    <include file="/db/changelog/logs/ch-add-table-coordinates-Proskurina.xml"/>-->
     <include file="db/changelog/logs/ch-add-table-events-dates-locations-Proskurina.xml"/>
     <include file="db/changelog/logs/ch-add-table-events-comment-Veremienko.xml"/>
+    <include file="db/changelog/logs/ch-change-users-addColumn-Klopov.xml"/>
 </databaseChangeLog>
 
