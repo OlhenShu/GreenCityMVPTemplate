@@ -6,6 +6,7 @@ import greencity.entity.localization.TagTranslation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.query.QueryUtils;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -42,7 +43,9 @@ public class EcoNewsSearchRepo {
 
         Predicate predicate = getPredicate(criteriaQuery, searchingText, languageCode, root);
 
-        criteriaQuery.select(root).distinct(true).where(predicate);
+        criteriaQuery.select(root).distinct(true).where(predicate).orderBy(
+            QueryUtils.toOrders(pageable.getSort(), root, criteriaBuilder));
+
         TypedQuery<EcoNews> typedQuery = entityManager.createQuery(criteriaQuery);
         typedQuery.setFirstResult(pageable.getPageNumber() * pageable.getPageSize());
         typedQuery.setMaxResults(pageable.getPageSize());
