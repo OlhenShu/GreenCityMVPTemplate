@@ -1,5 +1,6 @@
 package greencity.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
 import greencity.dto.notification.NewNotificationDtoRequest;
@@ -27,14 +28,17 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static greencity.enums.NotificationSourceType.*;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepo notificationRepo;
-    private final UserRepo userRepo;
+    private final UserService userService;
     private final NotificationDtoResponseMapper mapper;
     private final NotifiedUserRepo notifiedUserRepo;
+    private final ObjectMapper objectMapper;
 
 
     /**
@@ -86,7 +90,7 @@ public class NotificationServiceImpl implements NotificationService {
         NotifiedUser notifiedUser = notifiedUserRepo.findByUserIdAndNotificationId(userId, notificationId)
                 .orElseThrow(() -> new NotFoundException("Notified user or notification not found"));
         if (notifiedUser.getIsRead()) {
-            throw new BadRequestException("Notification already read");
+            throw new BadRequestException(ErrorMessage.NOTIFICATION_ALREADY_READ);
         }
         notifiedUser.setIsRead(true);
         log.info("Set flag isRead: {}", notifiedUser.getIsRead());
@@ -102,7 +106,7 @@ public class NotificationServiceImpl implements NotificationService {
     public void readLatestNotification(Long userId) {
         List<Notification> unreadNotificationsForUser = notifiedUserRepo.findTop3UnreadNotificationsForUser(userId);
         if (unreadNotificationsForUser.isEmpty()) {
-            throw new NotFoundException("Not found unread notifications for current user");
+            throw new NotFoundException(ErrorMessage.NOT_FOUND_UNREAD_NOTIFICATION);
         }
 
         List<Long> notificationsIds = unreadNotificationsForUser.stream()
@@ -123,7 +127,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public NotificationDtoResponse createNewNotification(Long authorId, NewNotificationDtoRequest request) {
-        User author = validateUserExist(authorId);
+        User author = objectMapper.convertValue(userService.findById(authorId), User.class);
         Notification newNotification = Notification.builder()
                 .creationDate(ZonedDateTime.now())
                 .title(request.getTitle())
@@ -141,8 +145,8 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     public void friendRequestNotification(Long authorId, Long friendId) {
-        User author = validateUserExist(authorId);
-        Notification savedNotification = notificationRepo.save(createFriendNotification(author));
+        User author = objectMapper.convertValue(userService.findById(authorId), User.class);
+        notificationRepo.save(createFriendNotification(author));
 
     }
 
@@ -156,19 +160,12 @@ public class NotificationServiceImpl implements NotificationService {
         return mapper.convert(notification);
     }
 
-    private User validateUserExist(Long userId) {
-        return userRepo.findById(userId)
-                .orElseThrow(
-                        () -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + userId)
-                );
-    }
-
     private Notification createFriendNotification(User author) {
         return Notification.builder()
                 .creationDate(ZonedDateTime.now())
-                .title(NotificationSourceType.FRIEND_REQUEST.name())
+                .title(FRIEND_REQUEST.name())
                 .author(author)
-                .sourceType(NotificationSourceType.FRIEND_REQUEST)
+                .sourceType(FRIEND_REQUEST)
                 .sourceId(3L)
                 .build();
     }
