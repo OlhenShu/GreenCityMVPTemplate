@@ -10,7 +10,6 @@ import greencity.entity.NotifiedUser;
 import greencity.entity.User;
 import greencity.enums.NotificationSourceType;
 import greencity.exception.exceptions.BadRequestException;
-import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.mapping.NotificationDtoResponseMapper;
 import greencity.repository.NotificationRepo;
@@ -26,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,7 +32,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepo notificationRepo;
-    private final NotifiedUserServiceImpl notifiedUserService;
     private final UserRepo userRepo;
     private final NotificationDtoResponseMapper mapper;
     private final NotifiedUserRepo notifiedUserRepo;
@@ -146,7 +143,6 @@ public class NotificationServiceImpl implements NotificationService {
     public void friendRequestNotification(Long authorId, Long friendId) {
         User author = validateUserExist(authorId);
         Notification savedNotification = notificationRepo.save(createFriendNotification(author));
-        notifiedUserService.notifyUser(friendId, mapper.convert(savedNotification));
 
     }
 

@@ -1,5 +1,6 @@
 package greencity.repository;
 
+import greencity.dto.notification.NotificationDtoResponse;
 import greencity.dto.notification.ShortNotificationDtoResponse;
 import greencity.entity.Notification;
 import org.springframework.data.domain.Page;
