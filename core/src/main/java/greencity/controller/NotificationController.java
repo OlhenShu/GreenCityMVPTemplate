@@ -9,7 +9,6 @@ import greencity.dto.notification.NotificationDtoResponse;
 import greencity.dto.notification.ShortNotificationDtoResponse;
 import greencity.dto.user.UserVO;
 import greencity.service.NotificationService;
-import greencity.service.NotifiedUserService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -27,7 +26,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NotificationController {
     private final NotificationService notificationService;
-    private final NotifiedUserService notifiedUserService;
 
     /**
      * Retrieves the three latest notifications for the authenticated user.
@@ -60,7 +58,7 @@ public class NotificationController {
     })
     @PatchMapping("/mark-as-read/")
     public ResponseEntity<Void> markAsReadLatestNotification(@ApiIgnore @CurrentUser UserVO userVO) {
-        notifiedUserService.readLatestNotification(userVO.getId());
+        notificationService.readLatestNotification(userVO.getId());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -100,7 +98,7 @@ public class NotificationController {
     @PutMapping("/mark-as-read/{id}")
     public ResponseEntity<Void> markAsReadNotification(@ApiIgnore @CurrentUser UserVO userVO,
                                                        @PathVariable("id") Long id) {
-        notifiedUserService.markAsReadNotification(userVO.getId(), id);
+        notificationService.markAsReadNotification(userVO.getId(), id);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
