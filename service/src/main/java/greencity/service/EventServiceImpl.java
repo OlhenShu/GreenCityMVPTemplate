@@ -1,28 +1,22 @@
 package greencity.service;
 
-import greencity.constant.AppConstant;
-import greencity.dto.event.AddEventDto;
-import greencity.dto.event.EventDto;
-import greencity.dto.tag.TagVO;
+import greencity.client.RestClient;
+import greencity.constant.ErrorMessage;
+import greencity.dto.event.EventVO;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
-import greencity.entity.EventDateLocation;
-import greencity.entity.Tag;
-import greencity.entity.User;
-import greencity.enums.TagType;
+import greencity.enums.Role;
+import greencity.exception.exceptions.NotFoundException;
+import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.repository.EventRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.reflect.TypeUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -32,39 +26,27 @@ public class EventServiceImpl implements EventService {
 
     private final EventRepo eventRepo;
     private final ModelMapper modelMapper;
-    private final FileService fileService;
-    private final TagsService tagsService;
+    private final RestClient restClient;
 
     @Override
-    public EventDto save(AddEventDto addEventDto, UserVO userVO, List<MultipartFile> images) {
-        Event event = modelMapper.map(addEventDto, Event.class);
-        List<EventDateLocation> eventDateLocations = addEventDto.getDatesLocations()
-                .stream()
-                .map(date -> modelMapper.map(date, EventDateLocation.class))
-                .collect(Collectors.toList());
-        event.setDates(eventDateLocations);
-        event.setCreationDate(LocalDate.now());
-        event.setOrganizer(modelMapper.map(userVO, User.class));
+    public void delete(Long eventId, String email) {
+        UserVO userVO = restClient.findByEmail(email);
+        Event toDelete =
+                eventRepo.findById(eventId).orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND));
+        List<String> eventImages = new ArrayList<>();
+        eventImages.add(toDelete.getTitleImage());
 
-        event.setDates(event.getDates()
-                .stream()
-                .map(date->date.setEvent(event))
-                .collect(Collectors.toList()));
-
-        List<TagVO> tagsVO = tagsService.findTagsByNamesAndType(addEventDto.getTags(), TagType.EVENT);
-        event.setTags(modelMapper.map(tagsVO, TypeUtils.parameterize(List.class, Tag.class)));
-
-        if (images == null || images.isEmpty()) {
-            event.setTitleImage(AppConstant.DEFAULT_HABIT_IMAGE);
+        if (toDelete.getOrganizer().getId().equals(userVO.getId()) || userVO.getRole() == Role.ROLE_ADMIN) {
+            eventRepo.delete(toDelete);
         } else {
-            List<String> imagesUrl = images
-                    .stream()
-                    .filter(Objects::nonNull)
-                    .map(fileService::upload)
-                    .collect(Collectors.toList());
-            event.setTitleImage(imagesUrl.get(0));
-            event.setImages(imagesUrl);
+            throw new UserHasNoPermissionToAccessException(ErrorMessage.USER_HAS_NO_PERMISSION);
         }
-        return modelMapper.map(eventRepo.save(event), EventDto.class);
+    }
+
+    @Override
+    public EventVO findById(Long eventId) {
+        Event event = eventRepo.findById(eventId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND_BY_ID + eventId));
+        return modelMapper.map(event, EventVO.class);
     }
 }

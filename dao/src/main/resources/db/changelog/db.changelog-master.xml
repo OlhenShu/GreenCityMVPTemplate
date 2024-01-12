@@ -183,5 +183,6 @@
     <include file="db/changelog/logs/ch-add-table-events-tags-Proskurina.xml"/>
 <!--    <include file="/db/changelog/logs/ch-add-table-coordinates-Proskurina.xml"/>-->
     <include file="db/changelog/logs/ch-add-table-events-dates-locations-Proskurina.xml"/>
+    <include file="db/changelog/logs/ch-add-table-events-comment-Veremienko.xml"/>
 </databaseChangeLog>
 

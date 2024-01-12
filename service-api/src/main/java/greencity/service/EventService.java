@@ -1,13 +1,9 @@
 package greencity.service;
 
-import greencity.dto.event.AddEventDto;
-import greencity.dto.event.EventDto;
-import greencity.dto.user.UserVO;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import greencity.dto.event.EventVO;
 
 public interface EventService {
-    EventDto save (AddEventDto addEventDto, UserVO userVO, List<MultipartFile> images);
-
+    void delete(Long eventId, String email);
+    EventVO findById(Long eventId);
 }
