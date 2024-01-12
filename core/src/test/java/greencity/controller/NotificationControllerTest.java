@@ -2,23 +2,33 @@ package greencity.controller;
 
 import greencity.ModelUtils;
 import greencity.converters.UserArgumentResolver;
+import greencity.dto.PageableDto;
+import greencity.dto.notification.NotificationDtoResponse;
 import greencity.dto.user.UserVO;
+import greencity.enums.NotificationSourceType;
 import greencity.service.NotificationService;
 import greencity.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.mockito.ArgumentMatchers.anyString;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @ExtendWith(MockitoExtension.class)
 public class NotificationControllerTest {
@@ -38,6 +48,8 @@ public class NotificationControllerTest {
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(notificationController)
             .setCustomArgumentResolvers(new UserArgumentResolver(userService, modelMapper))
+            .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
+                new UserArgumentResolver(userService, modelMapper))
             .build();
     }
 
@@ -50,5 +62,26 @@ public class NotificationControllerTest {
             .andExpect(status().isOk());
 
         verify(notificationService).getTheLatestThreeNotifications(userVO.getId());
+    }
+    @Test
+    void findAllByUserTest() throws Exception {
+        List<NotificationDtoResponse> notificationDtoList = new ArrayList<>();
+        notificationDtoList.add(
+            new NotificationDtoResponse(2L, 2L, "name1", "title",
+                NotificationSourceType.NEWS_LIKED, 1L, false, ZonedDateTime.now()));
+        notificationDtoList.add(
+            new NotificationDtoResponse(3L, 1L, "name2", "title",
+                NotificationSourceType.NEWS_COMMENTED, 23L, true, ZonedDateTime.now()));
+
+        when(userService.findByEmail(anyString())).thenReturn(userVO);
+        when(notificationService.findAllByUser(userVO.getId(), PageRequest.of(0, 10)))
+            .thenReturn(new PageableDto<>(notificationDtoList, 2L, 0, 1));
+
+        mockMvc.perform(get(link)
+            .principal(userVO::getEmail)
+            .param("page", "0")
+            .param("size", "10"))
+            .andExpect(status().isOk());
+        verify(notificationService).findAllByUser(userVO.getId(), PageRequest.of(0, 10));
     }
 }

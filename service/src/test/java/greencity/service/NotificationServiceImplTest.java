@@ -1,22 +1,31 @@
 package greencity.service;
 
 import greencity.ModelUtils;
+import greencity.dto.PageableDto;
+import greencity.dto.notification.NotificationDtoResponse;
 import greencity.dto.notification.ShortNotificationDtoResponse;
 import greencity.dto.user.UserVO;
+import greencity.enums.NotificationSourceType;
 import greencity.repository.NotificationRepo;
-import java.util.List;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class NotificationServiceImplTest {
@@ -28,17 +37,38 @@ public class NotificationServiceImplTest {
 
     @Test
     public void getTheLatestThreeNotifications() {
-       var expected = List.of(
-           new ShortNotificationDtoResponse(1L,"title", true),
-           new ShortNotificationDtoResponse(2L,"title", true)
-       );
+        var expected = List.of(
+                new ShortNotificationDtoResponse(1L, "title", true),
+                new ShortNotificationDtoResponse(2L, "title", true)
+        );
 
         when(notificationRepo.findTop3ByReceiversIdOrderByCreationDate(anyLong(), any(Pageable.class)))
-            .thenReturn(expected);
+                .thenReturn(expected);
 
         var actual = notificationService.getTheLatestThreeNotifications(userVO.getId());
 
         verify(notificationRepo).findTop3ByReceiversIdOrderByCreationDate(userVO.getId(), PageRequest.of(0, 3));
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void findAllByUserTest() {
+        List<NotificationDtoResponse> notificationDtoList = new ArrayList<>();
+        notificationDtoList.add(
+                new NotificationDtoResponse(2L, 2L, "name1", "title",
+                        NotificationSourceType.NEWS_LIKED, 1L, false, ZonedDateTime.now()));
+        notificationDtoList.add(
+                new NotificationDtoResponse(3L, 1L, "name2", "title",
+                        NotificationSourceType.NEWS_COMMENTED, 23L, true, ZonedDateTime.now()));
+        Page<NotificationDtoResponse> notificationDtoPage = new PageImpl<>(notificationDtoList, PageRequest.of(0, 10), 2L);
+
+        when(notificationRepo.findAllReceivedNotificationDtoByUserId(anyLong(), any(Pageable.class)))
+                .thenReturn(notificationDtoPage);
+
+        PageableDto<NotificationDtoResponse> pageableDto = notificationService.findAllByUser(userVO.getId(), PageRequest.of(0, 10));
+        PageableDto<NotificationDtoResponse> expectedPageableDto = new PageableDto<>(notificationDtoList, 2L, 0, 1);
+
+        verify(notificationRepo).findAllReceivedNotificationDtoByUserId(userVO.getId(), PageRequest.of(0, 10));
+        assertEquals(expectedPageableDto, pageableDto);
     }
 }
