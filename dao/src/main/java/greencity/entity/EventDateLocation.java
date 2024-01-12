@@ -3,6 +3,7 @@ package greencity.entity;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
 
 @Entity
@@ -27,8 +28,14 @@ public class EventDateLocation {
     @Column(nullable = false)
     private ZonedDateTime finishDate;
 
-    @Embedded
+        @Embedded
     private Coordinates coordinates;
+//    @Embedded
+//    @NotNull
+//    private Address coordinates;
 
     private String onlineLink;
+//
+//    @Version
+//    private Long version;
 }

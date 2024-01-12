@@ -16,7 +16,19 @@
             <column name="finish_date" type="TIMESTAMP"/>
             <column name="latitude" type="DOUBLE"/>
             <column name="longitude" type="DOUBLE"/>
+<!--            <column name="street_en" type="VARCHAR"/>-->
+<!--            <column name="street_ua" type="VARCHAR"/>-->
+<!--            <column name="house_number" type="VARCHAR"/>-->
+<!--            <column name="city_en" type="VARCHAR"/>-->
+<!--            <column name="city_ua" type="VARCHAR"/>-->
+<!--            <column name="region_en" type="VARCHAR"/>-->
+<!--            <column name="region_ua" type="VARCHAR"/>-->
+<!--            <column name="country_en" type="VARCHAR"/>-->
+<!--            <column name="country_ua" type="VARCHAR"/>-->
+<!--            <column name="formatted_address_en" type="VARCHAR"/>-->
+<!--            <column name="formatted_address_ua" type="VARCHAR"/>-->
             <column name="online_link" type="VARCHAR"/>
+<!--            <column name="version" type="BIGINT"/>-->
             <!-- Add other columns as needed -->
         </createTable>
     </changeSet>

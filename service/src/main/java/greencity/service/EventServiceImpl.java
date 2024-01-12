@@ -1,9 +1,13 @@
 package greencity.service;
 
+import com.google.maps.model.LatLng;
 import greencity.client.RestClient;
 import greencity.constant.ErrorMessage;
+import greencity.dto.event.AddressDto;
+import greencity.dto.event.EventDateLocationDto;
 import greencity.dto.event.EventDto;
 import greencity.dto.event.UpdateEventDto;
+import greencity.dto.geocoding.AddressLatLngResponse;
 import greencity.entity.EventDateLocation;
 import greencity.entity.Event;
 import greencity.entity.Tag;
@@ -25,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -94,11 +99,33 @@ public class EventServiceImpl implements EventService {
                     }.getType()));
         }
 
+//        if (updateEventDto.getDatesLocations() != null) {
+//            toUpdate.setDates(updateEventDto.getDatesLocations().stream()
+//                    .map(d -> modelMapper.map(d, EventDateLocation.class))
+//                    .peek(d -> d.setEvent(toUpdate))
+//                    .collect(Collectors.toList()));
+//        }
+//    }
+
         if (updateEventDto.getDatesLocations() != null) {
+            addAddressToLocation(updateEventDto.getDatesLocations());
+            eventRepo.deleteEventDateLocationsByEventId(toUpdate.getId());
             toUpdate.setDates(updateEventDto.getDatesLocations().stream()
                     .map(d -> modelMapper.map(d, EventDateLocation.class))
                     .peek(d -> d.setEvent(toUpdate))
                     .collect(Collectors.toList()));
         }
+    }
+
+    private void addAddressToLocation(List<EventDateLocationDto> eventDateLocationDtos) {
+        eventDateLocationDtos
+                .stream()
+                .filter(eventDateLocationDto -> Objects.nonNull(eventDateLocationDto.getCoordinates()))
+                        .forEach(eventDateLocationDto -> {
+            AddressDto addressDto = eventDateLocationDto.getCoordinates();
+            AddressLatLngResponse response = googleApiService.getResultFromGeoCodeByCoordinates(
+                    new LatLng(addressDto.getLatitude(), addressDto.getLongitude()));
+            eventDateLocationDto.setCoordinates(modelMapper.map(response, AddressDto.class));
+        });
     }
 }
