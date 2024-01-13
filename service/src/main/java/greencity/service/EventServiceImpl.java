@@ -99,17 +99,8 @@ public class EventServiceImpl implements EventService {
                     }.getType()));
         }
 
-//        if (updateEventDto.getDatesLocations() != null) {
-//            toUpdate.setDates(updateEventDto.getDatesLocations().stream()
-//                    .map(d -> modelMapper.map(d, EventDateLocation.class))
-//                    .peek(d -> d.setEvent(toUpdate))
-//                    .collect(Collectors.toList()));
-//        }
-//    }
-
         if (updateEventDto.getDatesLocations() != null) {
             addAddressToLocation(updateEventDto.getDatesLocations());
-            eventRepo.deleteEventDateLocationsByEventId(toUpdate.getId());
             toUpdate.setDates(updateEventDto.getDatesLocations().stream()
                     .map(d -> modelMapper.map(d, EventDateLocation.class))
                     .peek(d -> d.setEvent(toUpdate))
@@ -121,11 +112,11 @@ public class EventServiceImpl implements EventService {
         eventDateLocationDtos
                 .stream()
                 .filter(eventDateLocationDto -> Objects.nonNull(eventDateLocationDto.getCoordinates()))
-                        .forEach(eventDateLocationDto -> {
-            AddressDto addressDto = eventDateLocationDto.getCoordinates();
-            AddressLatLngResponse response = googleApiService.getResultFromGeoCodeByCoordinates(
-                    new LatLng(addressDto.getLatitude(), addressDto.getLongitude()));
-            eventDateLocationDto.setCoordinates(modelMapper.map(response, AddressDto.class));
-        });
+                .forEach(eventDateLocationDto -> {
+                    AddressDto addressDto = eventDateLocationDto.getCoordinates();
+                    AddressLatLngResponse response = googleApiService.getResultFromGeoCodeByCoordinates(
+                            new LatLng(addressDto.getLatitude(), addressDto.getLongitude()));
+                    eventDateLocationDto.setCoordinates(modelMapper.map(response, AddressDto.class));
+                });
     }
 }

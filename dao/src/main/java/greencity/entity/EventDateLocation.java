@@ -28,14 +28,9 @@ public class EventDateLocation {
     @Column(nullable = false)
     private ZonedDateTime finishDate;
 
-        @Embedded
-    private Coordinates coordinates;
-//    @Embedded
-//    @NotNull
-//    private Address coordinates;
+    @Embedded
+    @NotNull
+    private Address coordinates;
 
     private String onlineLink;
-//
-//    @Version
-//    private Long version;
 }

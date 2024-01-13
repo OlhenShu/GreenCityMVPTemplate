@@ -65,9 +65,24 @@ public class GoogleApiService {
         if (addressUa == null) {
             throw new BadRequestException("Address with ukrainian is required!");
         }
-        addressLatLngResponse.setAddressUa(addressUa);
-        addressLatLngResponse
-                .setAddressEn(getAddressResponseByLocaleAndCoordinates(searchCoordinates, ENGLISH));
+        AddressResponse addressEn = getAddressResponseByLocaleAndCoordinates(searchCoordinates, ENGLISH);
+        if (addressEn == null) {
+            throw new BadRequestException("Address with english is required!");
+        }
+        addressLatLngResponse.setStreetUa(addressUa.getStreet());
+        addressLatLngResponse.setHouseNumber(addressUa.getHouseNumber());
+        addressLatLngResponse.setCityUa(addressUa.getCity());
+        addressLatLngResponse.setRegionUa(addressUa.getRegion());
+        addressLatLngResponse.setCountryUa(addressUa.getCountry());
+        addressLatLngResponse.setFormattedAddressUa(addressUa.getFormattedAddress());
+
+        addressLatLngResponse.setStreetEn(addressEn.getStreet());
+        addressLatLngResponse.setHouseNumber(addressEn.getHouseNumber());
+        addressLatLngResponse.setCityEn(addressEn.getCity());
+        addressLatLngResponse.setRegionEn(addressEn.getRegion());
+        addressLatLngResponse.setCountryEn(addressEn.getCountry());
+        addressLatLngResponse.setFormattedAddressEn(addressEn.getFormattedAddress());
+
         return addressLatLngResponse;
     }
 
