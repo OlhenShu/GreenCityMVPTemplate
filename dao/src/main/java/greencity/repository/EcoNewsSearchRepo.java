@@ -65,7 +65,7 @@ public class EcoNewsSearchRepo {
     private List<Order> getOrderListFromPageable(Pageable pageable, Root<EcoNews> root) {
         List<Order> orderList = new ArrayList<>();
         pageable.getSort()
-            .get().filter(order -> !order.getProperty().equalsIgnoreCase("relevance"))
+            .get()
             .forEach(o -> {
                 if (o.getProperty().equalsIgnoreCase("relevance")) {
                     orderList.add(criteriaBuilder.desc(criteriaBuilder.size(root.get("usersLikedNews"))));
