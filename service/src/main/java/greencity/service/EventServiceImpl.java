@@ -3,11 +3,13 @@ package greencity.service;
 import com.google.maps.model.LatLng;
 import greencity.client.RestClient;
 import greencity.constant.ErrorMessage;
+import greencity.dto.PageableDto;
 import greencity.dto.event.AddressDto;
 import greencity.dto.event.EventDateLocationDto;
 import greencity.dto.event.EventDto;
 import greencity.dto.event.UpdateEventDto;
 import greencity.dto.geocoding.AddressLatLngResponse;
+import greencity.dto.search.SearchEventDto;
 import greencity.entity.EventDateLocation;
 import greencity.entity.Event;
 import greencity.entity.Tag;
@@ -18,10 +20,12 @@ import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.repository.EventRepo;
+import greencity.repository.EventSearchRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,6 +46,7 @@ public class EventServiceImpl implements EventService {
     private final RestClient restClient;
     private final TagsService tagsService;
     private final GoogleApiService googleApiService;
+    private final EventSearchRepo eventSearchRepo;
 
     @Override
     public EventDto getById(Long eventId) {
@@ -71,6 +76,11 @@ public class EventServiceImpl implements EventService {
         Event updatedEvent = eventRepo.save(eventToUpdate);
 
         return buildEventDto(updatedEvent);
+    }
+
+    @Override
+    public PageableDto<SearchEventDto> search(Pageable pageable, String searchQuery, String languageCode) {
+        return eventSearchRepo.find(pageable,searchQuery,languageCode);
     }
 
     private EventDto buildEventDto(Event event) {
