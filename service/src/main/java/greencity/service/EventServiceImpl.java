@@ -1,7 +1,7 @@
 package greencity.service;
 
 import greencity.constant.AppConstant;
-import greencity.dto.event.AddEventDto;
+import greencity.dto.event.RequestAddEventDto;
 import greencity.dto.event.EventDto;
 import greencity.dto.tag.TagVO;
 import greencity.dto.user.UserVO;
@@ -36,24 +36,26 @@ public class EventServiceImpl implements EventService {
     private final TagsService tagsService;
 
     @Override
-    public EventDto save(AddEventDto addEventDto, UserVO userVO, List<MultipartFile> images) {
-        Event event = modelMapper.map(addEventDto, Event.class);
-        List<EventDateLocation> eventDateLocations = addEventDto.getDatesLocations()
+    public EventDto save(RequestAddEventDto requestAddEventDto, UserVO userVO, List<MultipartFile> images) {
+        Event event = modelMapper.map(requestAddEventDto, Event.class);
+        List<EventDateLocation> eventDateLocations = requestAddEventDto.getDatesLocations()
                 .stream()
                 .map(date -> modelMapper.map(date, EventDateLocation.class))
+                .map(date->date.setEvent(event))
                 .collect(Collectors.toList());
         event.setDates(eventDateLocations);
+
         event.setCreationDate(LocalDate.now());
         event.setOrganizer(modelMapper.map(userVO, User.class));
 
-        event.setDates(event.getDates()
-                .stream()
-                .map(date->date.setEvent(event))
-                .collect(Collectors.toList()));
-
-        List<TagVO> tagsVO = tagsService.findTagsByNamesAndType(addEventDto.getTags(), TagType.EVENT);
+        List<TagVO> tagsVO = tagsService.findTagsByNamesAndType(requestAddEventDto.getTags(), TagType.EVENT);
         event.setTags(modelMapper.map(tagsVO, TypeUtils.parameterize(List.class, Tag.class)));
 
+        saveImages(images, event);
+        return modelMapper.map(eventRepo.save(event), EventDto.class);
+    }
+
+    private void saveImages(List<MultipartFile> images, Event event) {
         if (images == null || images.isEmpty()) {
             event.setTitleImage(AppConstant.DEFAULT_HABIT_IMAGE);
         } else {
@@ -65,6 +67,5 @@ public class EventServiceImpl implements EventService {
             event.setTitleImage(imagesUrl.get(0));
             event.setImages(imagesUrl);
         }
-        return modelMapper.map(eventRepo.save(event), EventDto.class);
     }
 }
