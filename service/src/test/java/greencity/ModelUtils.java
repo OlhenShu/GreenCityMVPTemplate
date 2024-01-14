@@ -50,12 +50,13 @@ public class ModelUtils {
     public static LocalDateTime localDateTime = LocalDateTime.now();
 
     public static Tag getTag() {
-        return new Tag(1L, TagType.ECO_NEWS, getTagTranslations(), Collections.emptyList(), Collections.emptySet());
+        return new Tag(1L, TagType.ECO_NEWS, getTagTranslations(), Collections.emptyList(),
+            Collections.emptySet(), Collections.emptyList());
     }
 
     public static Tag getHabitTag() {
         return new Tag(1L, TagType.HABIT, getHabitTagTranslations(), Collections.emptyList(),
-            Collections.emptySet());
+            Collections.emptySet(), Collections.emptyList());
     }
 
     public static List<TagTranslation> getTagTranslations() {
@@ -213,7 +214,7 @@ public class ModelUtils {
             .habit(Habit.builder()
                 .id(1L)
                 .image("")
-                    .userId(2L)
+                .userId(2L)
                 .habitTranslations(Collections.singletonList(HabitTranslation.builder()
                     .id(1L)
                     .name("")
@@ -266,19 +267,19 @@ public class ModelUtils {
 
     public static ShoppingListItemResponseDto getShoppingListItemResponseDto() {
         return ShoppingListItemResponseDto.builder()
-                .id(1L)
-                .translations(Arrays.asList(
-                        ShoppingListItemTranslationDTO.builder()
-                                .id(2L)
-                                .language(new LanguageVO(1L, AppConstant.DEFAULT_LANGUAGE_CODE))
-                                .content("Buy a bamboo toothbrush")
-                                .build(),
-                        ShoppingListItemTranslationDTO.builder()
-                                .id(11L)
-                                .language(new LanguageVO(1L, AppConstant.DEFAULT_LANGUAGE_CODE))
-                                .content("Start recycling batteries")
-                                .build())
-                ).build();
+            .id(1L)
+            .translations(Arrays.asList(
+                ShoppingListItemTranslationDTO.builder()
+                    .id(2L)
+                    .language(new LanguageVO(1L, AppConstant.DEFAULT_LANGUAGE_CODE))
+                    .content("Buy a bamboo toothbrush")
+                    .build(),
+                ShoppingListItemTranslationDTO.builder()
+                    .id(11L)
+                    .language(new LanguageVO(1L, AppConstant.DEFAULT_LANGUAGE_CODE))
+                    .content("Start recycling batteries")
+                    .build())
+            ).build();
     }
 
     public static UserShoppingListItem getPredefinedUserShoppingListItem() {
@@ -300,7 +301,7 @@ public class ModelUtils {
                 .id(1L)
                 .build())
             .status(ShoppingListItemStatus.DONE)
-                .shoppingListItemVO(new ShoppingListItemVO(1L, Collections.emptyList(), Collections.emptyList()))
+            .shoppingListItemVO(new ShoppingListItemVO(1L, Collections.emptyList(), Collections.emptyList()))
             .build();
     }
 
@@ -407,7 +408,7 @@ public class ModelUtils {
 
     public static List<TagTranslationVO> getTagTranslationsVO() {
         return Arrays.asList(TagTranslationVO.builder().id(1L).name("Новини")
-            .languageVO(LanguageVO.builder().id(1L).code("ua").build()).build(),
+                .languageVO(LanguageVO.builder().id(1L).code("ua").build()).build(),
             TagTranslationVO.builder().id(2L).name("News").languageVO(LanguageVO.builder().id(2L).code("en").build())
                 .build());
     }
@@ -695,23 +696,23 @@ public class ModelUtils {
 
     public static RatingStatisticsVO getRatingStatisticsVO() {
         return RatingStatisticsVO.builder()
-                .id(1L)
-                .rating(5.0)
-                .createDate(zonedDateTime)
-                .pointsChanged(1.0)
-                .ratingCalculationEnum(RatingCalculationEnum.LIKE_COMMENT)
-                .user(getUserVO())
-                .build();
+            .id(1L)
+            .rating(5.0)
+            .createDate(zonedDateTime)
+            .pointsChanged(1.0)
+            .ratingCalculationEnum(RatingCalculationEnum.LIKE_COMMENT)
+            .user(getUserVO())
+            .build();
     }
 
     public static RatingStatistics getRatingStatistics() {
         return RatingStatistics.builder()
-                .id(1L)
-                .rating(5.0)
-                .createDate(zonedDateTime)
-                .pointsChanged(1.0)
-                .ratingCalculationEnum(RatingCalculationEnum.LIKE_COMMENT)
-                .user(getUser())
-                .build();
+            .id(1L)
+            .rating(5.0)
+            .createDate(zonedDateTime)
+            .pointsChanged(1.0)
+            .ratingCalculationEnum(RatingCalculationEnum.LIKE_COMMENT)
+            .user(getUser())
+            .build();
     }
- }
+}

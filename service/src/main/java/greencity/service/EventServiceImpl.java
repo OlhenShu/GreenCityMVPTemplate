@@ -10,10 +10,8 @@ import greencity.dto.event.EventDto;
 import greencity.dto.event.UpdateEventDto;
 import greencity.dto.geocoding.AddressLatLngResponse;
 import greencity.dto.search.SearchEventDto;
-import greencity.entity.EventDateLocation;
-import greencity.entity.Event;
-import greencity.entity.Tag;
-import greencity.entity.User;
+import greencity.dto.search.SearchNewsDto;
+import greencity.entity.*;
 import greencity.enums.Role;
 import greencity.enums.TagType;
 import greencity.exception.exceptions.BadRequestException;
@@ -25,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -78,9 +77,25 @@ public class EventServiceImpl implements EventService {
         return buildEventDto(updatedEvent);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PageableDto<SearchEventDto> search(Pageable pageable, String searchQuery, String languageCode) {
-        return eventSearchRepo.find(pageable,searchQuery,languageCode);
+        Page<Event> eventPage = eventSearchRepo.find(pageable,searchQuery,languageCode);
+        return getSearchEventDtoPageableDto(eventPage);
+    }
+
+    private PageableDto<SearchEventDto> getSearchEventDtoPageableDto(Page<Event> page) {
+        List<SearchEventDto> searchEventDtos = page.stream()
+            .map(event -> modelMapper.map(event, SearchEventDto.class))
+            .collect(Collectors.toList());
+
+        return new PageableDto<>(
+            searchEventDtos,
+            page.getTotalElements(),
+            page.getPageable().getPageNumber(),
+            page.getTotalPages());
     }
 
     private EventDto buildEventDto(Event event) {

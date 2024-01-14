@@ -72,6 +72,7 @@ public class SearchController {
         return ResponseEntity.status(HttpStatus.OK)
             .body(searchService.searchAllNews(pageable, searchQuery, locale.getLanguage()));
     }
+
     /**
      * Method for search events.
      *

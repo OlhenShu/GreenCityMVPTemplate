@@ -26,5 +26,13 @@ public interface EventService {
      */
     EventDto update(UpdateEventDto eventDto, String email, MultipartFile[] images);
 
+    /**
+     * Method for getting all Events by searchQuery.
+     *
+     * @param pageable    {@link Pageable}.
+     * @param searchQuery query to search.
+     * @return PageableDto of {@link SearchEventDto} instances.
+     * @author Nikita Malov & Denys Liubchenko
+     */
     PageableDto<SearchEventDto> search(Pageable pageable, String searchQuery, String languageCode);
 }
