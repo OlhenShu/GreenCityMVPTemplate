@@ -28,7 +28,6 @@ import java.util.List;
 @RequestMapping("/events")
 @RequiredArgsConstructor
 public class EventsController {
-
     private final EventService eventService;
 
     /**
@@ -47,7 +46,6 @@ public class EventsController {
     })
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-
     public ResponseEntity<EventDto> save(
             @ApiParam(value = SwaggerExampleModel.ADD_EVENT, required = true)
             @RequestPart RequestAddEventDto requestAddEventDto,

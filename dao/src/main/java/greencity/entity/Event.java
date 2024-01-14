@@ -1,6 +1,5 @@
 package greencity.entity;
 
-
 import lombok.*;
 
 import javax.persistence.*;
