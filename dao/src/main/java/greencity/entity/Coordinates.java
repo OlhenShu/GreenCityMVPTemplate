@@ -10,9 +10,7 @@ import javax.persistence.Embeddable;
 @AllArgsConstructor
 @Builder
 public class Coordinates {
-
     private double latitude;
 
     private double longitude;
-
 }
