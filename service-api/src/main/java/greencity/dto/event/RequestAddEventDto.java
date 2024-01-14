@@ -10,7 +10,7 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AddEventDto {
+public class RequestAddEventDto {
     String title;
     String description;
     boolean open;
