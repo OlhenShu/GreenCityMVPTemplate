@@ -142,9 +142,17 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
         + "UNION (SELECT friend_id FROM users_friends WHERE user_id = :userId and status = 'FRIEND'));")
     List<User> getAllUserFriends(Long userId);
 
-    @Query(nativeQuery = true, value = "SELECT EXISTS (SELECT 1 FROM users_friends " +
-            "WHERE (user_id = :userId AND friend_id = :friendId) " +
-            "AND status = 'FRIEND')")
+    /**
+     * Checks if two users are friends.
+     *
+     * @param userId The ID of the user.
+     * @param friendId The ID of the friend.
+     *
+     * @return list of {@link User}.
+     */
+    @Query(nativeQuery = true, value = "SELECT EXISTS (SELECT 1 FROM users_friends "
+            + "WHERE (user_id = :userId AND friend_id = :friendId) "
+            + "AND status = 'FRIEND')")
     boolean isFriend(Long userId, Long friendId);
 
     /**
