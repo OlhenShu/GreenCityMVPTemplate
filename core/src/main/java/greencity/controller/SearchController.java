@@ -5,6 +5,7 @@ import greencity.annotations.ApiPageableWithLocale;
 import greencity.annotations.ValidLanguage;
 import greencity.constant.HttpStatuses;
 import greencity.dto.PageableDto;
+import greencity.dto.search.SearchEventDto;
 import greencity.dto.search.SearchNewsDto;
 import greencity.dto.search.SearchResponseDto;
 import greencity.service.SearchService;
@@ -51,14 +52,14 @@ public class SearchController {
     }
 
     /**
-     * Method for search.
+     * Method for search econews.
      *
      * @param searchQuery query to search.
      * @return PageableDto of {@link SearchNewsDto} instances.
      */
-    @ApiOperation(value = "Search Eco news.")
+    @ApiOperation(value = "Search eco news.")
     @ApiResponses(value = {
-        @ApiResponse(code = 201, message = HttpStatuses.OK),
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 303, message = HttpStatuses.SEE_OTHER),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
@@ -70,5 +71,25 @@ public class SearchController {
         @ApiIgnore @ValidLanguage Locale locale) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(searchService.searchAllNews(pageable, searchQuery, locale.getLanguage()));
+    }
+    /**
+     * Method for search events.
+     *
+     * @param searchQuery query to search.
+     * @return PageableDto of {@link SearchEventDto} instances.
+     */
+    @ApiOperation(value = "Search events.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @GetMapping("/events")
+    @ApiPageableWithLocale
+    public ResponseEntity<PageableDto<SearchEventDto>> searchEvents(
+        @ApiIgnore Pageable pageable,
+        @ApiParam(value = "Query to search") @RequestParam String searchQuery,
+        @ApiIgnore @ValidLanguage Locale locale) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(searchService.searchAllEvents(pageable, searchQuery, locale.getLanguage()));
     }
 }
