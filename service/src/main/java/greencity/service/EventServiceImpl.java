@@ -75,6 +75,9 @@ public class EventServiceImpl implements EventService {
         return buildEventDto(updatedEvent);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Long getAmountOfEvents(Long userId) {
         if (!userRepo.existsById(userId)) {
