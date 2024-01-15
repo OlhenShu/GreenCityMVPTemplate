@@ -22,4 +22,12 @@ public interface EventService {
      * @return The updated event DTO.
      */
     EventDto update(UpdateEventDto eventDto, String email, MultipartFile[] images);
+
+    /**
+     * Retrieves the total number of events associated with the specified user.
+     *
+     * @param userId The unique identifier of the user for whom the event count is to be obtained.
+     * @return The total number of events associated with the specified user.
+     */
+    Long getAmountOfEvents(Long userId);
 }

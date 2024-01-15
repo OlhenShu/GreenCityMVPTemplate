@@ -16,4 +16,13 @@ public interface EventRepo extends JpaRepository<Event, Long>, JpaSpecificationE
     @Modifying
     @Query(value = "DELETE FROM events_dates_locations WHERE event_id = :eventId", nativeQuery = true)
     void deleteEventDateLocationsByEventId(Long eventId);
+
+    /**
+     * Counts the number of events associated with the specified organizer.
+     *
+     * @param organizerId The unique identifier of the organizer for whom the event count is to be obtained.
+     * @return The total number of events associated with the specified organizer.
+     */
+    @Query("select count(*) from Event e where e.organizer.id =:organizerId")
+    Long countByOrganizerId(Long organizerId);
 }

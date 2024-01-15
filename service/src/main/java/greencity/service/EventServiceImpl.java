@@ -18,6 +18,7 @@ import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.repository.EventRepo;
+import greencity.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -42,6 +43,7 @@ public class EventServiceImpl implements EventService {
     private final RestClient restClient;
     private final TagsService tagsService;
     private final GoogleApiService googleApiService;
+    private final UserRepo userRepo;
 
     @Override
     public EventDto getById(Long eventId) {
@@ -71,6 +73,14 @@ public class EventServiceImpl implements EventService {
         Event updatedEvent = eventRepo.save(eventToUpdate);
 
         return buildEventDto(updatedEvent);
+    }
+
+    @Override
+    public Long getAmountOfEvents(Long userId) {
+        if (!userRepo.existsById(userId)) {
+            throw new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + userId);
+        }
+        return eventRepo.countByOrganizerId(userId);
     }
 
     private EventDto buildEventDto(Event event) {
