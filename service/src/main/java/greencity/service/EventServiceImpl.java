@@ -1,6 +1,9 @@
 package greencity.service;
 
+import com.google.maps.model.LatLng;
 import greencity.constant.AppConstant;
+import greencity.dto.geocoding.AddressDto;
+import greencity.dto.event.EventDateLocationDto;
 import greencity.dto.event.RequestAddEventDto;
 import greencity.dto.event.EventDto;
 import greencity.dto.tag.TagVO;
@@ -34,6 +37,7 @@ public class EventServiceImpl implements EventService {
     private final ModelMapper modelMapper;
     private final FileService fileService;
     private final TagsService tagsService;
+    private final GoogleApiService googleApiService;
 
     @Override
     public EventDto save(RequestAddEventDto requestAddEventDto, UserVO userVO, List<MultipartFile> images) {
@@ -52,7 +56,10 @@ public class EventServiceImpl implements EventService {
         event.setTags(modelMapper.map(tagsVO, TypeUtils.parameterize(List.class, Tag.class)));
 
         saveImages(images, event);
-        return modelMapper.map(eventRepo.save(event), EventDto.class);
+        EventDto eventDto = modelMapper.map(eventRepo.save(event), EventDto.class);
+        addAddressToLocation(requestAddEventDto.getDatesLocations());
+        eventDto.setDates(requestAddEventDto.getDatesLocations());
+        return eventDto;
     }
 
     private void saveImages(List<MultipartFile> images, Event event) {
@@ -67,5 +74,17 @@ public class EventServiceImpl implements EventService {
             event.setTitleImage(imagesUrl.get(0));
             event.setImages(imagesUrl);
         }
+    }
+
+    private void addAddressToLocation(List<EventDateLocationDto> eventDateLocationDtos) {
+        eventDateLocationDtos
+                .stream()
+                .filter(eventDateLocationDto -> Objects.nonNull(eventDateLocationDto.getCoordinates()))
+                .forEach(eventDateLocationDto -> {
+                    AddressDto addressDto = eventDateLocationDto.getCoordinates();
+                    AddressDto response = googleApiService.getResultFromGeoCodeByCoordinates(
+                            new LatLng(addressDto.getLatitude(), addressDto.getLongitude()));
+                    eventDateLocationDto.setCoordinates(response);
+                });
     }
 }

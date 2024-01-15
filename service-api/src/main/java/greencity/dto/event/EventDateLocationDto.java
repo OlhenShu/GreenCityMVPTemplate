@@ -1,6 +1,7 @@
 package greencity.dto.event;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import greencity.dto.geocoding.AddressDto;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

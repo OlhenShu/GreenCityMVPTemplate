@@ -1,4 +1,4 @@
-package greencity.dto.event;
+package greencity.dto.geocoding;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -7,6 +7,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Getter
 @Setter
+@Builder
 @EqualsAndHashCode
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AddressDto {
