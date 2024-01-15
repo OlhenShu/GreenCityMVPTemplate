@@ -240,6 +240,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 CUSTOM_SHOPPING_LIST_URL,
                 "/favorite_place/{placeId}",
                 "/social-networks",
+                "/friends/{friendId}",
                 USER_CUSTOM_SHOPPING_LIST_ITEMS,
                 USER_SHOPPING_LIST + "/user-shopping-list-items")
             .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
