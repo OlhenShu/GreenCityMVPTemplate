@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class NotificationDtoResponseMapper extends AbstractConverter<Notification, NotificationDtoResponse> {
-
     @Override
     public NotificationDtoResponse convert(Notification notification) {
         return NotificationDtoResponse.builder()
