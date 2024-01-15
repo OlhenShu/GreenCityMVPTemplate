@@ -8,7 +8,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface EventService {
-
     /**
      * Method for creating {@link EventDto} instance.
      *

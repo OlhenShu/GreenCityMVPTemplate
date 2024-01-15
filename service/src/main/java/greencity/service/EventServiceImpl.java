@@ -6,6 +6,7 @@ import greencity.dto.geocoding.AddressDto;
 import greencity.dto.event.EventDateLocationDto;
 import greencity.dto.event.RequestAddEventDto;
 import greencity.dto.event.EventDto;
+import greencity.dto.tag.TagUaEnDto;
 import greencity.dto.tag.TagVO;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
@@ -45,21 +46,39 @@ public class EventServiceImpl implements EventService {
         List<EventDateLocation> eventDateLocations = requestAddEventDto.getDatesLocations()
                 .stream()
                 .map(date -> modelMapper.map(date, EventDateLocation.class))
-                .map(date->date.setEvent(event))
+                .map(date -> date.setEvent(event))
                 .collect(Collectors.toList());
         event.setDates(eventDateLocations);
 
         event.setCreationDate(LocalDate.now());
         event.setOrganizer(modelMapper.map(userVO, User.class));
 
-        List<TagVO> tagsVO = tagsService.findTagsByNamesAndType(requestAddEventDto.getTags(), TagType.EVENT);
+        List<TagVO> tagsVO = tagsService.findTagsWithAllTranslationsByNamesAndType(requestAddEventDto.getTags(), TagType.EVENT);
         event.setTags(modelMapper.map(tagsVO, TypeUtils.parameterize(List.class, Tag.class)));
 
         saveImages(images, event);
         EventDto eventDto = modelMapper.map(eventRepo.save(event), EventDto.class);
-        addAddressToLocation(requestAddEventDto.getDatesLocations());
-        eventDto.setDates(requestAddEventDto.getDatesLocations());
+        tagConvertor(event, eventDto);
+        addAddressToLocation(eventDto.getDates());
         return eventDto;
+    }
+
+    private static void tagConvertor(Event event, EventDto eventDto) {
+        eventDto.setTags(event.getTags()
+                .stream()
+                .map(tag -> {
+                    TagUaEnDto tagUaEnDto = new TagUaEnDto().setId(tag.getId());
+                    tagUaEnDto.setId(tag.getId());
+                    tag.getTagTranslations()
+                            .forEach(tagTranslation -> {
+                                if (tagTranslation.getLanguage().getCode().equals("ua")){
+                                    tagUaEnDto.setNameUa(tagTranslation.getName());
+                                }else if (tagTranslation.getLanguage().getCode().equals("en")){
+                                    tagUaEnDto.setNameEn(tagTranslation.getName());
+                                }
+                            });
+                return tagUaEnDto;})
+                .collect(Collectors.toList()));
     }
 
     private void saveImages(List<MultipartFile> images, Event event) {
