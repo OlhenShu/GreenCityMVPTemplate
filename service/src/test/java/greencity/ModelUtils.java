@@ -1,6 +1,7 @@
 package greencity;
 
 import com.google.maps.model.*;
+import greencity.annotations.RatingCalculationEnum;
 import greencity.constant.AppConstant;
 import greencity.dto.PageableAdvancedDto;
 import greencity.dto.econews.*;
@@ -11,10 +12,10 @@ import greencity.dto.language.LanguageDTO;
 import greencity.dto.language.LanguageTranslationDTO;
 import greencity.dto.language.LanguageVO;
 import greencity.dto.ownsecurity.OwnSecurityVO;
+import greencity.dto.ratingstatistics.RatingStatisticsVO;
 import greencity.dto.search.SearchNewsDto;
-import greencity.dto.shoppinglistitem.CustomShoppingListItemResponseDto;
-import greencity.dto.shoppinglistitem.CustomShoppingListItemVO;
-import greencity.dto.shoppinglistitem.CustomShoppingListItemWithStatusSaveRequestDto;
+import greencity.dto.search.SearchResponseDto;
+import greencity.dto.shoppinglistitem.*;
 import greencity.dto.tag.*;
 import greencity.dto.user.*;
 import greencity.dto.verifyemail.VerifyEmailVO;
@@ -212,6 +213,7 @@ public class ModelUtils {
             .habit(Habit.builder()
                 .id(1L)
                 .image("")
+                    .userId(2L)
                 .habitTranslations(Collections.singletonList(HabitTranslation.builder()
                     .id(1L)
                     .name("")
@@ -221,7 +223,7 @@ public class ModelUtils {
                     .build()))
                 .build())
             .user(getUser())
-            .userShoppingListItems(new ArrayList<>())
+            .userShoppingListItems(List.of(getUserShoppingListItem()))
             .workingDays(0)
             .duration(0)
             .habitStreak(0)
@@ -257,9 +259,26 @@ public class ModelUtils {
     public static UserShoppingListItemResponseDto getUserShoppingListItemResponseDto() {
         return UserShoppingListItemResponseDto.builder()
             .id(1L)
-            .text("Buy electric car")
+            .text("TEST")
             .status(ShoppingListItemStatus.ACTIVE)
             .build();
+    }
+
+    public static ShoppingListItemResponseDto getShoppingListItemResponseDto() {
+        return ShoppingListItemResponseDto.builder()
+                .id(1L)
+                .translations(Arrays.asList(
+                        ShoppingListItemTranslationDTO.builder()
+                                .id(2L)
+                                .language(new LanguageVO(1L, AppConstant.DEFAULT_LANGUAGE_CODE))
+                                .content("Buy a bamboo toothbrush")
+                                .build(),
+                        ShoppingListItemTranslationDTO.builder()
+                                .id(11L)
+                                .language(new LanguageVO(1L, AppConstant.DEFAULT_LANGUAGE_CODE))
+                                .content("Start recycling batteries")
+                                .build())
+                ).build();
     }
 
     public static UserShoppingListItem getPredefinedUserShoppingListItem() {
@@ -281,6 +300,7 @@ public class ModelUtils {
                 .id(1L)
                 .build())
             .status(ShoppingListItemStatus.DONE)
+                .shoppingListItemVO(new ShoppingListItemVO(1L, Collections.emptyList(), Collections.emptyList()))
             .build();
     }
 
@@ -672,4 +692,26 @@ public class ModelUtils {
             .status(ShoppingListItemStatus.INPROGRESS)
             .build();
     }
-}
+
+    public static RatingStatisticsVO getRatingStatisticsVO() {
+        return RatingStatisticsVO.builder()
+                .id(1L)
+                .rating(5.0)
+                .createDate(zonedDateTime)
+                .pointsChanged(1.0)
+                .ratingCalculationEnum(RatingCalculationEnum.LIKE_COMMENT)
+                .user(getUserVO())
+                .build();
+    }
+
+    public static RatingStatistics getRatingStatistics() {
+        return RatingStatistics.builder()
+                .id(1L)
+                .rating(5.0)
+                .createDate(zonedDateTime)
+                .pointsChanged(1.0)
+                .ratingCalculationEnum(RatingCalculationEnum.LIKE_COMMENT)
+                .user(getUser())
+                .build();
+    }
+ }
