@@ -181,5 +181,6 @@
     <include file="db/changelog/logs/ch-add-table-events_dates_locations-Osovskyi.xml"/>
     <include file="db/changelog/logs/ch-add-table-events-tags-Proskurina.xml"/>
     <include file="db/changelog/logs/ch-add-table-events-images-Osovskyi.xml"/>
+    <include file="db/changelog/logs/ch-add-table-events-users-likes.Osovskyi.xml"/>
 </databaseChangeLog>
 

@@ -55,4 +55,11 @@ public class Event {
             joinColumns = @JoinColumn(name = "event_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private List<Tag> tags;
+
+    @ManyToMany
+    @JoinTable(
+            name = "events_users_likes",
+            joinColumns = @JoinColumn(name = "event_id"),
+            inverseJoinColumns = @JoinColumn(name = "users_id"))
+    private Set<User> usersLikedEvents = new HashSet<>();
 }
