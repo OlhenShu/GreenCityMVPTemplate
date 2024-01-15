@@ -1,5 +1,7 @@
-package greencity.entity;
+package greencity.entity.event;
 
+import greencity.entity.Tag;
+import greencity.entity.User;
 import lombok.*;
 
 import javax.persistence.*;
@@ -41,6 +43,9 @@ public class Event {
     @OrderBy("finishDate ASC")
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
     private List<EventDateLocation> dates = new ArrayList<>();
+
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
+    private List<EventImages> additionalImages = new ArrayList<>();
 
     @Column
     private Boolean open = true;
