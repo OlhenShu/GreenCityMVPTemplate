@@ -39,7 +39,7 @@ public class SearchController {
      */
     @ApiOperation(value = "Search.")
     @ApiResponses(value = {
-        @ApiResponse(code = 201, message = HttpStatuses.OK),
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
         @ApiResponse(code = 303, message = HttpStatuses.SEE_OTHER),
         @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN)
     })
@@ -48,7 +48,8 @@ public class SearchController {
     public ResponseEntity<SearchResponseDto> search(
         @ApiParam(value = "Query to search") @RequestParam String searchQuery,
         @ApiIgnore @ValidLanguage Locale locale) {
-        return ResponseEntity.status(HttpStatus.OK).body(searchService.search(searchQuery, locale.getLanguage()));
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(searchService.search(searchQuery, locale.getLanguage()));
     }
 
     /**

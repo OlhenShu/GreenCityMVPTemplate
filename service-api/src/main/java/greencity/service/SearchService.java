@@ -33,8 +33,9 @@ public interface SearchService {
     /**
      * Method that allow you to search {@link SearchEventDto}.
      *
-     * @param pageable    {@link Pageable}.
-     * @param searchQuery query to search.
+     * @param pageable     {@link Pageable}.
+     * @param searchQuery  query to search.
+     * @param languageCode the language code to specify the desired language for event information.
      * @return PageableDto of {@link SearchEventDto} instances.
      */
     PageableDto<SearchEventDto> searchAllEvents(Pageable pageable, String searchQuery, String languageCode);

@@ -29,8 +29,9 @@ public interface EventService {
     /**
      * Method for getting all Events by searchQuery.
      *
-     * @param pageable    {@link Pageable}.
-     * @param searchQuery query to search.
+     * @param pageable     {@link Pageable}.
+     * @param searchQuery  query to search.
+     * @param languageCode the language code to specify the desired language for event information.
      * @return PageableDto of {@link SearchEventDto} instances.
      * @author Nikita Malov & Denys Liubchenko
      */

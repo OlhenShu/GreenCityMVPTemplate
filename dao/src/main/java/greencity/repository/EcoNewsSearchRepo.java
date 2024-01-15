@@ -34,8 +34,9 @@ public class EcoNewsSearchRepo {
     /**
      * Method for search eco news by title,text,short info and tag name.
      *
-     * @param searchingText - text criteria for searching.
-     * @param languageCode  - code of needed language for finding tag.
+     * @param pageable      {@link Pageable}.
+     * @param searchingText text criteria for searching.
+     * @param languageCode  code of needed language for finding tag.
      * @return all finding eco news, their tags and also count of finding eco news.
      */
     public Page<EcoNews> find(Pageable pageable, String searchingText, String languageCode) {

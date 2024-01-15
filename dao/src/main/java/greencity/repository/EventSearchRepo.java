@@ -31,9 +31,9 @@ public class EventSearchRepo {
     /**
      * Method for search events by title, description and tag name.
      *
-     * @param pageable - {@link Pageable}.
-     * @param searchQuery - text criteria for searching.
-     * @param languageCode  - code of needed language for finding tag.
+     * @param pageable     {@link Pageable}.
+     * @param searchQuery  text criteria for searching.
+     * @param languageCode code of needed language for finding tag.
      * @return all finding eco news, their tags and also count of finding eco news.
      */
     public Page<Event> find(Pageable pageable, String searchQuery, String languageCode) {
