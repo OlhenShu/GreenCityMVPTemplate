@@ -9,24 +9,49 @@ import greencity.entity.UserFriend;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.repository.UserRepo;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.springframework.transaction.annotation.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class FriendServiceImpl implements FriendService {
+    private final ModelMapper modelMapper;
     private final UserRepo userRepo;
     private final NotificationService notificationService;
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PageableDto<UserFriendDto> getUserFriendsByUserId(Long userId, Pageable pageable) {
+        validateUserExist(userId);
+        Page<User> allUserFriends = userRepo.getAllUserFriendsPage(pageable, userId);
+
+        List<UserFriendDto> userFriendDtoList =
+                allUserFriends.stream().map(e -> modelMapper.map(e, UserFriendDto.class))
+                        .collect(Collectors.toList());
+
+        return new PageableDto<>(
+                userFriendDtoList,
+                allUserFriends.getTotalElements(),
+                allUserFriends.getPageable().getPageNumber(),
+                allUserFriends.getTotalPages()
+        );
+    }
 
     /**
      * {@inheritDoc}
@@ -80,7 +105,9 @@ public class FriendServiceImpl implements FriendService {
         notificationService.friendRequestNotification(userId, friendId);
         userRepo.addFriend(userId, friendId);
     }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public void acceptFriendRequest(Long userId, Long friendId) {
@@ -89,6 +116,9 @@ public class FriendServiceImpl implements FriendService {
         validateIsNotSameUsers(userId, friendId);
         userRepo.acceptFriendRequest(userId, friendId);
     }
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public void declineFriendRequest(Long userId, Long friendId) {

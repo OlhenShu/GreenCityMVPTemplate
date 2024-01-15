@@ -22,6 +22,23 @@ public interface NotificationService {
     PageableDto<NotificationDtoResponse> findAllByUser(Long userId, Pageable page);
 
     /**
+     * Retrieves a pageable list of friend requests for a given user.
+     *
+     * This method fetches a paginated list of friend requests received by the specified user.
+     *
+     * @param userId The unique identifier of the user for whom friend requests are to be retrieved.
+     * @param page   The pagination information to determine the page number, size, sorting, etc.
+     * @return A {@link PageableDto} containing {@link NotificationDtoResponse} objects representing friend requests.
+     *         The list is paginated based on the provided {@code page} parameter.
+     *
+     * @see NotificationDtoResponse
+     * @see PageableDto
+     * @see Pageable
+     * @author Dmytro Klopov
+     */
+    PageableDto<NotificationDtoResponse> findAllFriendRequestsByUserId(Long userId, Pageable page);
+
+    /**
      * Retrieves the latest three notifications for a specific receiver as {@link ShortNotificationDtoResponse} objects.
      *
      * @param receiverId The ID of the receiver for whom notifications are retrieved.

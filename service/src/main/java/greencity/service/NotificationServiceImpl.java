@@ -9,13 +9,11 @@ import greencity.dto.notification.ShortNotificationDtoResponse;
 import greencity.entity.Notification;
 import greencity.entity.NotifiedUser;
 import greencity.entity.User;
-import greencity.enums.NotificationSourceType;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.mapping.NotificationDtoResponseMapper;
 import greencity.repository.NotificationRepo;
 import greencity.repository.NotifiedUserRepo;
-import greencity.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -28,7 +26,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static greencity.enums.NotificationSourceType.*;
+import static greencity.enums.NotificationSourceType.FRIEND_REQUEST;
 
 @Service
 @RequiredArgsConstructor
@@ -78,6 +76,21 @@ public class NotificationServiceImpl implements NotificationService {
                 notificationDtoPage.getTotalElements(),
                 notificationDtoPage.getPageable().getPageNumber(),
                 notificationDtoPage.getTotalPages()
+        );
+    }
+
+    @Override
+    public PageableDto<NotificationDtoResponse> findAllFriendRequestsByUserId(Long userId, Pageable page) {
+        Page<NotificationDtoResponse> allFriendRequestsByUserId =
+                notificationRepo.findAllFriendRequestsByUserId(userId, page);
+
+        List<NotificationDtoResponse> content = allFriendRequestsByUserId.getContent();
+
+        return new PageableDto<>(
+                content,
+                allFriendRequestsByUserId.getTotalElements(),
+                allFriendRequestsByUserId.getPageable().getPageNumber(),
+                allFriendRequestsByUserId.getTotalPages()
         );
     }
 
@@ -146,8 +159,13 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void friendRequestNotification(Long authorId, Long friendId) {
         User author = objectMapper.convertValue(userService.findById(authorId), User.class);
-        notificationRepo.save(createFriendNotification(author));
-
+        Notification save = notificationRepo.save(createFriendNotification(author));
+        User friend = objectMapper.convertValue(userService.findById(friendId), User.class);
+        notifiedUserRepo.save(NotifiedUser.builder()
+                                .notification(save)
+                                .user(friend)
+                                .isRead(false)
+                                .build());
     }
 
     @Override

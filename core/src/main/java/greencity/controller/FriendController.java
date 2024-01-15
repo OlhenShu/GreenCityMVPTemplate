@@ -28,6 +28,23 @@ public class FriendController {
     private final FriendService friendService;
 
     /**
+     * Retrieves a paginated list of user friends for the authenticated user.
+     *
+     * @param pageable The pagination information for the result set.
+     * @param userVO   The authenticated user details.
+     * @return A {@link ResponseEntity} containing a {@link PageableDto} of {@link UserFriendDto}.
+     * The page is based on the provided pagination information.
+     */
+    @GetMapping("/all")
+    public ResponseEntity<PageableDto<UserFriendDto>> getAllUserFriend(
+            @ApiIgnore Pageable pageable,
+            @ApiIgnore @CurrentUser UserVO userVO) {
+        return ResponseEntity.status(HttpStatus.OK).body(
+                friendService.getUserFriendsByUserId(userVO.getId(), pageable)
+        );
+    }
+
+    /**
      * Searches for friends based on specific criteria.
      *
      * @param pageable         Pagination information for the result.
@@ -74,6 +91,13 @@ public class FriendController {
         friendService.addFriend(userVO.getId(), friendId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+    /**
+     * Accepts a friend request from another user.
+     *
+     * @param friendId The ID of the user who sent the friend request.
+     * @param userVO   The authenticated user details.
+     * @return A {@link ResponseEntity} representing the result of the operation.
+     */
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = HttpStatuses.OK),
             @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
@@ -88,14 +112,21 @@ public class FriendController {
         friendService.acceptFriendRequest(userVO.getId(), friendId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+    /**
+     * Rejects a friend request from another user.
+     *
+     * @param friendId The ID of the user who sent the friend request.
+     * @param userVO   The authenticated user details.
+     * @return A {@link ResponseEntity} representing the result of the operation.
+     */
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = HttpStatuses.OK),
             @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
             @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PatchMapping("/{friendId}/declineRequest")
-    public ResponseEntity<ResponseEntity.BodyBuilder> declineFriendRequest(
+    @PatchMapping("/{friendId}/rejectRequest")
+    public ResponseEntity<ResponseEntity.BodyBuilder> rejectFriendRequest(
             @PathVariable Long friendId, @ApiIgnore @CurrentUser UserVO userVO
     ) {
         friendService.declineFriendRequest(userVO.getId(), friendId);

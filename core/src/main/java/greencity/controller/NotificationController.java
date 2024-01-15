@@ -121,13 +121,10 @@ public class NotificationController {
         return ResponseEntity.ok(notificationService.createNewNotification(userVO.getId(), request));
     }
 
-    @ApiOperation(value = "Send a friend request notification")
-    @ApiResponses(value = {
-            @ApiResponse(code = 201, message = HttpStatuses.CREATED)
-    })
-    @PostMapping("/friend-request/{id}")
-    public ResponseEntity<Object> createFriendRequestNotification(@ApiIgnore @CurrentUser UserVO userVO,
-                                                                @PathVariable Long id, @RequestBody NewNotificationDtoRequest friendRequest) {
-        return null;
+    @GetMapping("/friend-requests")
+    public ResponseEntity<PageableDto<NotificationDtoResponse>> findAllFriendRequestsByUserId(@ApiIgnore @CurrentUser UserVO userVO,
+                                                                                 @ApiIgnore Pageable page) {
+        return ResponseEntity.ok(notificationService.findAllFriendRequestsByUserId(userVO.getId(), page));
+
     }
 }
