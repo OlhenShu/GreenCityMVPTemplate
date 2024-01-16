@@ -76,19 +76,6 @@ public class EventServiceImpl implements EventService {
         return buildEventDto(updatedEvent);
     }
 
-    @Override
-    public String uploadImage(MultipartFile image) {
-        if (image != null) {
-            return fileService.upload(image);
-        }
-        return null;
-    }
-
-    @Override
-    public String[] uploadImages(MultipartFile[] images) {
-        return Arrays.stream(images).map(fileService::upload).toArray(String[]::new);
-    }
-
     private EventDto buildEventDto(Event event) {
         return modelMapper.map(event, EventDto.class);
     }
@@ -114,7 +101,6 @@ public class EventServiceImpl implements EventService {
                     new TypeToken<List<Tag>>() {
                     }.getType()));
         }
-
         updateImages(toUpdate, updateEventDto, images);
 
         if (updateEventDto.getDatesLocations() != null) {
@@ -186,27 +172,6 @@ public class EventServiceImpl implements EventService {
         images.stream().filter(img -> !img.equals(DEFAULT_TITLE_IMAGE_PATH)).forEach(fileService::delete);
     }
 
-//    private void addNewImages(Event toUpdate, UpdateEventDto updateEventDto, MultipartFile[] images) {
-//        int imagesCounter = 0;
-//        if (updateEventDto.getTitleImage() != null) {
-//            toUpdate.setTitleImage(updateEventDto.getTitleImage());
-//        } else {
-//            toUpdate.setTitleImage(fileService.upload(images[imagesCounter++]));
-//        }
-//        List<String> additionalImagesStr = new ArrayList<>();
-//        if (updateEventDto.getAdditionalImages() != null) {
-//            additionalImagesStr.addAll(updateEventDto.getAdditionalImages());
-//        }
-//        for (int i = imagesCounter; i < images.length; i++) {
-//            additionalImagesStr.add(fileService.upload(images[imagesCounter++]));
-//        }
-//        if (!additionalImagesStr.isEmpty()) {
-//            toUpdate.setAdditionalImages(additionalImagesStr.stream().map(url -> EventImages.builder()
-//                    .event(toUpdate).link(url).build()).collect(Collectors.toList()));
-//        } else {
-//            toUpdate.setAdditionalImages(null);
-//        }
-//    }
     private void addNewImages(Event toUpdate, UpdateEventDto updateEventDto, MultipartFile[] images) {
         int imagesCounter = 0;
         if (updateEventDto.getTitleImage() != null) {
@@ -219,7 +184,7 @@ public class EventServiceImpl implements EventService {
             additionalImagesStr.addAll(updateEventDto.getAdditionalImages());
         }
         for (int i = imagesCounter; i < images.length; i++) {
-            additionalImagesStr.add(fileService.upload(images[i]));  // Use the fileService.upload method here
+            additionalImagesStr.add(fileService.upload(images[i]));
         }
         if (!additionalImagesStr.isEmpty()) {
             toUpdate.setAdditionalImages(additionalImagesStr.stream().map(url -> EventImages.builder()
