@@ -21,7 +21,7 @@ public class SearchEventDtoMapper extends AbstractConverter<Event, SearchEventDt
             .id(event.getId())
             .title(event.getTitle())
             .organizer(new EventAuthorDto(author.getId(),
-                author.getName(), author.getRating()))
+                author.getName(), author.getEventOrganizerRating()))
             .creationDate(event.getCreationDate())
             .tags(event.getTags().stream().flatMap(t -> t.getTagTranslations().stream())
                 .filter(tagTranslation -> tagTranslation.getLanguage().getCode().equals(language))
