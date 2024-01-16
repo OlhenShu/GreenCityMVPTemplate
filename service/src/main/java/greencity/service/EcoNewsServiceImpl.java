@@ -22,9 +22,9 @@ import greencity.enums.TagType;
 import greencity.exception.exceptions.*;
 import greencity.filters.EcoNewsSpecification;
 import greencity.filters.SearchCriteria;
-import greencity.repository.*;
+import greencity.repository.EcoNewsRepo;
+import greencity.repository.EcoNewsSearchRepo;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.cache.annotation.CacheEvict;
@@ -40,7 +40,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -50,7 +49,6 @@ import static greencity.constant.AppConstant.AUTHORIZATION;
 @Service
 @EnableCaching
 @RequiredArgsConstructor
-@Slf4j
 public class EcoNewsServiceImpl implements EcoNewsService {
     private final EcoNewsRepo ecoNewsRepo;
     private final RestClient restClient;
@@ -61,10 +59,7 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     private final HttpServletRequest httpServletRequest;
     private final EcoNewsSearchRepo ecoNewsSearchRepo;
     private final NotificationService notificationService;
-    private final NotifiedUserRepo notifiedUserRepo;
-    private final NotificationRepo notificationRepo;
     private final List<String> languageCode = List.of("en", "ua");
-    private final UserRepo userRepo;
 
     /**
      * {@inheritDoc}
@@ -527,25 +522,7 @@ public class EcoNewsServiceImpl implements EcoNewsService {
             ecoNewsVO.getUsersLikedNews().add(userVO);
         }
         ecoNewsRepo.save(modelMapper.map(ecoNewsVO, EcoNews.class));
-        User author = userRepo.findById(userVO.getId())
-                .orElseThrow(() -> new NotFoundException(String.format("User with id: %d not found", userVO.getId())));
-        Notification newNotification = Notification.builder()
-                .title(ecoNewsVO.getTitle())
-                .sourceId(ecoNewsVO.getId())
-                .sourceType(NotificationSourceType.NEWS_LIKED)
-                .author(author)
-                .creationDate(ZonedDateTime.now())
-                .build();
-        Notification savedNotification = notificationRepo.save(newNotification);
-        log.info("Notification with id: {} was saved", savedNotification.getId());
-        NotifiedUser notifiedUser = NotifiedUser.builder()
-                .isRead(false)
-                .user(userRepo.findById(ecoNewsVO.getAuthor().getId())
-                        .orElseThrow(() -> new NotFoundException(String.format("User with id: %d not found", ecoNewsVO.getAuthor().getId()))))
-                .notification(savedNotification)
-                .build();
-        NotifiedUser savedUser = notifiedUserRepo.save(notifiedUser);
-        log.info("Notified user with id {} was saved", savedUser.getId());
+        notificationService.createEcoNewsNotification(userVO, ecoNewsVO, NotificationSourceType.NEWS_LIKED);
     }
 
     /**

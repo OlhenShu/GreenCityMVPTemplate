@@ -1,10 +1,13 @@
 package greencity.service;
 
 import greencity.dto.PageableDto;
-import greencity.dto.notification.LikesNotificationDto;
+import greencity.dto.econews.EcoNewsVO;
+import greencity.dto.notification.NotificationsForEcoNewsDto;
 import greencity.dto.notification.NewNotificationDtoRequest;
 import greencity.dto.notification.NotificationDtoResponse;
 import greencity.dto.notification.ShortNotificationDtoResponse;
+import greencity.dto.user.UserVO;
+import greencity.enums.NotificationSourceType;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -83,5 +86,7 @@ public interface NotificationService {
 
     NotificationDtoResponse findById(Long notificationId);
 
-    List<LikesNotificationDto> getLikeForCurrentUser(Long userId);
+    List<NotificationsForEcoNewsDto> getNotificationsEcoNewsForCurrentUser(Long userId);
+
+    void createEcoNewsNotification(UserVO userVO, EcoNewsVO ecoNewsVO, NotificationSourceType sourceType);
 }
