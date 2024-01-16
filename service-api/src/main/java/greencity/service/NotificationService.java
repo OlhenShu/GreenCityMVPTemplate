@@ -2,9 +2,9 @@ package greencity.service;
 
 import greencity.dto.PageableDto;
 import greencity.dto.econews.EcoNewsVO;
-import greencity.dto.notification.NotificationsForEcoNewsDto;
 import greencity.dto.notification.NewNotificationDtoRequest;
 import greencity.dto.notification.NotificationDtoResponse;
+import greencity.dto.notification.NotificationsForEcoNewsDto;
 import greencity.dto.notification.ShortNotificationDtoResponse;
 import greencity.dto.user.UserVO;
 import greencity.enums.NotificationSourceType;
@@ -32,12 +32,11 @@ public interface NotificationService {
      * @param userId The unique identifier of the user for whom friend requests are to be retrieved.
      * @param page   The pagination information to determine the page number, size, sorting, etc.
      * @return A {@link PageableDto} containing {@link NotificationDtoResponse} objects representing friend requests.
-     *         The list is paginated based on the provided {@code page} parameter.
-     *
+     * The list is paginated based on the provided {@code page} parameter.
+     * @author Dmytro Klopov
      * @see NotificationDtoResponse
      * @see PageableDto
      * @see Pageable
-     * @author Dmytro Klopov
      */
     PageableDto<NotificationDtoResponse> findAllFriendRequestsByUserId(Long userId, Pageable page);
 
@@ -75,18 +74,34 @@ public interface NotificationService {
      * @param userId The ID of the user for whom to mark the latest unread notifications as read.
      */
     void readLatestNotification(Long userId);
+
     /**
      * Sends a friend request to the specified user with
      *
      * @param authorId the ID of the author for the notification
-     * @param friendId  the object containing data to create the notification
+     * @param friendId the object containing data to create the notification
      * @author Klopov Dmytro
      */
     void friendRequestNotification(Long authorId, Long friendId);
 
     NotificationDtoResponse findById(Long notificationId);
 
+    /**
+     * Retrieves the notifications related to EcoNews for the specified user.
+     *
+     * @param userId The ID of the user to fetch notifications for.
+     * @return List of {@link NotificationsForEcoNewsDto} representing notifications for EcoNews.
+     * @author Kizerov Dmytro
+     */
     List<NotificationsForEcoNewsDto> getNotificationsEcoNewsForCurrentUser(Long userId);
 
+    /**
+     * Creates and saves an EcoNews notification for the specified user based on the provided EcoNews data and source type.
+     *
+     * @param userVO     The authenticated user who will receive the notification.
+     * @param ecoNewsVO  The EcoNews data associated with the notification.
+     * @param sourceType The source type of the notification.
+     * @author Kizerov Dmytro
+     */
     void createEcoNewsNotification(UserVO userVO, EcoNewsVO ecoNewsVO, NotificationSourceType sourceType);
 }

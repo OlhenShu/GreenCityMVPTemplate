@@ -4,9 +4,9 @@ import greencity.annotations.ApiPageable;
 import greencity.annotations.CurrentUser;
 import greencity.constant.HttpStatuses;
 import greencity.dto.PageableDto;
-import greencity.dto.notification.NotificationsForEcoNewsDto;
 import greencity.dto.notification.NewNotificationDtoRequest;
 import greencity.dto.notification.NotificationDtoResponse;
+import greencity.dto.notification.NotificationsForEcoNewsDto;
 import greencity.dto.notification.ShortNotificationDtoResponse;
 import greencity.dto.user.UserVO;
 import greencity.service.NotificationService;
@@ -124,11 +124,17 @@ public class NotificationController {
 
     @GetMapping("/friend-requests")
     public ResponseEntity<PageableDto<NotificationDtoResponse>> findAllFriendRequestsByUserId(@ApiIgnore @CurrentUser UserVO userVO,
-                                                                                 @ApiIgnore Pageable page) {
+                                                                                              @ApiIgnore Pageable page) {
         return ResponseEntity.ok(notificationService.findAllFriendRequestsByUserId(userVO.getId(), page));
 
     }
 
+    /**
+     * Retrieves the latest notifications related to likes for the current user.
+     *
+     * @param userVO The authenticated user.
+     * @return ResponseEntity with a list of {@link NotificationsForEcoNewsDto} representing like notifications.
+     */
     @ApiOperation(value = "Get likes notifications")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = HttpStatuses.OK),
@@ -140,6 +146,12 @@ public class NotificationController {
         return ResponseEntity.ok(notificationService.getNotificationsEcoNewsForCurrentUser(userVO.getId()));
     }
 
+    /**
+     * Retrieves the latest notifications related to comments for the current user.
+     *
+     * @param userVO The authenticated user.
+     * @return ResponseEntity with a list of {@link NotificationsForEcoNewsDto}o representing comment notifications.
+     */
     @ApiOperation(value = "Get comments notifications")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = HttpStatuses.OK),

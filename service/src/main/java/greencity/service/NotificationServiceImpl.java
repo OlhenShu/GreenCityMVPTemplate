@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
 import greencity.dto.econews.EcoNewsVO;
-import greencity.dto.notification.NotificationsForEcoNewsDto;
 import greencity.dto.notification.NewNotificationDtoRequest;
 import greencity.dto.notification.NotificationDtoResponse;
+import greencity.dto.notification.NotificationsForEcoNewsDto;
 import greencity.dto.notification.ShortNotificationDtoResponse;
 import greencity.dto.user.UserVO;
 import greencity.entity.Notification;
@@ -185,6 +185,9 @@ public class NotificationServiceImpl implements NotificationService {
         return mapper.convert(notification);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public List<NotificationsForEcoNewsDto> getNotificationsEcoNewsForCurrentUser(Long userId) {
@@ -202,6 +205,9 @@ public class NotificationServiceImpl implements NotificationService {
         return likesDtos;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public void createEcoNewsNotification(UserVO userVO, EcoNewsVO ecoNewsVO, NotificationSourceType sourceType) {

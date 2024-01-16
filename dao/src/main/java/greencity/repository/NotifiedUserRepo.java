@@ -41,6 +41,13 @@ public interface NotifiedUserRepo extends JpaRepository<NotifiedUser, Long> {
      */
     List<NotifiedUser> findByUserIdAndNotificationIdIn(Long userId, List<Long> notificationIds);
 
+    /**
+     * Retrieves all unread notifications for the specified user and notification source type.
+     *
+     * @param userId     The ID of the user to fetch notifications for.
+     * @param sourceType The source type of the notifications.
+     * @return List of {@link NotifiedUser} representing unread notifications for the specified user and source type.
+     */
     @Query("SELECT nu FROM NotifiedUser nu " +
            "JOIN FETCH nu.notification n " +
            "WHERE nu.user.id = :userId " +
