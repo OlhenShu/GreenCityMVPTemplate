@@ -2,8 +2,8 @@ package greencity.mapping;
 
 import greencity.dto.event.EventAuthorDto;
 import greencity.dto.search.SearchEventDto;
-import greencity.entity.Event;
 import greencity.entity.User;
+import greencity.entity.event.Event;
 import greencity.entity.localization.TagTranslation;
 import java.util.stream.Collectors;
 import org.modelmapper.AbstractConverter;

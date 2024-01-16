@@ -1,7 +1,7 @@
 package greencity.repository;
 
-import greencity.entity.Event;
 import greencity.entity.Tag;
+import greencity.entity.event.Event;
 import greencity.entity.localization.TagTranslation;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,7 +65,7 @@ public class EventSearchRepo {
             .get()
             .forEach(o -> {
                 if (o.getProperty().equalsIgnoreCase("relevance")) {
-                    //TODO : implement relevance sort
+                    orderList.add(criteriaBuilder.desc(criteriaBuilder.size(root.get("usersLikedEvents"))));
                 } else {
                     orderList.add(o.isAscending()
                         ? criteriaBuilder.asc(root.get(o.getProperty()))

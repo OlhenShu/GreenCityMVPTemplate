@@ -10,10 +10,10 @@ import greencity.dto.event.EventDto;
 import greencity.dto.event.UpdateEventDto;
 import greencity.dto.geocoding.AddressLatLngResponse;
 import greencity.dto.search.SearchEventDto;
-import greencity.entity.Event;
-import greencity.entity.EventDateLocation;
 import greencity.entity.Tag;
 import greencity.entity.User;
+import greencity.entity.event.Event;
+import greencity.entity.event.EventDateLocation;
 import greencity.enums.Role;
 import greencity.enums.TagType;
 import greencity.exception.exceptions.BadRequestException;
@@ -35,12 +35,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
