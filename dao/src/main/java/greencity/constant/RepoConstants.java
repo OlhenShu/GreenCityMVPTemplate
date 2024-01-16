@@ -8,6 +8,7 @@ public final class RepoConstants {
     public static final String ROLE = "role";
     public static final String EMAIL = "email";
     public static final String NAME = "name";
+    public static final String CITY = "city";
     public static final String AUTHOR = "author";
     public static final String ID = "id";
 

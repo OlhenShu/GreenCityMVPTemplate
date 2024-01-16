@@ -34,7 +34,6 @@ public class EcoNewsDtoMapper extends AbstractConverter<EcoNews, EcoNewsDto> {
             .content(ecoNews.getText())
             .creationDate(ecoNews.getCreationDate())
             .imagePath(ecoNews.getImagePath())
-            .likes(ecoNews.getUsersLikedNews().size())
             .shortInfo(ecoNews.getShortInfo())
             .tags(ecoNews.getTags().stream()
                 .flatMap(t -> t.getTagTranslations().stream())
