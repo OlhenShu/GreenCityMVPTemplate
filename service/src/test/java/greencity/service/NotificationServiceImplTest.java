@@ -2,7 +2,9 @@ package greencity.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
+import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
+import greencity.dto.notification.NewNotificationDtoRequest;
 import greencity.dto.notification.NotificationDtoResponse;
 import greencity.dto.notification.ShortNotificationDtoResponse;
 import greencity.dto.user.UserVO;
@@ -10,12 +12,14 @@ import greencity.entity.Notification;
 import greencity.entity.NotifiedUser;
 import greencity.entity.User;
 import greencity.enums.NotificationSourceType;
+import greencity.exception.exceptions.NotFoundException;
 import greencity.repository.NotificationRepo;
 import greencity.repository.NotifiedUserRepo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -28,23 +32,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Optional.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class NotificationServiceImplTest {
+class NotificationServiceImplTest {
     @Mock
     private NotificationRepo notificationRepo;
     @Mock
     private NotifiedUserRepo notifiedUserRepo;
     @Mock
     private UserService userService;
-    @Mock
-    private ObjectMapper objectMapper;
     @Mock
     private ModelMapper modelMapper;
     @InjectMocks
@@ -134,5 +138,32 @@ public class NotificationServiceImplTest {
         verify(modelMapper, times(2)).map(any(), eq(User.class));
         verify(notificationRepo, times(1)).save(any(Notification.class));
         verify(notifiedUserRepo, times(1)).save(any(NotifiedUser.class));
+    }
+
+
+    @Test
+    void testFindById() {
+        var user = ModelUtils.getUser();
+        var title = "title";
+        Long notificationId = 1L;
+        Notification notification = new Notification(2L, user, title, ZonedDateTime.now(),
+                NotificationSourceType.FRIEND_REQUEST, 1L, List.of(new NotifiedUser())); // You need to create an instance of Notification with some data
+        var notificationDtoResponse = new NotificationDtoResponse(2L, 2L, "name1", title,
+                NotificationSourceType.FRIEND_REQUEST, 1L, false, ZonedDateTime.now());
+
+        Mockito.when(notificationRepo.findById(notificationId)).thenReturn(of(notification));
+        Mockito.when(modelMapper.map(notification, NotificationDtoResponse.class)).thenReturn(notificationDtoResponse); // You need to create an instance of NotificationDtoResponse with some data
+
+
+        NotificationDtoResponse result = notificationService.findById(notificationId);
+
+
+        Mockito.verify(notificationRepo, Mockito.times(1)).findById(Mockito.anyLong());
+        Mockito.verify(modelMapper, Mockito.times(1)).map(notification, NotificationDtoResponse.class);
+        assertEquals(notificationDtoResponse, result);
+    }
+    @Test
+    void testFindByWrongId() {
+        assertThrows(NotFoundException.class, () -> notificationService.findById(1L));
     }
 }

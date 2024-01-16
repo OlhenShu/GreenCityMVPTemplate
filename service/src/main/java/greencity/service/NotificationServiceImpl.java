@@ -171,12 +171,12 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public NotificationDtoResponse findById(Long notificationId) {
-        Notification notification =
+            Notification notification =
                 notificationRepo.findById(notificationId)
                         .orElseThrow(
                                 () -> new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND_BY_ID + notificationId)
                         );
-        return mapper.convert(notification);
+        return modelMapper.map(notification, NotificationDtoResponse.class);
     }
 
     private Notification createFriendNotification(User author) {
