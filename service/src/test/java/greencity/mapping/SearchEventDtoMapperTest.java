@@ -3,7 +3,7 @@ package greencity.mapping;
 import greencity.ModelUtils;
 import greencity.dto.event.EventAuthorDto;
 import greencity.dto.search.SearchEventDto;
-import greencity.entity.Event;
+import greencity.entity.event.Event;
 import greencity.entity.localization.TagTranslation;
 import java.time.LocalDate;
 import java.util.stream.Collectors;

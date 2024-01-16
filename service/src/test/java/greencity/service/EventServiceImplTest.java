@@ -3,7 +3,7 @@ package greencity.service;
 import greencity.ModelUtils;
 import greencity.dto.PageableDto;
 import greencity.dto.search.SearchEventDto;
-import greencity.entity.Event;
+import greencity.entity.event.Event;
 import greencity.repository.EventSearchRepo;
 import java.time.LocalDate;
 import java.util.ArrayList;
