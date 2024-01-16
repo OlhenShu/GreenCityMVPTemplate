@@ -16,6 +16,7 @@ import greencity.repository.NotificationRepo;
 import greencity.repository.NotifiedUserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -36,7 +37,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final UserService userService;
     private final NotificationDtoResponseMapper mapper;
     private final NotifiedUserRepo notifiedUserRepo;
-    private final ObjectMapper objectMapper;
+    private final ModelMapper modelMapper;
 
 
     /**
@@ -140,7 +141,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public NotificationDtoResponse createNewNotification(Long authorId, NewNotificationDtoRequest request) {
-        User author = objectMapper.convertValue(userService.findById(authorId), User.class);
+        User author = modelMapper.map(userService.findById(authorId), User.class);
         Notification newNotification = Notification.builder()
                 .creationDate(ZonedDateTime.now())
                 .title(request.getTitle())
@@ -158,9 +159,9 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     public void friendRequestNotification(Long authorId, Long friendId) {
-        User author = objectMapper.convertValue(userService.findById(authorId), User.class);
+        User author = modelMapper.map(userService.findById(authorId), User.class);
         Notification save = notificationRepo.save(createFriendNotification(author));
-        User friend = objectMapper.convertValue(userService.findById(friendId), User.class);
+        User friend = modelMapper.map(userService.findById(friendId), User.class);
         notifiedUserRepo.save(NotifiedUser.builder()
                                 .notification(save)
                                 .user(friend)

@@ -1,17 +1,23 @@
 package greencity.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.dto.PageableDto;
 import greencity.dto.notification.NotificationDtoResponse;
 import greencity.dto.notification.ShortNotificationDtoResponse;
 import greencity.dto.user.UserVO;
+import greencity.entity.Notification;
+import greencity.entity.NotifiedUser;
+import greencity.entity.User;
 import greencity.enums.NotificationSourceType;
 import greencity.repository.NotificationRepo;
+import greencity.repository.NotifiedUserRepo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -20,17 +26,27 @@ import org.springframework.data.domain.Pageable;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class NotificationServiceImplTest {
     @Mock
     private NotificationRepo notificationRepo;
+    @Mock
+    private NotifiedUserRepo notifiedUserRepo;
+    @Mock
+    private UserService userService;
+    @Mock
+    private ObjectMapper objectMapper;
+    @Mock
+    private ModelMapper modelMapper;
     @InjectMocks
     private NotificationServiceImpl notificationService;
     private final UserVO userVO = ModelUtils.getUserVO();
@@ -70,5 +86,53 @@ public class NotificationServiceImplTest {
 
         verify(notificationRepo).findAllReceivedNotificationDtoByUserId(userVO.getId(), PageRequest.of(0, 10));
         assertEquals(expectedPageableDto, pageableDto);
+    }
+
+    @Test
+    void findAllFriendRequestsByUserId() {
+        Long userId = 1L;
+        Pageable page = PageRequest.of(0, 10);
+        List<NotificationDtoResponse> notifications = new ArrayList<>();
+        notifications.add(
+                new NotificationDtoResponse(2L, 2L, "name1", "title",
+                        NotificationSourceType.FRIEND_REQUEST, 1L, false, ZonedDateTime.now()));
+        notifications.add(
+                new NotificationDtoResponse(3L, 1L, "name2", "title",
+                        NotificationSourceType.FRIEND_REQUEST, 23L, true, ZonedDateTime.now()));
+        Page<NotificationDtoResponse> pagedNotifications = new PageImpl<>(notifications, PageRequest.of(0, 10), 2L);
+        when(notificationRepo.findAllFriendRequestsByUserId(userId, page)).thenReturn(pagedNotifications);
+
+        PageableDto<NotificationDtoResponse> result = notificationService.findAllFriendRequestsByUserId(userId, page);
+
+        verify(notificationRepo, times(1)).findAllFriendRequestsByUserId(userId, page);
+        verifyNoMoreInteractions(notificationRepo);
+        assertThat(result).isNotNull();
+        assertThat(result.getTotalElements()).isEqualTo(2);
+        assertThat(result.getTotalPages()).isEqualTo(1);
+    }
+
+    @Test
+    public void testFriendRequestNotification() {
+        Long authorId = 1L;
+        Long friendId = 2L;
+
+        when(userService.findById(authorId)).thenReturn(ModelUtils.getUserVO());
+        when(userService.findById(friendId)).thenReturn(ModelUtils.getUserVO());
+
+        when(modelMapper.map(any(), any())).thenReturn(ModelUtils.getUser());
+        when(modelMapper.map(any(), any())).thenReturn(ModelUtils.getUser());
+
+        when(notificationRepo.save(any(Notification.class))).thenAnswer(invocation -> {
+            Notification notification = invocation.getArgument(0);
+            notification.setId(1L);
+            return notification;
+        });
+
+        notificationService.friendRequestNotification(authorId, friendId);
+
+        verify(userService, times(2)).findById(anyLong());
+        verify(modelMapper, times(2)).map(any(), eq(User.class));
+        verify(notificationRepo, times(1)).save(any(Notification.class));
+        verify(notifiedUserRepo, times(1)).save(any(NotifiedUser.class));
     }
 }
