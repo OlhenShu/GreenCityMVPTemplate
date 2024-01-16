@@ -3,6 +3,7 @@ package greencity.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
+import greencity.dto.notification.LikesNotificationDto;
 import greencity.dto.notification.NewNotificationDtoRequest;
 import greencity.dto.notification.NotificationDtoResponse;
 import greencity.dto.notification.ShortNotificationDtoResponse;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static greencity.enums.NotificationSourceType.FRIEND_REQUEST;
+import static greencity.enums.NotificationSourceType.NEWS_LIKED;
 
 @Service
 @RequiredArgsConstructor
@@ -162,10 +164,10 @@ public class NotificationServiceImpl implements NotificationService {
         Notification save = notificationRepo.save(createFriendNotification(author));
         User friend = objectMapper.convertValue(userService.findById(friendId), User.class);
         notifiedUserRepo.save(NotifiedUser.builder()
-                                .notification(save)
-                                .user(friend)
-                                .isRead(false)
-                                .build());
+                .notification(save)
+                .user(friend)
+                .isRead(false)
+                .build());
     }
 
     @Override
@@ -176,6 +178,23 @@ public class NotificationServiceImpl implements NotificationService {
                                 () -> new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND_BY_ID + notificationId)
                         );
         return mapper.convert(notification);
+    }
+
+    @Override
+    @Transactional
+    public List<LikesNotificationDto> getLikeForCurrentUser(Long userId) {
+        List<NotifiedUser> allUnreadNotificationsByUserId = notifiedUserRepo.findAllUnreadNotificationsByUserId(userId, NEWS_LIKED);
+        List<LikesNotificationDto> likesDtos = allUnreadNotificationsByUserId.stream()
+                .map(user -> LikesNotificationDto.builder()
+                        .userName(user.getNotification().getAuthor().getName())
+                        .title(user.getNotification().getTitle())
+                        .notificationTime(user.getNotification().getCreationDate())
+                        .build())
+                .collect(Collectors.toList());
+        if (likesDtos.isEmpty()) {
+            throw new NotFoundException("No new notification for current user");
+        }
+        return likesDtos;
     }
 
     private Notification createFriendNotification(User author) {

@@ -4,6 +4,7 @@ import greencity.annotations.ApiPageable;
 import greencity.annotations.CurrentUser;
 import greencity.constant.HttpStatuses;
 import greencity.dto.PageableDto;
+import greencity.dto.notification.LikesNotificationDto;
 import greencity.dto.notification.NewNotificationDtoRequest;
 import greencity.dto.notification.NotificationDtoResponse;
 import greencity.dto.notification.ShortNotificationDtoResponse;
@@ -126,5 +127,21 @@ public class NotificationController {
                                                                                  @ApiIgnore Pageable page) {
         return ResponseEntity.ok(notificationService.findAllFriendRequestsByUserId(userVO.getId(), page));
 
+    }
+
+    @ApiOperation(value = "Get likes notifications")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/likes")
+    public ResponseEntity<List<LikesNotificationDto>> getLastLikes(@ApiIgnore @CurrentUser UserVO userVO) {
+        return ResponseEntity.ok().body(notificationService.getLikeForCurrentUser(userVO.getId()));
+    }
+
+    @GetMapping("/comments")
+    public ResponseEntity<?> getLastComments(@ApiIgnore @CurrentUser UserVO userVO) {
+        return null;
     }
 }

@@ -1,6 +1,7 @@
 package greencity.service;
 
 import greencity.dto.PageableDto;
+import greencity.dto.notification.LikesNotificationDto;
 import greencity.dto.notification.NewNotificationDtoRequest;
 import greencity.dto.notification.NotificationDtoResponse;
 import greencity.dto.notification.ShortNotificationDtoResponse;
@@ -23,7 +24,6 @@ public interface NotificationService {
 
     /**
      * Retrieves a pageable list of friend requests for a given user.
-     *
      * This method fetches a paginated list of friend requests received by the specified user.
      *
      * @param userId The unique identifier of the user for whom friend requests are to be retrieved.
@@ -82,4 +82,6 @@ public interface NotificationService {
     void friendRequestNotification(Long authorId, Long friendId);
 
     NotificationDtoResponse findById(Long notificationId);
+
+    List<LikesNotificationDto> getLikeForCurrentUser(Long userId);
 }

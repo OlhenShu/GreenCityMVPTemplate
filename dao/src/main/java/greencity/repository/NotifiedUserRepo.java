@@ -2,6 +2,7 @@ package greencity.repository;
 
 import greencity.entity.Notification;
 import greencity.entity.NotifiedUser;
+import greencity.enums.NotificationSourceType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -39,4 +40,13 @@ public interface NotifiedUserRepo extends JpaRepository<NotifiedUser, Long> {
      * @return List of NotifiedUser entities corresponding to the specified user and notification IDs.
      */
     List<NotifiedUser> findByUserIdAndNotificationIdIn(Long userId, List<Long> notificationIds);
+
+    @Query("SELECT nu FROM NotifiedUser nu " +
+           "JOIN FETCH nu.notification n " +
+           "WHERE nu.user.id = :userId " +
+           "AND nu.isRead = false " +
+           "AND n.sourceType = :sourceType " +
+           "ORDER BY n.creationDate DESC")
+    List<NotifiedUser> findAllUnreadNotificationsByUserId(@Param("userId") Long userId,
+                                                          @Param("sourceType") NotificationSourceType sourceType);
 }
