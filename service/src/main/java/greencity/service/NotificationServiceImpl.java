@@ -232,7 +232,6 @@ public class NotificationServiceImpl implements NotificationService {
         log.info("Notified user with id {} was saved", savedUser.getId());
     }
 
-
     private Notification createFriendNotification(User author) {
         return Notification.builder()
                 .creationDate(ZonedDateTime.now())

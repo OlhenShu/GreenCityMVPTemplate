@@ -2,11 +2,19 @@ package greencity.service;
 
 import greencity.ModelUtils;
 import greencity.dto.PageableDto;
+import greencity.dto.econews.EcoNewsVO;
 import greencity.dto.notification.NotificationDtoResponse;
+import greencity.dto.notification.NotificationsForEcoNewsDto;
 import greencity.dto.notification.ShortNotificationDtoResponse;
 import greencity.dto.user.UserVO;
+import greencity.entity.Notification;
+import greencity.entity.NotifiedUser;
+import greencity.entity.User;
 import greencity.enums.NotificationSourceType;
+import greencity.exception.exceptions.NotFoundException;
 import greencity.repository.NotificationRepo;
+import greencity.repository.NotifiedUserRepo;
+import greencity.repository.UserRepo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,13 +27,13 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class NotificationServiceImplTest {
@@ -33,6 +41,10 @@ public class NotificationServiceImplTest {
     private NotificationRepo notificationRepo;
     @InjectMocks
     private NotificationServiceImpl notificationService;
+    @Mock
+    private NotifiedUserRepo notifiedUserRepo;
+    @Mock
+    private UserRepo userRepo;
     private final UserVO userVO = ModelUtils.getUserVO();
 
     @Test
@@ -70,5 +82,90 @@ public class NotificationServiceImplTest {
 
         verify(notificationRepo).findAllReceivedNotificationDtoByUserId(userVO.getId(), PageRequest.of(0, 10));
         assertEquals(expectedPageableDto, pageableDto);
+    }
+
+    @Test
+    void getNotificationsEcoNewsForCurrentUserReturnsNotificationsDtoList() {
+        Long userId = 1L;
+        NotifiedUser notifiedUser = buildNotifiedUser();
+        List<NotifiedUser> allUnreadNotifications = Collections.singletonList(notifiedUser);
+
+        when(notifiedUserRepo.findAllUnreadNotificationsByUserId(eq(userId), any())).thenReturn(allUnreadNotifications);
+
+        List<NotificationsForEcoNewsDto> result = notificationService.getNotificationsEcoNewsForCurrentUser(userId);
+
+        assertFalse(result.isEmpty());
+        assertEquals(1, result.size());
+
+        NotificationsForEcoNewsDto notificationsDto = result.get(0);
+        assertEquals("AuthorName", notificationsDto.getUserName());
+        assertEquals("TestTitle", notificationsDto.getTitle());
+        assertEquals(ZonedDateTime.parse("2022-01-01T10:15:30+01:00"), notificationsDto.getNotificationTime());
+
+        verify(notifiedUserRepo).findAllUnreadNotificationsByUserId(eq(userId), any());
+    }
+
+    @Test
+    void getNotificationsEcoNewsForCurrentUserThrowsNotFoundException() {
+        Long userId = 1L;
+
+        when(notifiedUserRepo.findAllUnreadNotificationsByUserId(eq(userId), any())).thenReturn(Collections.emptyList());
+
+        assertThrows(NotFoundException.class, () -> notificationService.getNotificationsEcoNewsForCurrentUser(userId));
+
+        verify(notifiedUserRepo).findAllUnreadNotificationsByUserId(eq(userId), any());
+    }
+
+    @Test
+    void createEcoNewsNotificationSuccessfullyCreatesNotification() {
+        //TODO: add test
+    }
+
+    @Test
+    void createEcoNewsNotificationThrowsNotFoundExceptionForUser() {
+        UserVO userVO = ModelUtils.getUserVO();
+        EcoNewsVO ecoNewsVO = ModelUtils.getEcoNewsVO();
+        NotificationSourceType sourceType = NotificationSourceType.NEWS_LIKED;
+
+        when(userRepo.findById(userVO.getId())).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> notificationService.createEcoNewsNotification(userVO, ecoNewsVO, sourceType));
+
+        verifyNoInteractions(notificationRepo, notifiedUserRepo);
+    }
+
+    @Test
+    void createEcoNewsNotificationThrowsNotFoundExceptionForNewsAuthor() {
+        UserVO userVO = ModelUtils.getUserVO();
+        EcoNewsVO ecoNewsVO = ModelUtils.getEcoNewsVO();
+        NotificationSourceType sourceType = NotificationSourceType.NEWS_LIKED;
+
+        User author = ModelUtils.getUser().setId(1L);
+        when(userRepo.findById(userVO.getId())).thenReturn(Optional.of(author));
+
+        when(notificationRepo.save(any(Notification.class))).thenThrow(new NotFoundException("User with id: 2 not found"));
+
+        assertThrows(NotFoundException.class, () -> notificationService.createEcoNewsNotification(userVO, ecoNewsVO, sourceType));
+
+        verify(userRepo).findById(userVO.getId());
+        verify(notificationRepo).save(any(Notification.class));
+        verifyNoInteractions(notifiedUserRepo);
+    }
+
+    private NotifiedUser buildNotifiedUser() {
+        return NotifiedUser.builder()
+                .isRead(false)
+                .id(1L)
+                .user(ModelUtils.getUser())
+                .notification(Notification.builder()
+                        .id(1L)
+                        .creationDate(ZonedDateTime.parse("2022-01-01T10:15:30+01:00"))
+                        .title("TestTitle")
+                        .sourceType(NotificationSourceType.NEWS_LIKED)
+                        .sourceId(1L)
+                        .author(ModelUtils.getUser().setId(2L).setName("AuthorName"))
+                        .notifiedUsers(Collections.emptyList())
+                        .build())
+                .build();
     }
 }
