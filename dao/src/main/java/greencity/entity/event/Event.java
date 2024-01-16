@@ -1,5 +1,7 @@
-package greencity.entity;
+package greencity.entity.event;
 
+import greencity.entity.Tag;
+import greencity.entity.User;
 import lombok.*;
 
 import javax.persistence.*;
@@ -42,6 +44,9 @@ public class Event {
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
     private List<EventDateLocation> dates = new ArrayList<>();
 
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
+    private List<EventImages> additionalImages = new ArrayList<>();
+
     @Column
     private Boolean open = true;
 
@@ -50,4 +55,11 @@ public class Event {
             joinColumns = @JoinColumn(name = "event_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private List<Tag> tags;
+
+    @ManyToMany
+    @JoinTable(
+            name = "events_users_likes",
+            joinColumns = @JoinColumn(name = "event_id"),
+            inverseJoinColumns = @JoinColumn(name = "users_id"))
+    private Set<User> usersLikedEvents = new HashSet<>();
 }
