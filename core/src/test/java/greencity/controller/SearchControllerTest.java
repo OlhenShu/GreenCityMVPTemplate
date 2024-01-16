@@ -71,11 +71,10 @@ class SearchControllerTest {
 
     @Test
     void searchEverythingTest() {
-
         String searchQuery = "Title";
         Locale locale = Locale.getDefault();
         when(searchService.search(eq(searchQuery), eq(locale.getLanguage())))
-                .thenReturn(SearchResponseDto.create(Collections.emptyList(), 0L));
+                .thenReturn(new SearchResponseDto(Collections.emptyList(), Collections.emptyList(), 0L, 0L));
 
         ResponseEntity<SearchResponseDto> response = searchController.search(searchQuery, locale);
 

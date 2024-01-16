@@ -346,6 +346,9 @@ public class EcoNewsServiceImpl implements EcoNewsService {
         return getSearchNewsDtoPageableDto(page);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PageableDto<SearchNewsDto> search(Pageable pageable, String searchQuery, String languageCode) {
         Page<EcoNews> page = ecoNewsSearchRepo.find(pageable, searchQuery, languageCode);

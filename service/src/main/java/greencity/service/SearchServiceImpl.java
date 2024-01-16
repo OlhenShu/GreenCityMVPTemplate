@@ -5,6 +5,7 @@ import greencity.dto.search.SearchEventDto;
 import greencity.dto.search.SearchNewsDto;
 import greencity.dto.search.SearchResponseDto;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -23,10 +24,13 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public SearchResponseDto search(String searchQuery, String languageCode) {
         PageableDto<SearchNewsDto> ecoNews = ecoNewsService.search(searchQuery, languageCode);
+        PageableDto<SearchEventDto> events = eventService.search(PageRequest.of(0,3), searchQuery,languageCode);
 
         return SearchResponseDto.builder()
             .ecoNews(ecoNews.getPage())
-            .countOfResults(ecoNews.getTotalElements())
+            .events(events.getPage())
+            .countOfEcoNews(ecoNews.getTotalElements())
+            .countOfEvents(events.getTotalElements())
             .build();
     }
 
