@@ -4,8 +4,12 @@ import greencity.ModelUtils;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.PageableDto;
 import greencity.dto.notification.NotificationDtoResponse;
+import greencity.dto.notification.NotificationsForEcoNewsDto;
 import greencity.dto.user.UserVO;
+import greencity.entity.Notification;
+import greencity.entity.NotifiedUser;
 import greencity.enums.NotificationSourceType;
+import greencity.repository.NotifiedUserRepo;
 import greencity.service.NotificationService;
 import greencity.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +28,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -41,6 +45,8 @@ public class NotificationControllerTest {
     private UserService userService;
     @Mock
     private ModelMapper modelMapper;
+    @Mock
+    private NotifiedUserRepo notifiedUserRepo;
     private MockMvc mockMvc;
     private final UserVO userVO = ModelUtils.getUserVO();
 
@@ -83,5 +89,41 @@ public class NotificationControllerTest {
             .param("size", "10"))
             .andExpect(status().isOk());
         verify(notificationService).findAllByUser(userVO.getId(), PageRequest.of(0, 10));
+    }
+
+    @Test
+    void getLikesForCurrentUser() throws Exception {
+        List<NotificationsForEcoNewsDto> notifications = List.of(NotificationsForEcoNewsDto.builder()
+                .userName("TEST")
+                .title("TEST")
+                .notificationTime(ZonedDateTime.now())
+                .build());
+
+        when(userService.findByEmail(anyString())).thenReturn(userVO);
+        when(notificationService.getNotificationsEcoNewsForCurrentUser(userVO.getId())).thenReturn(notifications);
+
+        mockMvc.perform(get(link + "/likes")
+                        .principal(userVO::getEmail))
+                .andExpect(status().isOk());
+
+        verify(notificationService).getNotificationsEcoNewsForCurrentUser(userVO.getId());
+    }
+
+    @Test
+    void getCommentsForCurrentUser() throws Exception {
+        List<NotificationsForEcoNewsDto> notifications = List.of(NotificationsForEcoNewsDto.builder()
+                .userName("TEST")
+                .title("TEST")
+                .notificationTime(ZonedDateTime.now())
+                .build());
+
+        when(userService.findByEmail(anyString())).thenReturn(userVO);
+        when(notificationService.getNotificationsEcoNewsForCurrentUser(userVO.getId())).thenReturn(notifications);
+
+        mockMvc.perform(get(link + "/comments")
+                        .principal(userVO::getEmail))
+                .andExpect(status().isOk());
+
+        verify(notificationService).getNotificationsEcoNewsForCurrentUser(userVO.getId());
     }
 }
