@@ -12,7 +12,7 @@ import java.util.List;
 @EqualsAndHashCode
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class RequestAddEventDto {
+public class AddEventDtoRequest {
     String title;
     String description;
     boolean open;

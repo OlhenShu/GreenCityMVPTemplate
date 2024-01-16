@@ -3,7 +3,7 @@ package greencity.controller;
 import greencity.annotations.CurrentUser;
 import greencity.constant.HttpStatuses;
 import greencity.constant.SwaggerExampleModel;
-import greencity.dto.event.RequestAddEventDto;
+import greencity.dto.event.AddEventDtoRequest;
 import greencity.dto.event.EventDto;
 import greencity.dto.user.UserVO;
 import greencity.service.EventService;
@@ -33,7 +33,7 @@ public class EventsController {
     /**
      * Method for creating an event.
      *
-     * @param requestAddEventDto {@link RequestAddEventDto} The DTO containing information for create event.
+     * @param addEventDtoRequest {@link AddEventDtoRequest} The DTO containing information for create event.
      * @param images      Optional array of images related to the event.
      * @return {@link EventDto}.
      * @author Vlada Proskurina.
@@ -48,10 +48,10 @@ public class EventsController {
     @PostMapping(value = "/create", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<EventDto> save(
             @ApiParam(value = SwaggerExampleModel.ADD_EVENT, required = true)
-            @RequestPart RequestAddEventDto requestAddEventDto,
+            @RequestPart AddEventDtoRequest addEventDtoRequest,
             @ApiIgnore @CurrentUser UserVO userVO,
             @RequestPart(required = false) @Nullable List<MultipartFile> images) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(eventService.save(requestAddEventDto, userVO, images));
+                .body(eventService.save(addEventDtoRequest, userVO, images));
     }
 }

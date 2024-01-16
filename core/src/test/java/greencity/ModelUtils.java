@@ -10,7 +10,7 @@ import greencity.dto.econewscomment.AddEcoNewsCommentDtoResponse;
 import greencity.dto.econewscomment.EcoNewsCommentAuthorDto;
 import greencity.dto.econewscomment.EcoNewsCommentDto;
 import greencity.dto.event.EventDateLocationDto;
-import greencity.dto.event.RequestAddEventDto;
+import greencity.dto.event.AddEventDtoRequest;
 import greencity.dto.habit.*;
 import greencity.dto.habitfact.*;
 import greencity.dto.habitstatistic.AddHabitStatisticDto;
@@ -398,8 +398,8 @@ public class ModelUtils {
                 .build();
     }
 
-    public static RequestAddEventDto getRequestAddEventDto() {
-        return RequestAddEventDto.builder()
+    public static AddEventDtoRequest getRequestAddEventDto() {
+        return AddEventDtoRequest.builder()
                 .title("How to Promote Eco-Friendly Events on Social Media")
                 .description("How to Promote Eco-Friendly Events on Social Media")
                 .open(true)

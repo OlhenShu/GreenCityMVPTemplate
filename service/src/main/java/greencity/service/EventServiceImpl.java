@@ -4,7 +4,7 @@ import com.google.maps.model.LatLng;
 import greencity.constant.AppConstant;
 import greencity.dto.geocoding.AddressDto;
 import greencity.dto.event.EventDateLocationDto;
-import greencity.dto.event.RequestAddEventDto;
+import greencity.dto.event.AddEventDtoRequest;
 import greencity.dto.event.EventDto;
 import greencity.dto.tag.TagUaEnDto;
 import greencity.dto.tag.TagVO;
@@ -41,9 +41,9 @@ public class EventServiceImpl implements EventService {
     private final GoogleApiService googleApiService;
 
     @Override
-    public EventDto save(RequestAddEventDto requestAddEventDto, UserVO userVO, List<MultipartFile> images) {
-        Event event = modelMapper.map(requestAddEventDto, Event.class);
-        List<EventDateLocation> eventDateLocations = requestAddEventDto.getDatesLocations()
+    public EventDto save(AddEventDtoRequest addEventDtoRequest, UserVO userVO, List<MultipartFile> images) {
+        Event event = modelMapper.map(addEventDtoRequest, Event.class);
+        List<EventDateLocation> eventDateLocations = addEventDtoRequest.getDatesLocations()
                 .stream()
                 .map(date -> modelMapper.map(date, EventDateLocation.class))
                 .map(date -> date.setEvent(event))
@@ -53,7 +53,7 @@ public class EventServiceImpl implements EventService {
         event.setCreationDate(LocalDate.now());
         event.setOrganizer(modelMapper.map(userVO, User.class));
 
-        List<TagVO> tagsVO = tagsService.findTagsWithAllTranslationsByNamesAndType(requestAddEventDto.getTags(), TagType.EVENT);
+        List<TagVO> tagsVO = tagsService.findTagsWithAllTranslationsByNamesAndType(addEventDtoRequest.getTags(), TagType.EVENT);
         event.setTags(modelMapper.map(tagsVO, TypeUtils.parameterize(List.class, Tag.class)));
 
         saveImages(images, event);
