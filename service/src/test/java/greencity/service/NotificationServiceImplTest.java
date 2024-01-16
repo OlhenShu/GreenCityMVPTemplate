@@ -118,7 +118,34 @@ public class NotificationServiceImplTest {
 
     @Test
     void createEcoNewsNotificationSuccessfullyCreatesNotification() {
-        //TODO: add test
+        UserVO userVO = ModelUtils.getUserVO();
+        EcoNewsVO ecoNewsVO = ModelUtils.getEcoNewsVO();
+        NotificationSourceType sourceType = NotificationSourceType.NEWS_LIKED;
+
+        User author = ModelUtils.getUser();
+
+        Notification savedNotification = new Notification(2L, author, "title", ZonedDateTime.now(),
+                NotificationSourceType.FRIEND_REQUEST, 1L, null);
+
+        NotifiedUser savedUser = NotifiedUser.builder()
+                .id(1L)
+                .user(author)
+                .notification(savedNotification)
+                .isRead(false)
+                .build();
+
+
+        when(userRepo.findById(userVO.getId())).thenReturn(Optional.of(author));
+        when(notificationRepo.save(any(Notification.class))).thenReturn(savedNotification);
+        when(userRepo.findById(ecoNewsVO.getAuthor().getId())).thenReturn(Optional.of(author));
+        when(notifiedUserRepo.save(any(NotifiedUser.class))).thenReturn(savedUser);
+
+        notificationService.createEcoNewsNotification(userVO, ecoNewsVO, sourceType);
+
+        verify(userRepo, times(2)).findById(anyLong());
+        verify(notificationRepo, times(1)).save(any(Notification.class));
+        verify(notifiedUserRepo, times(1)).save(any(NotifiedUser.class));
+
     }
 
     @Test
