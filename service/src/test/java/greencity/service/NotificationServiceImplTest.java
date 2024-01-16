@@ -56,7 +56,7 @@ class NotificationServiceImplTest {
     private final UserVO userVO = ModelUtils.getUserVO();
 
     @Test
-    public void getTheLatestThreeNotifications() {
+    void getTheLatestThreeNotifications() {
         var expected = List.of(
                 new ShortNotificationDtoResponse(1L, "title", true),
                 new ShortNotificationDtoResponse(2L, "title", true)
@@ -72,7 +72,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    public void findAllByUserTest() {
+    void findAllByUserTest() {
         List<NotificationDtoResponse> notificationDtoList = new ArrayList<>();
         notificationDtoList.add(
                 new NotificationDtoResponse(2L, 2L, "name1", "title",

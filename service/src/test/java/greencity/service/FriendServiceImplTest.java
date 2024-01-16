@@ -9,17 +9,19 @@ import greencity.entity.UserFriendPK;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.repository.UserRepo;
-import java.time.LocalDateTime;
-import java.util.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -27,13 +29,35 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class FriendServiceImplTest {
+class FriendServiceImplTest {
     @Mock
     private UserRepo userRepo;
+    @Mock
+    private ModelMapper modelMapper;
+    @Mock
+    private NotificationService notificationService;
     @InjectMocks
     private FriendServiceImpl friendService;
 
     private final UserVO userVO = ModelUtils.getUserVO();
+
+    @Test
+    void testGetUserFriendsByUserId() {
+        Long userId = 1L;
+        Pageable pageable = PageRequest.of(0, 10);
+
+        List<User> userFriendsList = new ArrayList<>();
+        userFriendsList.add(ModelUtils.getUser());
+        Page<User> userFriendsPage = new PageImpl<>(userFriendsList, pageable, userFriendsList.size());
+        when(userRepo.getAllUserFriendsPage(pageable, userId)).thenReturn(userFriendsPage);
+        when(userRepo.existsById(anyLong())).thenReturn(true);
+
+        when(modelMapper.map(Mockito.any(User.class), Mockito.eq(UserFriendDto.class))).thenReturn(new UserFriendDto());
+
+        friendService.getUserFriendsByUserId(userId, pageable);
+        Mockito.verify(userRepo, Mockito.times(1)).getAllUserFriendsPage(pageable, userId);
+        Mockito.verify(modelMapper, Mockito.times(userFriendsList.size())).map(Mockito.any(User.class), Mockito.eq(UserFriendDto.class));
+    }
 
     @Test
     void searchFriendsTest() {
@@ -69,7 +93,7 @@ public class FriendServiceImplTest {
 
         when(userRepo.findById(anyLong())).thenReturn(Optional.of(user));
         when(userRepo.existsById(anyLong())).thenReturn(true);
-        when(userRepo.findAllUserFriendDtoByFriendFilter(anyString(), anyObject(), anyBoolean(), any(Pageable.class), anyLong()))
+        when(userRepo.findAllUserFriendDtoByFriendFilter(anyString(), any(), anyBoolean(), any(Pageable.class), anyLong()))
             .thenReturn(userFriendDtos);
 
         var response = friendService.searchFriends(
@@ -164,10 +188,11 @@ public class FriendServiceImplTest {
         userFriends.add(userFriend);
         user.setConnections(userFriends);
 
+        when(userRepo.existsById(anyLong())).thenReturn(true);
         when(userRepo.findById(anyLong())).thenReturn(Optional.of(user));
         when(userRepo.existsById(anyLong())).thenReturn(true);
         doNothing().when(userRepo).addFriend(anyLong(), anyLong());
-
+        doNothing().when(notificationService).friendRequestNotification(anyLong(), anyLong());
         friendService.addFriend(1L, 2L);
 
         verify(userRepo).addFriend(1L, 2L);
@@ -216,6 +241,52 @@ public class FriendServiceImplTest {
 
         assertThrows(BadRequestException.class, () -> friendService.addFriend(1L, 1L));
     }
+
+
+    @Test
+    void testAcceptFriendRequest() {
+        Long userId = 1L;
+        Long friendId = 2L;
+
+        when(userRepo.existsById(anyLong())).thenReturn(true);
+        doNothing().when(userRepo).acceptFriendRequest(userId, friendId);
+
+        friendService.acceptFriendRequest(userId, friendId);
+
+        verify(userRepo, times(1)).acceptFriendRequest(userId, friendId);
+    }
+
+    @Test
+    void testDeclineFriendRequest() {
+        Long userId = 1L;
+        Long friendId = 2L;
+
+        when(userRepo.existsById(anyLong())).thenReturn(true);
+        doNothing().when(userRepo).declineFriendRequest(userId, friendId);
+
+        friendService.declineFriendRequest(userId, friendId);
+
+        verify(userRepo, times(1)).declineFriendRequest(userId, friendId);
+    }
+
+    @Test
+    void testAcceptFriendRequestWithNonExistingUser () {
+        Long userId = 1L;
+        Long friendId = 2L;
+
+        assertThrows(NotFoundException.class, () ->
+                friendService.acceptFriendRequest(userId, friendId));
+    }
+
+    @Test
+    void testRejectFriendRequestWithNonExistingUser () {
+        Long userId = 1L;
+        Long friendId = 2L;
+
+        assertThrows(NotFoundException.class, () ->
+                friendService.declineFriendRequest(userId, friendId));
+    }
+
 
     private String replaceCriteria(String criteria) {
         criteria = Optional.ofNullable(criteria).orElseGet(() -> "");
