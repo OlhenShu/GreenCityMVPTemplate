@@ -8,6 +8,7 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @Setter
 @Builder
+@ToString
 @EqualsAndHashCode
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AddressDto {

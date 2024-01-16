@@ -11,11 +11,10 @@ public interface EventService {
     /**
      * Method for creating {@link EventDto} instance.
      *
-     * @param requestAddEventDto - dto with {@link RequestAddEventDto} entered info about field that need.
-     * @param userVO                {@link UserVO} - current user.
-     * @param images                {@link List<MultipartFile>} - optional to fill png files.
-     *
+     * @param requestAddEventDto dto with {@link RequestAddEventDto} entered info about field that need.
+     * @param userVO             {@link UserVO} - current user.
+     * @param images             optional to fill png files.
      * @return {@link EventDto} instance.
      */
-    EventDto save (RequestAddEventDto requestAddEventDto, UserVO userVO, List<MultipartFile> images);
+    EventDto save(RequestAddEventDto requestAddEventDto, UserVO userVO, List<MultipartFile> images);
 }

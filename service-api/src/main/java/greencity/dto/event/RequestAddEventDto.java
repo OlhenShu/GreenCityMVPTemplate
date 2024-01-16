@@ -8,7 +8,9 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
+@Builder
 @EqualsAndHashCode
+@ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RequestAddEventDto {
     String title;

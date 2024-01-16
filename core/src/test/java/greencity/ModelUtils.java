@@ -9,6 +9,8 @@ import greencity.dto.econewscomment.AddEcoNewsCommentDtoRequest;
 import greencity.dto.econewscomment.AddEcoNewsCommentDtoResponse;
 import greencity.dto.econewscomment.EcoNewsCommentAuthorDto;
 import greencity.dto.econewscomment.EcoNewsCommentDto;
+import greencity.dto.event.EventDateLocationDto;
+import greencity.dto.event.RequestAddEventDto;
 import greencity.dto.habit.*;
 import greencity.dto.habitfact.*;
 import greencity.dto.habitstatistic.AddHabitStatisticDto;
@@ -45,8 +47,8 @@ public class ModelUtils {
 
     public static List<TagTranslationVO> getTagTranslationsVO() {
         return Arrays.asList(TagTranslationVO.builder().id(1L).name("Новини").build(),
-            TagTranslationVO.builder().id(2L).name("News").build(),
-            TagTranslationVO.builder().id(3L).name("Новины").build());
+                TagTranslationVO.builder().id(2L).name("News").build(),
+                TagTranslationVO.builder().id(3L).name("Новины").build());
     }
 
     public static LanguageVO getLanguageVO() {
@@ -63,22 +65,22 @@ public class ModelUtils {
 
     public static User getUser() {
         return User.builder()
-            .id(1L)
-            .email(TestConst.EMAIL)
-            .name(TestConst.NAME)
-            .role(Role.ROLE_USER)
-            .lastActivityTime(LocalDateTime.now())
-            .dateOfRegistration(LocalDateTime.now())
-            .build();
+                .id(1L)
+                .email(TestConst.EMAIL)
+                .name(TestConst.NAME)
+                .role(Role.ROLE_USER)
+                .lastActivityTime(LocalDateTime.now())
+                .dateOfRegistration(LocalDateTime.now())
+                .build();
     }
 
     public static UserVO getUserVO() {
         return UserVO.builder()
-            .id(1L)
-            .email(TestConst.EMAIL)
-            .name(TestConst.NAME)
-            .role(Role.ROLE_USER)
-            .build();
+                .id(1L)
+                .email(TestConst.EMAIL)
+                .name(TestConst.NAME)
+                .role(Role.ROLE_USER)
+                .build();
     }
 
     public static EcoNewsAuthorDto getEcoNewsAuthorDto() {
@@ -87,19 +89,19 @@ public class ModelUtils {
 
     public static EcoNewsDto getEcoNewsDto() {
         return new EcoNewsDto(ZonedDateTime.of(2022, 12, 12, 12, 12, 12, 12, ZoneId.systemDefault()), null, 1L,
-            "title", "text", "shortInfo", getEcoNewsAuthorDto(), null, null, 12, 12, 12);
+                "title", "text", "shortInfo", getEcoNewsAuthorDto(), null, null, 12, 12, 12);
     }
 
     public static AddEcoNewsDtoRequest getAddEcoNewsDtoRequest() {
         return new AddEcoNewsDtoRequest("title", "text",
-            Collections.singletonList("tag"), null, null, "shortInfo");
+                Collections.singletonList("tag"), null, null, "shortInfo");
     }
 
     public static AddEcoNewsDtoResponse getAddEcoNewsDtoResponse() {
         return new AddEcoNewsDtoResponse(1L, "title",
-            "text", "shortInfo", EcoNewsAuthorDto.builder().id(1L).name(TestConst.NAME).build(),
-            ZonedDateTime.now(), TestConst.SITE, null,
-            Collections.singletonList("tag"));
+                "text", "shortInfo", EcoNewsAuthorDto.builder().id(1L).name(TestConst.NAME).build(),
+                ZonedDateTime.now(), TestConst.SITE, null,
+                Collections.singletonList("tag"));
     }
 
     public static MultipartFile getFile() {
@@ -113,7 +115,7 @@ public class ModelUtils {
             e.printStackTrace();
         }
         return new MockMultipartFile(name,
-            name, contentType, content);
+                name, contentType, content);
     }
 
     public static URL getUrl() throws MalformedURLException {
@@ -122,27 +124,27 @@ public class ModelUtils {
 
     public static AddHabitStatisticDto addHabitStatisticDto() {
         return AddHabitStatisticDto.builder()
-            .amountOfItems(5)
-            .habitRate(HabitRate.DEFAULT)
-            .createDate(ZonedDateTime.now())
-            .build();
+                .amountOfItems(5)
+                .habitRate(HabitRate.DEFAULT)
+                .createDate(ZonedDateTime.now())
+                .build();
     }
 
     public static HabitStatistic getHabitStatistic() {
         return HabitStatistic.builder()
-            .id(1L)
-            .habitRate(HabitRate.DEFAULT)
-            .createDate(ZonedDateTime.now())
-            .amountOfItems(5)
-            .habitAssign(HabitAssign.builder().id(13L).build())
-            .build();
+                .id(1L)
+                .habitRate(HabitRate.DEFAULT)
+                .createDate(ZonedDateTime.now())
+                .amountOfItems(5)
+                .habitAssign(HabitAssign.builder().id(13L).build())
+                .build();
     }
 
     public static Category getCategory() {
         return Category.builder()
-            .id(12L)
-            .name("category")
-            .build();
+                .id(12L)
+                .name("category")
+                .build();
     }
 
     public static LocalTime getLocalTime() {
@@ -151,9 +153,9 @@ public class ModelUtils {
 
     public static Specification getSpecification() {
         return Specification.builder()
-            .id(1L)
-            .name("specification")
-            .build();
+                .id(1L)
+                .name("specification")
+                .build();
     }
 
     public static LanguageDTO getLanguageDTO() {
@@ -166,12 +168,12 @@ public class ModelUtils {
 
     public static EcoNewsComment getEcoNewsComment() {
         return EcoNewsComment.builder()
-            .id(1L)
-            .text("text")
-            .createdDate(LocalDateTime.now())
-            .modifiedDate(LocalDateTime.now())
-            .user(getUser())
-            .build();
+                .id(1L)
+                .text("text")
+                .createdDate(LocalDateTime.now())
+                .modifiedDate(LocalDateTime.now())
+                .user(getUser())
+                .build();
     }
 
     public static AddEcoNewsCommentDtoRequest getAddEcoNewsCommentDtoRequest() {
@@ -180,32 +182,32 @@ public class ModelUtils {
 
     public static AddEcoNewsCommentDtoResponse getAddEcoNewsCommentDtoResponse() {
         return AddEcoNewsCommentDtoResponse.builder()
-            .id(getEcoNewsComment().getId())
-            .author(getEcoNewsCommentAuthorDto())
-            .text(getEcoNewsComment().getText())
-            .modifiedDate(getEcoNewsComment().getModifiedDate())
-            .build();
+                .id(getEcoNewsComment().getId())
+                .author(getEcoNewsCommentAuthorDto())
+                .text(getEcoNewsComment().getText())
+                .modifiedDate(getEcoNewsComment().getModifiedDate())
+                .build();
     }
 
     public static EcoNewsCommentAuthorDto getEcoNewsCommentAuthorDto() {
         return EcoNewsCommentAuthorDto.builder()
-            .id(getUser().getId())
-            .name(getUser().getName().trim())
-            .userProfilePicturePath(getUser().getProfilePicturePath())
-            .build();
+                .id(getUser().getId())
+                .name(getUser().getName().trim())
+                .userProfilePicturePath(getUser().getProfilePicturePath())
+                .build();
     }
 
     public static EcoNewsCommentDto getEcoNewsCommentDto() {
         return EcoNewsCommentDto.builder()
-            .id(1L)
-            .modifiedDate(LocalDateTime.now())
-            .author(getEcoNewsCommentAuthorDto())
-            .text("text")
-            .replies(0)
-            .likes(0)
-            .currentUserLiked(false)
-            .status(CommentStatus.ORIGINAL)
-            .build();
+                .id(1L)
+                .modifiedDate(LocalDateTime.now())
+                .author(getEcoNewsCommentAuthorDto())
+                .text("text")
+                .replies(0)
+                .likes(0)
+                .currentUserLiked(false)
+                .status(CommentStatus.ORIGINAL)
+                .build();
     }
 
     public static Principal getPrincipal() {
@@ -222,73 +224,73 @@ public class ModelUtils {
 
     public static HabitAssign getHabitAssign() {
         return HabitAssign.builder()
-            .id(1L)
-            .status(HabitAssignStatus.ACQUIRED)
-            .createDate(ZonedDateTime.now())
-            .habit(Habit.builder()
                 .id(1L)
-                .image("")
-                .habitTranslations(Collections.singletonList(HabitTranslation.builder()
-                    .id(1L)
-                    .name("")
-                    .description("")
-                    .habitItem("")
-                    .build()))
-                .build())
-            .user(getUser())
-            .workingDays(0)
-            .duration(0)
-            .habitStreak(0)
-            .lastEnrollmentDate(ZonedDateTime.now())
-            .build();
+                .status(HabitAssignStatus.ACQUIRED)
+                .createDate(ZonedDateTime.now())
+                .habit(Habit.builder()
+                        .id(1L)
+                        .image("")
+                        .habitTranslations(Collections.singletonList(HabitTranslation.builder()
+                                .id(1L)
+                                .name("")
+                                .description("")
+                                .habitItem("")
+                                .build()))
+                        .build())
+                .user(getUser())
+                .workingDays(0)
+                .duration(0)
+                .habitStreak(0)
+                .lastEnrollmentDate(ZonedDateTime.now())
+                .build();
     }
 
     public static HabitStatusCalendar getHabitStatusCalendar() {
         return HabitStatusCalendar.builder()
-            .id(1L)
-            .enrollDate(LocalDate.now()).build();
+                .id(1L)
+                .enrollDate(LocalDate.now()).build();
     }
 
     public static HabitFactVO getHabitFactVO() {
         return HabitFactVO.builder()
-            .id(1L)
-            .habit(HabitVO.builder()
                 .id(1L)
-                .image("string")
-                .build())
-            .translations(Collections.singletonList(HabitFactTranslationVO.builder()
-                .id(1L)
-                .content("content")
-                .factOfDayStatus(FactOfDayStatus.POTENTIAL)
-                .habitFact(null)
-                .language(LanguageVO.builder()
-                    .id(1L)
-                    .code("ua")
-                    .build())
-                .build()))
-            .build();
+                .habit(HabitVO.builder()
+                        .id(1L)
+                        .image("string")
+                        .build())
+                .translations(Collections.singletonList(HabitFactTranslationVO.builder()
+                        .id(1L)
+                        .content("content")
+                        .factOfDayStatus(FactOfDayStatus.POTENTIAL)
+                        .habitFact(null)
+                        .language(LanguageVO.builder()
+                                .id(1L)
+                                .code("ua")
+                                .build())
+                        .build()))
+                .build();
     }
 
     public static HabitFactPostDto getHabitFactPostDto() {
         return HabitFactPostDto.builder()
-            .translations(List.of(getLanguageTranslationDTO()))
-            .habit(new HabitIdRequestDto(1L))
-            .build();
+                .translations(List.of(getLanguageTranslationDTO()))
+                .habit(new HabitIdRequestDto(1L))
+                .build();
     }
 
     public static HabitFactUpdateDto getHabitFactUpdateDto() {
         return HabitFactUpdateDto.builder()
-            .habit(new HabitIdRequestDto(1L))
-            .translations(Collections.singletonList(
-                new HabitFactTranslationUpdateDto(FactOfDayStatus.POTENTIAL, getLanguageDTO(), "")))
-            .build();
+                .habit(new HabitIdRequestDto(1L))
+                .translations(Collections.singletonList(
+                        new HabitFactTranslationUpdateDto(FactOfDayStatus.POTENTIAL, getLanguageDTO(), "")))
+                .build();
     }
 
     public static List<LanguageTranslationDTO> getLanguageTranslationsDTOs() {
         return Arrays.asList(
-            new LanguageTranslationDTO(new LanguageDTO(1L, "en"), "hello"),
-            new LanguageTranslationDTO(new LanguageDTO(1L, "en"), "text"),
-            new LanguageTranslationDTO(new LanguageDTO(1L, "en"), "smile"));
+                new LanguageTranslationDTO(new LanguageDTO(1L, "en"), "hello"),
+                new LanguageTranslationDTO(new LanguageDTO(1L, "en"), "text"),
+                new LanguageTranslationDTO(new LanguageDTO(1L, "en"), "smile"));
     }
 
     public static ShoppingListItemPostDto getShoppingListItemPostDto() {
@@ -297,103 +299,117 @@ public class ModelUtils {
 
     public static UserShoppingListItem getUserShoppingListItem() {
         return UserShoppingListItem.builder()
-            .id(1L)
-            .status(ShoppingListItemStatus.DONE)
-            .habitAssign(HabitAssign.builder()
                 .id(1L)
-                .status(HabitAssignStatus.ACQUIRED)
-                .habitStreak(10)
-                .duration(300)
-                .lastEnrollmentDate(ZonedDateTime.now())
-                .workingDays(5)
-                .build())
-            .shoppingListItem(ShoppingListItem.builder()
-                .id(1L)
-                .build())
-            .dateCompleted(LocalDateTime.of(2021, 2, 2, 14, 2))
-            .build();
+                .status(ShoppingListItemStatus.DONE)
+                .habitAssign(HabitAssign.builder()
+                        .id(1L)
+                        .status(HabitAssignStatus.ACQUIRED)
+                        .habitStreak(10)
+                        .duration(300)
+                        .lastEnrollmentDate(ZonedDateTime.now())
+                        .workingDays(5)
+                        .build())
+                .shoppingListItem(ShoppingListItem.builder()
+                        .id(1L)
+                        .build())
+                .dateCompleted(LocalDateTime.of(2021, 2, 2, 14, 2))
+                .build();
     }
 
     public static UserManagementDto getUserManagementDto() {
         return UserManagementDto.builder()
-            .id(1L)
-            .name("Username")
-            .email("user@gmail.com")
-            .userCredo("Credo")
-            .role(Role.ROLE_ADMIN)
-            .userStatus(UserStatus.ACTIVATED)
-            .build();
+                .id(1L)
+                .name("Username")
+                .email("user@gmail.com")
+                .userCredo("Credo")
+                .role(Role.ROLE_ADMIN)
+                .userStatus(UserStatus.ACTIVATED)
+                .build();
     }
 
     public static HabitAssignPropertiesDto getHabitAssignPropertiesDto() {
         return HabitAssignPropertiesDto.builder()
-            .defaultShoppingListItems(List.of(1L, 2L))
-            .duration(20)
-            .build();
+                .defaultShoppingListItems(List.of(1L, 2L))
+                .duration(20)
+                .build();
     }
 
     public static HabitAssignCustomPropertiesDto getHabitAssignCustomPropertiesDto() {
         return HabitAssignCustomPropertiesDto.builder()
-            .habitAssignPropertiesDto(getHabitAssignPropertiesDto())
-            .friendsIdsList(List.of(1L, 2L))
-            .build();
+                .habitAssignPropertiesDto(getHabitAssignPropertiesDto())
+                .friendsIdsList(List.of(1L, 2L))
+                .build();
     }
 
     public static UpdateUserShoppingListDto getUpdateUserShoppingListDto() {
         return UpdateUserShoppingListDto.builder()
-            .userShoppingListItemId(1L)
-            .habitAssignId(1L)
-            .userShoppingListAdvanceDto(List.of(UserShoppingListItemAdvanceDto.builder()
-                .id(1L)
-                .shoppingListItemId(1L)
-                .status(ShoppingListItemStatus.INPROGRESS)
-                .build()))
-            .build();
+                .userShoppingListItemId(1L)
+                .habitAssignId(1L)
+                .userShoppingListAdvanceDto(List.of(UserShoppingListItemAdvanceDto.builder()
+                        .id(1L)
+                        .shoppingListItemId(1L)
+                        .status(ShoppingListItemStatus.INPROGRESS)
+                        .build()))
+                .build();
     }
 
     public static CustomShoppingListItemResponseDto getCustomShoppingListItemResponseDto() {
         return CustomShoppingListItemResponseDto.builder()
-            .id(1L)
-            .status(ShoppingListItemStatus.ACTIVE)
-            .text("text")
-            .build();
+                .id(1L)
+                .status(ShoppingListItemStatus.ACTIVE)
+                .text("text")
+                .build();
     }
 
     public static UserShoppingListItemResponseDto getUserShoppingListItemResponseDto() {
         return UserShoppingListItemResponseDto.builder()
-            .id(1L)
-            .status(ShoppingListItemStatus.ACTIVE)
-            .text("text")
-            .build();
+                .id(1L)
+                .status(ShoppingListItemStatus.ACTIVE)
+                .text("text")
+                .build();
     }
 
     public static UserShoppingAndCustomShoppingListsDto getUserShoppingAndCustomShoppingListsDto() {
         return UserShoppingAndCustomShoppingListsDto.builder()
-            .userShoppingListItemDto(List.of(getUserShoppingListItemResponseDto()))
-            .customShoppingListItemDto(List.of(getCustomShoppingListItemResponseDto()))
-            .build();
+                .userShoppingListItemDto(List.of(getUserShoppingListItemResponseDto()))
+                .customShoppingListItemDto(List.of(getCustomShoppingListItemResponseDto()))
+                .build();
     }
 
     public static AddCustomHabitDtoRequest getAddCustomHabitDtoRequest() {
         return AddCustomHabitDtoRequest.builder()
-            .complexity(2)
-            .customShoppingListItemDto(List.of(
-                CustomShoppingListItemResponseDto.builder()
-                    .id(1L)
-                    .status(ShoppingListItemStatus.ACTIVE)
-                    .text("buy a shopper")
-                    .build()))
-            .defaultDuration(7)
-            .habitTranslations(
-                List.of(HabitTranslationDto.builder()
-                    .description("Description")
-                    .habitItem("Item")
-                    .languageCode("en")
-                    .name("use shopper")
-                    .build()))
-            .image("https://csb10032000a548f571.blob.core.windows.net/allfiles/photo_2021-06-01_15-39-56.jpg")
-            .tagIds(Set.of(20L))
-            .build();
+                .complexity(2)
+                .customShoppingListItemDto(List.of(
+                        CustomShoppingListItemResponseDto.builder()
+                                .id(1L)
+                                .status(ShoppingListItemStatus.ACTIVE)
+                                .text("buy a shopper")
+                                .build()))
+                .defaultDuration(7)
+                .habitTranslations(
+                        List.of(HabitTranslationDto.builder()
+                                .description("Description")
+                                .habitItem("Item")
+                                .languageCode("en")
+                                .name("use shopper")
+                                .build()))
+                .image("https://csb10032000a548f571.blob.core.windows.net/allfiles/photo_2021-06-01_15-39-56.jpg")
+                .tagIds(Set.of(20L))
+                .build();
     }
 
+    public static RequestAddEventDto getRequestAddEventDto() {
+        return RequestAddEventDto.builder()
+                .title("How to Promote Eco-Friendly Events on Social Media")
+                .description("How to Promote Eco-Friendly Events on Social Media")
+                .open(true)
+                .datesLocations(
+                        List.of(EventDateLocationDto.builder()
+                                .id(1L)
+                                .startDate(ZonedDateTime.parse("2024-01-17T06:00Z[UTC]"))
+                                .finishDate(ZonedDateTime.parse("2024-01-17T06:00Z[UTC]"))
+                                .onlineLink("http://localhost:8080/swagger-ui.html#/")
+                                .build())
+                ).build();
+    }
 }

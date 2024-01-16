@@ -45,7 +45,7 @@ public class EventsController {
             @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
     })
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/create", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<EventDto> save(
             @ApiParam(value = SwaggerExampleModel.ADD_EVENT, required = true)
             @RequestPart RequestAddEventDto requestAddEventDto,
