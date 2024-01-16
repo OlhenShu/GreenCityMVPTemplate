@@ -22,4 +22,20 @@ public interface EventService {
      * @return The updated event DTO.
      */
     EventDto update(UpdateEventDto eventDto, String email, MultipartFile[] images);
+
+    /**
+     * Method to upload news image.
+     *
+     * @param image - eco news image
+     * @return image path
+     */
+    String uploadImage(MultipartFile image);
+
+    /**
+     * Method to upload news images.
+     *
+     * @param images - array of eco news images
+     * @return array of images path
+     */
+    String[] uploadImages(MultipartFile[] images);
 }
