@@ -1,10 +1,9 @@
 package greencity.service;
 
 import greencity.dto.PageableDto;
-import greencity.dto.econews.EcoNewsVO;
 import greencity.dto.notification.NewNotificationDtoRequest;
 import greencity.dto.notification.NotificationDtoResponse;
-import greencity.dto.notification.NotificationsForEcoNewsDto;
+import greencity.dto.notification.NotificationsDto;
 import greencity.dto.notification.ShortNotificationDtoResponse;
 import greencity.dto.user.UserVO;
 import greencity.enums.NotificationSourceType;
@@ -89,19 +88,19 @@ public interface NotificationService {
     /**
      * Retrieves the notifications related to EcoNews for the specified user.
      *
-     * @param userId The ID of the user to fetch notifications for.
-     * @return List of {@link NotificationsForEcoNewsDto} representing notifications for EcoNews.
+     * @param userId     The ID of the user to fetch notifications for.
+     * @param sourceType The type of the notification source.
+     * @return List of {@link NotificationsDto} representing notifications for EcoNews.
      * @author Kizerov Dmytro
      */
-    List<NotificationsForEcoNewsDto> getNotificationsEcoNewsForCurrentUser(Long userId);
+    List<NotificationsDto> getNotificationsForCurrentUser(Long userId, NotificationSourceType sourceType);
 
     /**
-     * Creates and saves an EcoNews notification for the specified user based on the provided EcoNews data and source type.
+     * Creates a notification for the specified user based on the provided source and source type.
      *
-     * @param userVO     The authenticated user who will receive the notification.
-     * @param ecoNewsVO  The EcoNews data associated with the notification.
-     * @param sourceType The source type of the notification.
-     * @author Kizerov Dmytro
+     * @param userVO     The UserVO for whom the notification is created.
+     * @param source     The source object (e.g., EcoNewsVO, EcoNewsComment and other) providing information for the notification.
+     * @param sourceType The type of the notification source.
      */
-    void createEcoNewsNotification(UserVO userVO, EcoNewsVO ecoNewsVO, NotificationSourceType sourceType);
+    void createNotification(UserVO userVO, Object source, NotificationSourceType sourceType);
 }

@@ -522,7 +522,7 @@ public class EcoNewsServiceImpl implements EcoNewsService {
             ecoNewsVO.getUsersLikedNews().add(userVO);
         }
         ecoNewsRepo.save(modelMapper.map(ecoNewsVO, EcoNews.class));
-        notificationService.createEcoNewsNotification(userVO, ecoNewsVO, NotificationSourceType.NEWS_LIKED);
+        notificationService.createNotification(userVO, ecoNewsVO, NotificationSourceType.NEWS_LIKED);
     }
 
     /**

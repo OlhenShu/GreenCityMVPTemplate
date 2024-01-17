@@ -4,7 +4,7 @@ import greencity.ModelUtils;
 import greencity.dto.PageableDto;
 import greencity.dto.econews.EcoNewsVO;
 import greencity.dto.notification.NotificationDtoResponse;
-import greencity.dto.notification.NotificationsForEcoNewsDto;
+import greencity.dto.notification.NotificationsDto;
 import greencity.dto.notification.ShortNotificationDtoResponse;
 import greencity.dto.user.UserVO;
 import greencity.entity.Notification;
@@ -92,15 +92,15 @@ public class NotificationServiceImplTest {
 
         when(notifiedUserRepo.findAllUnreadNotificationsByUserId(eq(userId), any())).thenReturn(allUnreadNotifications);
 
-        List<NotificationsForEcoNewsDto> result = notificationService.getNotificationsEcoNewsForCurrentUser(userId);
+        List<NotificationsDto> result = notificationService.getNotificationsForCurrentUser(userId, NotificationSourceType.NEWS_LIKED);
 
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
 
-        NotificationsForEcoNewsDto notificationsDto = result.get(0);
-        assertEquals("AuthorName", notificationsDto.getUserName());
-        assertEquals("TestTitle", notificationsDto.getTitle());
-        assertEquals(ZonedDateTime.parse("2022-01-01T10:15:30+01:00"), notificationsDto.getNotificationTime());
+        NotificationsDto notificationsForEcoNewsDto = result.get(0);
+        assertEquals("AuthorName", notificationsForEcoNewsDto.getUserName());
+        assertEquals("TestTitle", notificationsForEcoNewsDto.getObjectTitle());
+        assertEquals(ZonedDateTime.parse("2022-01-01T10:15:30+01:00"), notificationsForEcoNewsDto.getNotificationTime());
 
         verify(notifiedUserRepo).findAllUnreadNotificationsByUserId(eq(userId), any());
     }
@@ -111,7 +111,7 @@ public class NotificationServiceImplTest {
 
         when(notifiedUserRepo.findAllUnreadNotificationsByUserId(eq(userId), any())).thenReturn(Collections.emptyList());
 
-        assertThrows(NotFoundException.class, () -> notificationService.getNotificationsEcoNewsForCurrentUser(userId));
+        assertThrows(NotFoundException.class, () -> notificationService.getNotificationsForCurrentUser(userId, NotificationSourceType.NEWS_LIKED));
 
         verify(notifiedUserRepo).findAllUnreadNotificationsByUserId(eq(userId), any());
     }
@@ -140,12 +140,11 @@ public class NotificationServiceImplTest {
         when(userRepo.findById(ecoNewsVO.getAuthor().getId())).thenReturn(Optional.of(author));
         when(notifiedUserRepo.save(any(NotifiedUser.class))).thenReturn(savedUser);
 
-        notificationService.createEcoNewsNotification(userVO, ecoNewsVO, sourceType);
+        notificationService.createNotification(userVO, ecoNewsVO, sourceType);
 
         verify(userRepo, times(2)).findById(anyLong());
         verify(notificationRepo, times(1)).save(any(Notification.class));
         verify(notifiedUserRepo, times(1)).save(any(NotifiedUser.class));
-
     }
 
     @Test
@@ -156,7 +155,7 @@ public class NotificationServiceImplTest {
 
         when(userRepo.findById(userVO.getId())).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> notificationService.createEcoNewsNotification(userVO, ecoNewsVO, sourceType));
+        assertThrows(NotFoundException.class, () -> notificationService.createNotification(userVO, ecoNewsVO, sourceType));
 
         verifyNoInteractions(notificationRepo, notifiedUserRepo);
     }
@@ -172,7 +171,7 @@ public class NotificationServiceImplTest {
 
         when(notificationRepo.save(any(Notification.class))).thenThrow(new NotFoundException("User with id: 2 not found"));
 
-        assertThrows(NotFoundException.class, () -> notificationService.createEcoNewsNotification(userVO, ecoNewsVO, sourceType));
+        assertThrows(NotFoundException.class, () -> notificationService.createNotification(userVO, ecoNewsVO, sourceType));
 
         verify(userRepo).findById(userVO.getId());
         verify(notificationRepo).save(any(Notification.class));

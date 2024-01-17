@@ -10,8 +10,8 @@ import java.time.ZonedDateTime;
 @Setter
 @Builder
 @EqualsAndHashCode
-public class NotificationsForEcoNewsDto {
+public class NotificationsDto {
     private String userName;
-    private String title;
+    private String objectTitle;
     private ZonedDateTime notificationTime;
 }
