@@ -135,7 +135,6 @@ public final class ErrorMessage {
     public static final String INVALID_DURATION = "The duration for such habit is lower than previously set";
     public static final String EVENT_NOT_FOUND = "Event Not Found";
     public static final String EVENT_IS_FINISHED = "Event has already finished and can't be modified";
-
     public static final String ADDRESS_NOT_FOUND_EXCEPTION = "No address found for the given coordinates.";
 
     private ErrorMessage() {

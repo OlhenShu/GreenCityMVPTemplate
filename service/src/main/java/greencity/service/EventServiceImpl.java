@@ -4,11 +4,11 @@ import com.google.maps.model.LatLng;
 import greencity.client.RestClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
-import greencity.dto.event.AddressDto;
-import greencity.dto.event.EventDateLocationDto;
-import greencity.dto.event.EventDto;
-import greencity.dto.event.UpdateEventDto;
+import greencity.dto.event.*;
 import greencity.dto.geocoding.AddressLatLngResponse;
+import greencity.dto.tag.TagUaEnDto;
+import greencity.dto.tag.TagVO;
+import greencity.dto.user.UserVO;
 import greencity.entity.event.EventDateLocation;
 import greencity.entity.event.Event;
 import greencity.entity.Tag;
@@ -23,12 +23,14 @@ import greencity.repository.EventRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.reflect.TypeUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -45,6 +47,29 @@ public class EventServiceImpl implements EventService {
     private final GoogleApiService googleApiService;
     private final FileService fileService;
     private static final String DEFAULT_TITLE_IMAGE_PATH = AppConstant.DEFAULT_EVENT_IMAGES;
+
+    @Override
+    public EventDto save(AddEventDtoRequest addEventDtoRequest, UserVO userVO, MultipartFile[] images) {
+        Event event = modelMapper.map(addEventDtoRequest, Event.class);
+        List<EventDateLocation> eventDateLocations = addEventDtoRequest.getDatesLocations()
+                .stream()
+                .map(date -> modelMapper.map(date, EventDateLocation.class))
+                .map(date -> date.setEvent(event))
+                .collect(Collectors.toList());
+        event.setDates(eventDateLocations);
+
+        event.setCreationDate(LocalDate.now());
+        event.setOrganizer(modelMapper.map(userVO, User.class));
+
+        List<TagVO> tagsVO = tagsService.findTagsWithAllTranslationsByNamesAndType(addEventDtoRequest.getTags(), TagType.EVENT);
+        event.setTags(modelMapper.map(tagsVO, TypeUtils.parameterize(List.class, Tag.class)));
+
+        saveImages(images, event);
+        EventDto eventDto = modelMapper.map(eventRepo.save(event), EventDto.class);
+        tagConvertor(event, eventDto);
+        addAddressToLocation(eventDto.getDates());
+        return eventDto;
+    }
 
     @Override
     public EventDto getById(Long eventId) {
@@ -191,6 +216,44 @@ public class EventServiceImpl implements EventService {
                     .event(toUpdate).link(url).build()).collect(Collectors.toList()));
         } else {
             toUpdate.setAdditionalImages(null);
+        }
+    }
+
+    private static void tagConvertor(Event event, EventDto eventDto) {
+        eventDto.setTags(event.getTags()
+                .stream()
+                .map(tag -> {
+                    TagUaEnDto tagUaEnDto = new TagUaEnDto().setId(tag.getId());
+                    tagUaEnDto.setId(tag.getId());
+                    tag.getTagTranslations()
+                            .forEach(tagTranslation -> {
+                                if (tagTranslation.getLanguage().getCode().equals("ua")){
+                                    tagUaEnDto.setNameUa(tagTranslation.getName());
+                                }else if (tagTranslation.getLanguage().getCode().equals("en")){
+                                    tagUaEnDto.setNameEn(tagTranslation.getName());
+                                }
+                            });
+                    return tagUaEnDto;})
+                .collect(Collectors.toList()));
+    }
+
+    private void saveImages(MultipartFile[] images, Event event) {
+
+        if (images == null || images.length > 0) {
+            event.setTitleImage(AppConstant.DEFAULT_HABIT_IMAGE);
+        } else {
+            List<MultipartFile> files = new ArrayList<>(Arrays.asList(images));
+            List<EventImages> imagesUrl = files
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .map(fileService::upload)
+                    .map(image -> {EventImages newEvent = new EventImages();
+                    newEvent.setLink(image);
+                    newEvent.setEvent(event);
+                    return newEvent;})
+                    .collect(Collectors.toList());
+            event.setTitleImage(imagesUrl.get(0).getLink());
+            event.setAdditionalImages(imagesUrl);
         }
     }
 }

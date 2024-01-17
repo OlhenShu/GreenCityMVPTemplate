@@ -10,6 +10,7 @@ import java.time.ZonedDateTime;
 @Getter
 @Setter
 @EqualsAndHashCode
+@Builder
 public class EventDateLocationDto {
     private Long id;
     private AddressDto coordinates;
