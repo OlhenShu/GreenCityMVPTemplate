@@ -1,9 +1,11 @@
 package greencity.dto.event;
 
 import lombok.*;
+
 import lombok.experimental.FieldDefaults;
 
 import java.util.List;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

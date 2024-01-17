@@ -6,7 +6,6 @@ import greencity.dto.event.UpdateEventDto;
 import greencity.dto.user.UserVO;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 
 public interface EventService {
     /**
@@ -26,6 +25,7 @@ public interface EventService {
      * @return The updated event DTO.
      */
     EventDto update(UpdateEventDto eventDto, String email, MultipartFile[] images);
+
     /**
      * Method for creating {@link EventDto} instance.
      *

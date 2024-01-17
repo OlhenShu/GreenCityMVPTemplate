@@ -124,7 +124,8 @@ public class EventServiceImpl implements EventService {
             toUpdate.setTags(modelMapper.map(tagsService
                             .findTagsWithAllTranslationsByNamesAndType(updateEventDto.getTags(), TagType.EVENT),
                     new TypeToken<List<Tag>>() {
-                    }.getType()));
+                    }.getType())
+            );
         }
         updateImages(toUpdate, updateEventDto, images);
 
@@ -227,33 +228,40 @@ public class EventServiceImpl implements EventService {
                     tagUaEnDto.setId(tag.getId());
                     tag.getTagTranslations()
                             .forEach(tagTranslation -> {
-                                if (tagTranslation.getLanguage().getCode().equals("ua")){
+                                if (tagTranslation.getLanguage().getCode().equals("ua")) {
                                     tagUaEnDto.setNameUa(tagTranslation.getName());
-                                }else if (tagTranslation.getLanguage().getCode().equals("en")){
+                                } else if (tagTranslation.getLanguage().getCode().equals("en")) {
                                     tagUaEnDto.setNameEn(tagTranslation.getName());
                                 }
                             });
-                    return tagUaEnDto;})
+                    return tagUaEnDto;
+                })
                 .collect(Collectors.toList()));
     }
 
     private void saveImages(MultipartFile[] images, Event event) {
-
-        if (images == null || images.length > 0) {
-            event.setTitleImage(AppConstant.DEFAULT_HABIT_IMAGE);
-        } else {
+        if (images != null && images.length > 0) {
             List<MultipartFile> files = new ArrayList<>(Arrays.asList(images));
             List<EventImages> imagesUrl = files
                     .stream()
                     .filter(Objects::nonNull)
                     .map(fileService::upload)
-                    .map(image -> {EventImages newEvent = new EventImages();
-                    newEvent.setLink(image);
-                    newEvent.setEvent(event);
-                    return newEvent;})
+                    .map(image -> {
+                        EventImages newEvent = new EventImages();
+                        newEvent.setLink(image);
+                        newEvent.setEvent(event);
+                        return newEvent;
+                    })
                     .collect(Collectors.toList());
-            event.setTitleImage(imagesUrl.get(0).getLink());
-            event.setAdditionalImages(imagesUrl);
+
+            if (!imagesUrl.isEmpty()) {
+                event.setTitleImage(imagesUrl.get(0).getLink());
+                event.setAdditionalImages(imagesUrl);
+            } else {
+                event.setTitleImage(AppConstant.DEFAULT_EVENT_IMAGES);
+            }
+        } else {
+            event.setTitleImage(AppConstant.DEFAULT_EVENT_IMAGES);
         }
     }
 }
