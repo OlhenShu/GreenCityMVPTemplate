@@ -229,7 +229,7 @@ public class TagsServiceImpl implements TagsService {
     }
 
     @Override
-    public List<TagVO> findTagsWithAllTranslationsByNamesAndType(List<String> tagNames, TagType tagType) {
+    public List<TagVO> findAllTranslationsByNamesAndType(List<String> tagNames, TagType tagType) {
         List<String> lowerCaseTagNames = tagNames.stream()
             .map(String::toLowerCase)
             .collect(Collectors.toList());

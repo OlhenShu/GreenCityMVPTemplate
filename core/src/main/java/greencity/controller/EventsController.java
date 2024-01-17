@@ -23,7 +23,6 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.annotation.Nullable;
 import java.security.Principal;
-import java.util.List;
 
 @Validated
 @RestController
@@ -75,6 +74,7 @@ public class EventsController {
         return ResponseEntity.status(HttpStatus.OK).body(
                 eventService.update(eventDto, principal.getName(), images));
     }
+
     /**
      * Method for creating an event.
      *
@@ -90,7 +90,8 @@ public class EventsController {
             @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
     })
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping(value = "/create", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
+    @PostMapping(value = "/create",
+            consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
     public ResponseEntity<EventDto> save(
             @ApiParam(value = SwaggerExampleModel.ADD_EVENT, required = true)
             @RequestPart AddEventDtoRequest addEventDtoRequest,

@@ -61,7 +61,7 @@ public class EventServiceImpl implements EventService {
         event.setCreationDate(LocalDate.now());
         event.setOrganizer(modelMapper.map(userVO, User.class));
 
-        List<TagVO> tagsVO = tagsService.findTagsWithAllTranslationsByNamesAndType(addEventDtoRequest.getTags(), TagType.EVENT);
+        List<TagVO> tagsVO = tagsService.findAllTranslationsByNamesAndType(addEventDtoRequest.getTags(), TagType.EVENT);
         event.setTags(modelMapper.map(tagsVO, TypeUtils.parameterize(List.class, Tag.class)));
 
         saveImages(images, event);
@@ -122,10 +122,9 @@ public class EventServiceImpl implements EventService {
         }
         if (updateEventDto.getTags() != null) {
             toUpdate.setTags(modelMapper.map(tagsService
-                            .findTagsWithAllTranslationsByNamesAndType(updateEventDto.getTags(), TagType.EVENT),
+                            .findAllTranslationsByNamesAndType(updateEventDto.getTags(), TagType.EVENT),
                     new TypeToken<List<Tag>>() {
-                    }.getType())
-            );
+                    }.getType()));
         }
         updateImages(toUpdate, updateEventDto, images);
 
