@@ -1,5 +1,7 @@
-package greencity.entity;
+package greencity.entity.event;
 
+import greencity.entity.Coordinates;
+import greencity.entity.event.Event;
 import lombok.*;
 
 import javax.persistence.*;
