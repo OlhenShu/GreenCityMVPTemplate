@@ -6,8 +6,10 @@ import greencity.constant.HttpStatuses;
 import greencity.dto.PageableDto;
 import greencity.dto.notification.NewNotificationDtoRequest;
 import greencity.dto.notification.NotificationDtoResponse;
+import greencity.dto.notification.NotificationsDto;
 import greencity.dto.notification.ShortNotificationDtoResponse;
 import greencity.dto.user.UserVO;
+import greencity.enums.NotificationSourceType;
 import greencity.service.NotificationService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -123,8 +125,59 @@ public class NotificationController {
 
     @GetMapping("/friend-requests")
     public ResponseEntity<PageableDto<NotificationDtoResponse>> findAllFriendRequestsByUserId(@ApiIgnore @CurrentUser UserVO userVO,
-                                                                                 @ApiIgnore Pageable page) {
+                                                                                              @ApiIgnore Pageable page) {
         return ResponseEntity.ok(notificationService.findAllFriendRequestsByUserId(userVO.getId(), page));
+    }
 
+    /**
+     * Retrieves the latest notifications related to likes for the current user.
+     *
+     * @param userVO The authenticated user.
+     * @return ResponseEntity with a list of {@link NotificationsDto} representing like notifications.
+     */
+    @ApiOperation(value = "Get likes notifications for EcoNews")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/likes/eco-news")
+    public ResponseEntity<List<NotificationsDto>> getLastLikesForEcoNews(@ApiIgnore @CurrentUser UserVO userVO) {
+        return ResponseEntity.ok(notificationService.getNotificationsForCurrentUser(userVO.getId(), NotificationSourceType.NEWS_LIKED));
+    }
+
+    /**
+     * Retrieves the last likes notifications for EcoNews comments for the current user.
+     *
+     * @param userVO The UserVO representing the current user.
+     * @return A {@link ResponseEntity} containing a list of {@link NotificationsDto} representing the last likes notifications
+     * for EcoNews comments.
+     */
+    @ApiOperation(value = "Get likes notification for EcoNews comments")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/likes/eco-news-comments")
+    public ResponseEntity<List<NotificationsDto>> getLastLikesForEcoNewsComments(@ApiIgnore @CurrentUser UserVO userVO) {
+        return ResponseEntity.ok(notificationService.getNotificationsForCurrentUser(userVO.getId(), NotificationSourceType.COMMENT_LIKED));
+    }
+
+    /**
+     * Retrieves the latest notifications related to comments for the current user.
+     *
+     * @param userVO The authenticated user.
+     * @return ResponseEntity with a list of {@link NotificationsDto}o representing comment notifications.
+     */
+    @ApiOperation(value = "Get comments notifications")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/comments")
+    public ResponseEntity<List<NotificationsDto>> getLastComments(@ApiIgnore @CurrentUser UserVO userVO) {
+        return ResponseEntity.ok(notificationService.getNotificationsForCurrentUser(userVO.getId(), NotificationSourceType.NEWS_COMMENTED));
     }
 }

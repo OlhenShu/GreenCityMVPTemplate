@@ -3,17 +3,23 @@ package greencity.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
+import greencity.dto.econews.EcoNewsVO;
 import greencity.dto.notification.NewNotificationDtoRequest;
 import greencity.dto.notification.NotificationDtoResponse;
+import greencity.dto.notification.NotificationsDto;
 import greencity.dto.notification.ShortNotificationDtoResponse;
+import greencity.dto.user.UserVO;
+import greencity.entity.EcoNewsComment;
 import greencity.entity.Notification;
 import greencity.entity.NotifiedUser;
 import greencity.entity.User;
+import greencity.enums.NotificationSourceType;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.mapping.NotificationDtoResponseMapper;
 import greencity.repository.NotificationRepo;
 import greencity.repository.NotifiedUserRepo;
+import greencity.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -38,6 +44,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationDtoResponseMapper mapper;
     private final NotifiedUserRepo notifiedUserRepo;
     private final ModelMapper modelMapper;
+    private final UserRepo userRepo;
 
 
     /**
@@ -163,10 +170,10 @@ public class NotificationServiceImpl implements NotificationService {
         Notification save = notificationRepo.save(createFriendNotification(author));
         User friend = modelMapper.map(userService.findById(friendId), User.class);
         notifiedUserRepo.save(NotifiedUser.builder()
-                                .notification(save)
-                                .user(friend)
-                                .isRead(false)
-                                .build());
+                .notification(save)
+                .user(friend)
+                .isRead(false)
+                .build());
     }
 
     @Override
@@ -177,6 +184,75 @@ public class NotificationServiceImpl implements NotificationService {
                                 () -> new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND_BY_ID + notificationId)
                         );
         return modelMapper.map(notification, NotificationDtoResponse.class);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public List<NotificationsDto> getNotificationsForCurrentUser(Long userId, NotificationSourceType sourceType) {
+        List<NotifiedUser> allUnreadNotificationsByUserId = notifiedUserRepo.findAllUnreadNotificationsByUserId(userId, sourceType);
+        List<NotificationsDto> notifications = allUnreadNotificationsByUserId.stream()
+                .map(user -> NotificationsDto.builder()
+                        .userName(user.getNotification().getAuthor().getName())
+                        .objectTitle(user.getNotification().getTitle())
+                        .notificationTime(user.getNotification().getCreationDate())
+                        .build())
+                .collect(Collectors.toList());
+        if (notifications.isEmpty()) {
+            throw new NotFoundException("No new notification for current user");
+        }
+        return notifications;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void createNotification(UserVO userVO, Object sourceVO, NotificationSourceType sourceType) {
+        User author = userRepo.findById(userVO.getId())
+                .orElseThrow(() -> new NotFoundException(String.format("User with id: %d not found", userVO.getId())));
+
+        String title;
+        Long sourceId;
+        UserVO sourceAuthor;
+
+        if (sourceVO instanceof EcoNewsVO) {
+            EcoNewsVO ecoNewsVO = (EcoNewsVO) sourceVO;
+            title = ecoNewsVO.getTitle();
+            sourceId = ecoNewsVO.getId();
+            sourceAuthor = ecoNewsVO.getAuthor();
+        } else if (sourceVO instanceof EcoNewsComment) {
+            EcoNewsComment ecoNewsComment = (EcoNewsComment) sourceVO;
+            title = ecoNewsComment.getEcoNews().getTitle();
+            sourceId = ecoNewsComment.getEcoNews().getId();
+            sourceAuthor = modelMapper.map(ecoNewsComment.getEcoNews().getAuthor(), UserVO.class);
+        } else {
+            throw new NotFoundException("Not found source author");
+        }
+
+        Notification newNotification = Notification.builder()
+                .title(title)
+                .sourceId(sourceId)
+                .sourceType(sourceType)
+                .author(author)
+                .creationDate(ZonedDateTime.now())
+                .build();
+
+        Notification savedNotification = notificationRepo.save(newNotification);
+        log.info("Notification with id: {} was saved", savedNotification.getId());
+
+        NotifiedUser notifiedUser = NotifiedUser.builder()
+                .isRead(false)
+                .user(userRepo.findById(sourceAuthor.getId())
+                        .orElseThrow(() -> new NotFoundException(String.format("User with id: %d not found", sourceAuthor.getId()))))
+                .notification(savedNotification)
+                .build();
+
+        NotifiedUser savedUser = notifiedUserRepo.save(notifiedUser);
+        log.info("Notified user with id {} was saved", savedUser.getId());
     }
 
     private Notification createFriendNotification(User author) {

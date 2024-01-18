@@ -9,6 +9,7 @@ import greencity.dto.user.UserVO;
 import greencity.entity.EcoNews;
 import greencity.entity.EcoNewsComment;
 import greencity.entity.User;
+import greencity.enums.NotificationSourceType;
 import greencity.enums.Role;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
@@ -40,6 +41,7 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
     private final greencity.rating.RatingCalculation ratingCalculation;
     private final HttpServletRequest httpServletRequest;
     private final EcoNewsRepo ecoNewsRepo;
+    private final NotificationService notificationService;
 
     /**
      * Method to save {@link greencity.entity.EcoNewsComment}.
@@ -73,6 +75,7 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture.runAsync(
             () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_COMMENT, userVO, accessToken));
+        notificationService.createNotification(userVO, ecoNewsVO, NotificationSourceType.NEWS_COMMENTED);
         return modelMapper.map(ecoNewsCommentRepo.save(ecoNewsComment), AddEcoNewsCommentDtoResponse.class);
     }
 
@@ -203,6 +206,7 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
             ecoNewsService.likeComment(userVO, ecoNewsCommentVO);
         }
         ecoNewsCommentRepo.save(modelMapper.map(ecoNewsCommentVO, EcoNewsComment.class));
+        notificationService.createNotification(userVO, comment, NotificationSourceType.COMMENT_LIKED);
     }
 
     /**
