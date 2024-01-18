@@ -50,6 +50,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventDto save(AddEventDtoRequest addEventDtoRequest, UserVO userVO, MultipartFile[] images) {
+        addAddressToLocation(addEventDtoRequest.getDatesLocations());
         Event event = modelMapper.map(addEventDtoRequest, Event.class);
         List<EventDateLocation> eventDateLocations = addEventDtoRequest.getDatesLocations()
                 .stream()
@@ -67,7 +68,7 @@ public class EventServiceImpl implements EventService {
         saveImages(images, event);
         EventDto eventDto = modelMapper.map(eventRepo.save(event), EventDto.class);
         tagConvertor(event, eventDto);
-        addAddressToLocation(eventDto.getDates());
+
         return eventDto;
     }
 
