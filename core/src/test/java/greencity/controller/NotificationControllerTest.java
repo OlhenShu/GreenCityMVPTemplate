@@ -124,7 +124,7 @@ class NotificationControllerTest {
     }
 
     @Test
-    void testGetLastLikesForEcoNewsComments() throws Exception {
+    public void testGetLastLikesForEcoNewsComments() throws Exception {
         List<NotificationsDto> mockNotificationList = new ArrayList<>();
 
         when(notificationService.getNotificationsForCurrentUser(anyLong(), eq(NotificationSourceType.COMMENT_LIKED)))

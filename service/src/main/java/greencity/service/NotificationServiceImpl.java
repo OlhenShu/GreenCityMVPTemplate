@@ -43,9 +43,8 @@ public class NotificationServiceImpl implements NotificationService {
     private final UserService userService;
     private final NotificationDtoResponseMapper mapper;
     private final NotifiedUserRepo notifiedUserRepo;
-    private final ModelMapper modelMapper;
     private final UserRepo userRepo;
-
+    private final ModelMapper modelMapper;
 
     /**
      * {@inheritDoc}
@@ -178,7 +177,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public NotificationDtoResponse findById(Long notificationId) {
-            Notification notification =
+        Notification notification =
                 notificationRepo.findById(notificationId)
                         .orElseThrow(
                                 () -> new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND_BY_ID + notificationId)
