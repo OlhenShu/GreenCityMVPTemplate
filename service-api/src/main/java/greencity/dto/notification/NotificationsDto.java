@@ -13,5 +13,6 @@ import java.time.ZonedDateTime;
 public class NotificationsDto {
     private String userName;
     private String objectTitle;
+    private String notificationSource;
     private ZonedDateTime notificationTime;
 }

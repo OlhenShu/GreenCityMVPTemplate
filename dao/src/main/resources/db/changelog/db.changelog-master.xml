@@ -179,5 +179,6 @@
     <include file="db/changelog/logs/ch-add-table-users-friends-Liubchenko.xml"/>
     <include file="db/changelog/logs/ch-change-table-notification-and-add-table-notified-users-Kizerov.xml"/>
     <include file="db/changelog/logs/ch-change-users-addColumn-Klopov.xml"/>
+    <include file="/db/changelog/logs/ch-change-notifications-add-column-notification-source-Kizerov.xml"/>
 </databaseChangeLog>
 

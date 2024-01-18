@@ -26,7 +26,8 @@ public interface NotifiedUserRepo extends JpaRepository<NotifiedUser, Long> {
      * @param userId The ID of the user for whom to retrieve notifications.
      * @return List of the top 3 unread notifications for the specified user, ordered by creation date.
      */
-    @Query("SELECT nu.notification FROM NotifiedUser nu "
+    @Query( "SELECT nu FROM NotifiedUser nu "
+            + "JOIN FETCH nu.notification n "
             + "WHERE nu.user.id = :userId AND nu.isRead = false "
             + "ORDER BY nu.notification.creationDate DESC")
     List<Notification> findTop3UnreadNotificationsForUser(@Param("userId") Long userId);

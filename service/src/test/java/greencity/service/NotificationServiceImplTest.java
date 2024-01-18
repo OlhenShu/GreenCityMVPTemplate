@@ -10,6 +10,7 @@ import greencity.dto.user.UserVO;
 import greencity.entity.Notification;
 import greencity.entity.NotifiedUser;
 import greencity.entity.User;
+import greencity.enums.NotificationSource;
 import greencity.enums.NotificationSourceType;
 import greencity.enums.Role;
 import greencity.exception.exceptions.NotFoundException;
@@ -179,7 +180,7 @@ class NotificationServiceImplTest {
         User author = ModelUtils.getUser();
 
         Notification notification = new Notification(2L, user, title, ZonedDateTime.now(),
-                NotificationSourceType.FRIEND_REQUEST, 1L, null);
+                NotificationSourceType.FRIEND_REQUEST, 1L, NotificationSource.FRIENDS_REQUEST, null);
 
         NotifiedUser savedUser = NotifiedUser.builder()
                 .id(1L)
@@ -229,7 +230,7 @@ class NotificationServiceImplTest {
         User author = ModelUtils.getUser();
 
         Notification savedNotification = new Notification(2L, author, "title", ZonedDateTime.now(),
-                NotificationSourceType.FRIEND_REQUEST, 1L, null);
+                NotificationSourceType.FRIEND_REQUEST, 1L, NotificationSource.FRIENDS_REQUEST, null);
 
         NotifiedUser savedUser = NotifiedUser.builder()
                 .id(1L)
