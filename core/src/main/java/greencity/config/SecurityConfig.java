@@ -248,7 +248,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/favorite_place/{placeId}",
                 "/social-networks",
                 USER_CUSTOM_SHOPPING_LIST_ITEMS,
-                USER_SHOPPING_LIST + "/user-shopping-list-items")
+                USER_SHOPPING_LIST + "/user-shopping-list-items",
+                "/notifications/{notificationId:[0-9]+}")
             .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.GET,
                 "/newsSubscriber",

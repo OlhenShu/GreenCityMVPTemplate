@@ -109,4 +109,12 @@ public interface NotificationService {
      * @param sourceType The type of the notification source.
      */
     void createNotification(UserVO userVO, Object source, NotificationSourceType sourceType);
+
+    /**
+     * Method for deleting Notification by its id.
+     *
+     * @param notificationId Notification id which will be deleted.
+     * @param user {@link UserVO}, which notification will be deleted
+     */
+    void delete(Long notificationId, UserVO user);
 }

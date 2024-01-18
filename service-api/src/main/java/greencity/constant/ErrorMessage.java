@@ -83,7 +83,6 @@ public final class ErrorMessage {
     public static final String OWN_USER_ID = "You can not perform actions with your own id : ";
     public static final String NOT_FOUND_REQUEST = "Not found friend request from user with id: ";
     public static final String NOT_FOUND_ANY_FRIENDS = "Not found any friends by id: ";
-    public static final String NOTIFICATION_NOT_FOUND_BY_ID = "Notification not found by id: ";
     public static final String NOT_FOUND_UNREAD_NOTIFICATION = "Not found unread notification for current user";
     public static final String NOTIFICATION_ALREADY_READ = "The notification has already been read";
     public static final String CUSTOM_SHOPPING_LIST_ITEM_WHERE_NOT_SAVED =
@@ -136,6 +135,7 @@ public final class ErrorMessage {
     public static final String FILTER_NOT_FOUND_BY_ID = "Filter not found";
     public static final String USER_HAS_NO_FRIEND_WITH_ID = "User has no friend with this id: ";
     public static final String INVALID_DURATION = "The duration for such habit is lower than previously set";
+    public static final String NOTIFICATION_NOT_FOUND_BY_ID = "Notification doesn't exist by this id: ";
     public static final String INVALID_LENGTH_OF_QUERY_NAME = "The name query must be between 1 and 30 characters.";
     public static final String USER_ALREADY_HAS_CONNECTION = "User already has %s connection with this user";
 

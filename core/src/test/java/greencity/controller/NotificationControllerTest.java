@@ -9,6 +9,9 @@ import greencity.dto.user.UserVO;
 import greencity.enums.NotificationSourceType;
 import greencity.service.NotificationService;
 import greencity.service.UserService;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +31,14 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -137,5 +148,16 @@ class NotificationControllerTest {
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1)).getNotificationsForCurrentUser(anyLong(), eq(NotificationSourceType.COMMENT_LIKED));
+    }
+
+    @Test
+    void deleteTest () throws Exception {
+        when(userService.findByEmail(anyString())).thenReturn(userVO);
+
+        mockMvc.perform(delete(link + "/{notificationId}",2L)
+                .principal(userVO::getEmail))
+            .andExpect(status().isOk());
+        verify(notificationService).delete(2L, userVO);
+
     }
 }

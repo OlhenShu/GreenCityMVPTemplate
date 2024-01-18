@@ -14,12 +14,17 @@ import greencity.entity.NotifiedUser;
 import greencity.entity.User;
 import greencity.enums.NotificationSource;
 import greencity.enums.NotificationSourceType;
+import greencity.enums.Role;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
+import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.mapping.NotificationDtoResponseMapper;
 import greencity.repository.NotificationRepo;
 import greencity.repository.NotifiedUserRepo;
 import greencity.repository.UserRepo;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -29,15 +34,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import static greencity.enums.NotificationSourceType.FRIEND_REQUEST;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepo notificationRepo;
     private final UserService userService;
@@ -50,7 +52,6 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
-    @Transactional(readOnly = true)
     public List<ShortNotificationDtoResponse> getTheLatestThreeNotifications(Long receiverId) {
         return notificationRepo.findTop3ByReceiversIdOrderByCreationDate(receiverId, PageRequest.of(0, 3));
     }
@@ -122,6 +123,17 @@ public class NotificationServiceImpl implements NotificationService {
         log.info("Successfully update status");
     }
 
+    @Override
+    @Transactional
+    public void delete(Long notificationId, UserVO user) {
+        Notification notification = notificationRepo.findById(notificationId)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND_BY_ID + notificationId));
+        if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(notification.getAuthor().getId())) {
+            throw new UserHasNoPermissionToAccessException(ErrorMessage.USER_HAS_NO_PERMISSION);
+        }
+        notificationRepo.deleteById(notificationId);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -180,6 +192,9 @@ public class NotificationServiceImpl implements NotificationService {
                 .build());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public NotificationDtoResponse findById(Long notificationId) {
         Notification notification =
