@@ -4,6 +4,10 @@ import lombok.Getter;
 
 @Getter
 public enum RatingCalculationEnum {
+    ACQUIRED_HABIT_14_DAYS(20),
+    ACQUIRED_HABIT_21_DAYS(30),
+    ACQUIRED_HABIT_30_DAYS(40),
+
     ADD_COMMENT(2),
     DELETE_COMMENT(-2),
     LIKE_COMMENT(1),
