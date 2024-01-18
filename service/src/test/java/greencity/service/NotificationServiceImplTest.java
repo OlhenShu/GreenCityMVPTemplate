@@ -11,10 +11,17 @@ import greencity.entity.Notification;
 import greencity.entity.NotifiedUser;
 import greencity.entity.User;
 import greencity.enums.NotificationSourceType;
+import greencity.enums.Role;
 import greencity.exception.exceptions.NotFoundException;
+import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.repository.NotificationRepo;
 import greencity.repository.NotifiedUserRepo;
 import greencity.repository.UserRepo;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,12 +33,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -298,4 +299,53 @@ class NotificationServiceImplTest {
                         .build())
                 .build();
     }
+
+    @Test
+    void deleteTest () {
+        Notification notification = Notification.builder()
+            .id(1L)
+            .author(ModelUtils.getUser())
+            .build();
+
+        when(notificationRepo.findById(anyLong())).thenReturn(Optional.of(notification));
+
+        notificationService.delete(1L, userVO);
+
+        verify(notificationRepo).deleteById(1L);
+    }
+
+    @Test
+    void deleteWhenNotificationIsNotFoundThrowsNotFoundExceptionTest () {
+        assertThrows(NotFoundException.class, () -> notificationService.delete(1L, userVO));
+    }
+
+    @Test
+    void deleteWhenDeletingForeignNotificationWithoutAnAdminRoleThrowsUserHasNoPermissionToAccessExceptionTest () {
+        User user = ModelUtils.getUser();
+        user.setId(2L);
+        Notification notification = Notification.builder()
+            .id(1L)
+            .author(user)
+            .build();
+
+        when(notificationRepo.findById(anyLong())).thenReturn(Optional.of(notification));
+
+        assertThrows(UserHasNoPermissionToAccessException.class, () -> notificationService.delete(1L, userVO));
+    }
+
+    @Test
+    void deleteWhenDeletingForeignNotificationWithAnAdminRoleTest () {
+        User user = ModelUtils.getUser();
+        user.setId(2L);
+        user.setRole(Role.ROLE_ADMIN);
+        Notification notification = Notification.builder()
+            .id(1L)
+            .author(user)
+            .build();
+
+        when(notificationRepo.findById(anyLong())).thenReturn(Optional.of(notification));
+
+        assertThrows(UserHasNoPermissionToAccessException.class, () -> notificationService.delete(1L, userVO));
+    }
 }
+

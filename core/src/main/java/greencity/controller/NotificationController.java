@@ -14,14 +14,13 @@ import greencity.service.NotificationService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/notifications")
@@ -122,6 +121,26 @@ public class NotificationController {
             @RequestBody NewNotificationDtoRequest request
     ) {
         return ResponseEntity.ok(notificationService.createNewNotification(userVO.getId(), request));
+    }
+
+    /**
+     * Method for deleting Notification by its id.
+     *
+     * @param notificationId Notification id which will be deleted.
+     * @return status
+     */
+    @ApiOperation(value = "Delete notification.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @DeleteMapping("/{notificationId}")
+    public ResponseEntity<ResponseEntity.BodyBuilder> delete(@PathVariable Long notificationId,
+                                                             @ApiIgnore @CurrentUser UserVO user) {
+        notificationService.delete(notificationId, user);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**
