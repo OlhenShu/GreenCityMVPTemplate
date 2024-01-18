@@ -73,6 +73,44 @@ public interface NotificationService {
     void readLatestNotification(Long userId);
 
     /**
+     * Sends a friend request to the specified user.
+     *
+     * @param authorId the ID of the author for the notification
+     * @param friendId the object containing data to create the notification
+     * @author Klopov Dmytro
+     */
+    void friendRequestNotification(Long authorId, Long friendId);
+
+    /**
+     * Retrieves a notification by its unique identifier.
+     * This method is designed to fetch a specific notification based on the provided notification ID.
+     *
+     * @param notificationId The unique identifier of the notification to be retrieved.
+     * @return A NotificationDtoResponse object representing the retrieved notification.
+     * @see greencity.dto.notification.NotificationDtoResponse
+     */
+    NotificationDtoResponse findById(Long notificationId);
+
+    /**
+     * Retrieves the notifications related to EcoNews for the specified user.
+     *
+     * @param userId     The ID of the user to fetch notifications for.
+     * @param sourceType The type of the notification source.
+     * @return List of {@link NotificationsDto} representing notifications for EcoNews.
+     * @author Kizerov Dmytro
+     */
+    List<NotificationsDto> getNotificationsForCurrentUser(Long userId, NotificationSourceType sourceType);
+
+    /**
+     * Creates a notification for the specified user based on the provided source and source type.
+     *
+     * @param userVO     The UserVO for whom the notification is created.
+     * @param source     The source object (e.g., EcoNewsVO, EcoNewsComment) providing information for the notification.
+     * @param sourceType The type of the notification source.
+     */
+    void createNotification(UserVO userVO, Object source, NotificationSourceType sourceType);
+
+    /**
      * Method for deleting Notification by its id.
      *
      * @param notificationId Notification id which will be deleted.

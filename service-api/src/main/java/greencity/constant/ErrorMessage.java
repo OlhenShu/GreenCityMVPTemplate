@@ -83,7 +83,6 @@ public final class ErrorMessage {
     public static final String OWN_USER_ID = "You can not perform actions with your own id : ";
     public static final String NOT_FOUND_REQUEST = "Not found friend request from user with id: ";
     public static final String NOT_FOUND_ANY_FRIENDS = "Not found any friends by id: ";
-    public static final String NOTIFICATION_NOT_FOUND_BY_ID = "Notification not found by id: ";
     public static final String NOT_FOUND_UNREAD_NOTIFICATION = "Not found unread notification for current user";
     public static final String NOTIFICATION_ALREADY_READ = "The notification has already been read";
     public static final String CUSTOM_SHOPPING_LIST_ITEM_WHERE_NOT_SAVED =
