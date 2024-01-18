@@ -240,19 +240,16 @@ public class EventServiceImpl implements EventService {
 
     private void saveImages(MultipartFile[] images, Event event) {
         if (images != null && images.length > 0) {
-            List<MultipartFile> files = new ArrayList<>(Arrays.asList(images));
-            List<EventImages> imagesUrl = files
-                    .stream()
+            List<EventImages> imagesUrl = Arrays.stream(images)
                     .filter(Objects::nonNull)
                     .map(fileService::upload)
                     .map(image -> {
-                        EventImages newEvent = new EventImages();
-                        newEvent.setLink(image);
-                        newEvent.setEvent(event);
-                        return newEvent;
+                        EventImages eventImages = new EventImages();
+                        eventImages.setLink(image);
+                        eventImages.setEvent(event);
+                        return eventImages;
                     })
                     .collect(Collectors.toList());
-
             if (!imagesUrl.isEmpty()) {
                 event.setTitleImage(imagesUrl.get(0).getLink());
                 event.setAdditionalImages(imagesUrl);
