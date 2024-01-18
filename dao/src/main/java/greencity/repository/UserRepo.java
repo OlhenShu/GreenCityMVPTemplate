@@ -224,7 +224,7 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
     @Modifying
     @Transactional
     @Query(nativeQuery = true,
-            value = "UPDATE users_friends SET status = 'DECLINED' WHERE user_id = :userId AND friend_id = :friendId")
+            value = "UPDATE users_friends SET status = 'DECLINED' WHERE user_id = :friendId AND friend_id = :userId")
     void declineFriendRequest(Long userId, Long friendId);
 
 }

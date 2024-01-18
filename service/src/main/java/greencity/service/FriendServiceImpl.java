@@ -40,11 +40,9 @@ public class FriendServiceImpl implements FriendService {
     public PageableDto<UserFriendDto> getUserFriendsByUserId(Long userId, Pageable pageable) {
         validateUserExist(userId);
         Page<User> allUserFriends = userRepo.getAllUserFriendsPage(pageable, userId);
-
         List<UserFriendDto> userFriendDtoList =
                 allUserFriends.stream().map(e -> modelMapper.map(e, UserFriendDto.class))
                         .collect(Collectors.toList());
-
         return new PageableDto<>(
                 userFriendDtoList,
                 allUserFriends.getTotalElements(),
@@ -114,6 +112,13 @@ public class FriendServiceImpl implements FriendService {
         validateUserExist(userId);
         validateUserExist(friendId);
         validateIsNotSameUsers(userId, friendId);
+        User user = userRepo.findById(friendId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + friendId));
+        String status = user.getConnections().stream().filter(c -> Objects.equals(c.getFriend().getId(), userId))
+                .findAny().map(UserFriend::getStatus).orElse(null);
+        if (!status.equals("REQUEST")) {
+            throw new BadRequestException(String.format(ErrorMessage.USER_ALREADY_HAS_CONNECTION, status));
+        }
         userRepo.acceptFriendRequest(userId, friendId);
     }
     /**
@@ -125,6 +130,13 @@ public class FriendServiceImpl implements FriendService {
         validateUserExist(userId);
         validateUserExist(friendId);
         validateIsNotSameUsers(userId, friendId);
+        User user = userRepo.findById(friendId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + friendId));
+        String status = user.getConnections().stream().filter(c -> Objects.equals(c.getFriend().getId(), userId))
+                .findAny().map(UserFriend::getStatus).orElse(null);
+        if (!status.equals("REQUEST")) {
+            throw new BadRequestException(String.format(ErrorMessage.USER_ALREADY_HAS_CONNECTION, status));
+        }
         userRepo.declineFriendRequest(userId, friendId);
     }
 

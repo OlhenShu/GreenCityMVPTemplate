@@ -47,6 +47,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String CUSTOM_SHOPPING_LIST_ITEMS = "/{userId}/custom-shopping-list-items";
     private static final String HABIT_ASSIGN_ID = "/habit/assign/{habitId}";
     private static final String USER_SHOPPING_LIST = "/user/shopping-list-items";
+
     private final JwtTool jwtTool;
     private final UserService userService;
 
@@ -184,6 +185,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/habit/{habitId}/friends/profile-pictures",
                 "/friends",
                 "/friends/not-friends-yet",
+                "/friends/all",
                 "/habit/{habitId}/friends/profile-pictures",
                 "/notifications/latest")
             .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
@@ -233,7 +235,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/user/profilePicture",
                 "/user/deleteProfilePicture",
                 "/friends/{friendId}/acceptRequest",
-                "/friends/{friendId}/declineRequest")
+                "/friends/{friendId}/rejectRequest")
             .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.DELETE,
                 ECONEWS_COMMENTS,
