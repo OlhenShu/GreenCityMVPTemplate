@@ -252,7 +252,7 @@ public class NotificationServiceImpl implements NotificationService {
             title = ecoNewsComment.getEcoNews().getTitle();
             sourceId = ecoNewsComment.getEcoNews().getId();
             sourceAuthor = modelMapper.map(ecoNewsComment.getEcoNews().getAuthor(), UserVO.class);
-            source = NotificationSource.COMMENT;
+            source = NotificationSource.NEWS;
         } else {
             throw new NotFoundException("Not found source author");
         }
