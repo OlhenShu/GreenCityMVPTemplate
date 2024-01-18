@@ -11,12 +11,6 @@ import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotDeletedException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.repository.UserRepo;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -27,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -44,12 +39,10 @@ public class FriendServiceImpl implements FriendService {
     private final ModelMapper modelMapper;
     private final UserRepo userRepo;
     private final NotificationService notificationService;
-    private final ModelMapper modelMapper;
 
     /**
      * {@inheritDoc}
      */
-
     @Override
     public PageableDto<UserFriendDto> getUserFriendsByUserId(Long userId, Pageable pageable) {
         validateUserExist(userId);
@@ -63,7 +56,11 @@ public class FriendServiceImpl implements FriendService {
                 allUserFriends.getPageable().getPageNumber(),
                 allUserFriends.getTotalPages()
         );
+    }
 
+    /**
+     * {@inheritDoc}
+     */
     public PageableDto<UserFriendDto> findAllUsersFriends(Long userId, Pageable pageable) {
         List<User> friends = userRepo.getAllUserFriends(userId);
         if (friends.isEmpty()) {
@@ -78,7 +75,8 @@ public class FriendServiceImpl implements FriendService {
             friendDtoPage.getContent(),
             friendDtoPage.getTotalElements(),
             friendDtoPage.getPageable().getPageNumber(),
-            friendDtoPage.getTotalPages());
+            friendDtoPage.getTotalPages()
+        );
     }
 
     /**
@@ -131,6 +129,7 @@ public class FriendServiceImpl implements FriendService {
         notificationService.friendRequestNotification(userId, friendId);
         userRepo.addFriend(userId, friendId);
     }
+
     /**
      * {@inheritDoc}
      */
@@ -149,6 +148,7 @@ public class FriendServiceImpl implements FriendService {
         }
         userRepo.acceptFriendRequest(userId, friendId);
     }
+
     /**
      * {@inheritDoc}
      */

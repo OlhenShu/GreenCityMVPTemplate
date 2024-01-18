@@ -221,8 +221,6 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     /**
      * {@inheritDoc}
      *
-     * @return
-     * @author Kovaliv Taras.
      */
     @Override
     public PageableAdvancedDto<EcoNewsGenericDto> find(Pageable page, List<String> tags) {
@@ -324,8 +322,9 @@ public class EcoNewsServiceImpl implements EcoNewsService {
             throw new UserHasNoPermissionToAccessException(ErrorMessage.USER_HAS_NO_PERMISSION);
         }
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
-        CompletableFuture.runAsync(
-                () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.DELETE_ECO_NEWS, user, accessToken));
+        CompletableFuture.runAsync(() -> ratingCalculation.ratingCalculation(
+                RatingCalculationEnum.DELETE_ECO_NEWS, user, accessToken)
+        );
         ecoNewsRepo.deleteById(ecoNewsVO.getId());
     }
 
@@ -416,7 +415,8 @@ public class EcoNewsServiceImpl implements EcoNewsService {
         comment.getUsersLiked().add(user);
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture
-                .runAsync(() -> ratingCalculation.ratingCalculation(RatingCalculationEnum.LIKE_COMMENT, user, accessToken));
+                .runAsync(() -> ratingCalculation
+                        .ratingCalculation(RatingCalculationEnum.LIKE_COMMENT, user, accessToken));
     }
 
     /**
@@ -429,8 +429,8 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     public void unlikeComment(UserVO user, EcoNewsCommentVO comment) {
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         comment.getUsersLiked().removeIf(u -> u.getId().equals(user.getId()));
-        CompletableFuture
-                .runAsync(() -> ratingCalculation.ratingCalculation(RatingCalculationEnum.LIKE_COMMENT, user, accessToken));
+        CompletableFuture.runAsync(() -> ratingCalculation
+                .ratingCalculation(RatingCalculationEnum.LIKE_COMMENT, user, accessToken));
     }
 
     @Override
@@ -778,8 +778,8 @@ public class EcoNewsServiceImpl implements EcoNewsService {
         try {
             ecoNewsRepo.save(toSave);
             String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
-            CompletableFuture.runAsync(
-                    () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_ECO_NEWS, byEmail, accessToken));
+            CompletableFuture.runAsync(() -> ratingCalculation
+                    .ratingCalculation(RatingCalculationEnum.ADD_ECO_NEWS, byEmail, accessToken));
         } catch (DataIntegrityViolationException e) {
             throw new NotSavedException(ErrorMessage.ECO_NEWS_NOT_SAVED);
         }

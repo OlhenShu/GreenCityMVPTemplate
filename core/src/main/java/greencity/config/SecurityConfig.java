@@ -187,7 +187,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/friends/not-friends-yet",
                 "/friends/all",
                 "/habit/{habitId}/friends/profile-pictures",
-                "/notifications/latest")
+                "/notifications/latest",
                 "/friends/recommended")
 
             .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)

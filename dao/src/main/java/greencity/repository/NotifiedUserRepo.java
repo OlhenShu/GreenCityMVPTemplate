@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface NotifiedUserRepo extends JpaRepository<NotifiedUser, Long> {
-
     /**
      * Retrieves a notified user by the specified user ID and notification ID.
      *
@@ -27,9 +26,9 @@ public interface NotifiedUserRepo extends JpaRepository<NotifiedUser, Long> {
      * @param userId The ID of the user for whom to retrieve notifications.
      * @return List of the top 3 unread notifications for the specified user, ordered by creation date.
      */
-    @Query("SELECT nu.notification FROM NotifiedUser nu " +
-           "WHERE nu.user.id = :userId AND nu.isRead = false " +
-           "ORDER BY nu.notification.creationDate DESC")
+    @Query("SELECT nu.notification FROM NotifiedUser nu"
+            + "WHERE nu.user.id = :userId AND nu.isRead = false "
+            + "ORDER BY nu.notification.creationDate DESC")
     List<Notification> findTop3UnreadNotificationsForUser(@Param("userId") Long userId);
 
     /**
@@ -48,12 +47,12 @@ public interface NotifiedUserRepo extends JpaRepository<NotifiedUser, Long> {
      * @param sourceType The source type of the notifications.
      * @return List of {@link NotifiedUser} representing unread notifications for the specified user and source type.
      */
-    @Query("SELECT nu FROM NotifiedUser nu " +
-           "JOIN FETCH nu.notification n " +
-           "WHERE nu.user.id = :userId " +
-           "AND nu.isRead = false " +
-           "AND n.sourceType = :sourceType " +
-           "ORDER BY n.creationDate DESC")
+    @Query("SELECT nu FROM NotifiedUser nu "
+            + "JOIN FETCH nu.notification n "
+            + "WHERE nu.user.id = :userId "
+            + "AND nu.isRead = false "
+            + "AND n.sourceType = :sourceType "
+            + "ORDER BY n.creationDate DESC")
     List<NotifiedUser> findAllUnreadNotificationsByUserId(@Param("userId") Long userId,
                                                           @Param("sourceType") NotificationSourceType sourceType);
 }

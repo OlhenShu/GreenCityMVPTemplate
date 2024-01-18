@@ -31,7 +31,6 @@ public interface NotificationService {
      * @param userId The unique identifier of the user for whom friend requests are to be retrieved.
      * @param page   The pagination information to determine the page number, size, sorting, etc.
      * @return A {@link PageableDto} containing {@link NotificationDtoResponse} objects representing friend requests.
-     * The list is paginated based on the provided {@code page} parameter.
      * @author Dmytro Klopov
      * @see NotificationDtoResponse
      * @see PageableDto
@@ -43,14 +42,13 @@ public interface NotificationService {
      * Retrieves the latest three notifications for a specific receiver as {@link ShortNotificationDtoResponse} objects.
      *
      * @param receiverId The ID of the receiver for whom notifications are retrieved.
-     * @return A list of {@link ShortNotificationDtoResponse} objects representing the latest
-     * three notifications for the given receiver.
+     * @return A list of {@link ShortNotificationDtoResponse} objects representing the latest three notifications
      * @author Nikita Malov
      */
     List<ShortNotificationDtoResponse> getTheLatestThreeNotifications(Long receiverId);
 
     /**
-     * Creates a new notification based on the provided data in the request and returns the corresponding notification DTO.
+     * Creates a new notification based on the provided data in the request and returns the corresponding notification.
      *
      * @param authorId the ID of the author for the notification
      * @param request  the object containing data to create the notification
@@ -75,7 +73,7 @@ public interface NotificationService {
     void readLatestNotification(Long userId);
 
     /**
-     * Sends a friend request to the specified user with
+     * Sends a friend request to the specified user.
      *
      * @param authorId the ID of the author for the notification
      * @param friendId the object containing data to create the notification
@@ -83,6 +81,14 @@ public interface NotificationService {
      */
     void friendRequestNotification(Long authorId, Long friendId);
 
+    /**
+     * Retrieves a notification by its unique identifier.
+     * This method is designed to fetch a specific notification based on the provided notification ID.
+     *
+     * @param notificationId The unique identifier of the notification to be retrieved.
+     * @return A NotificationDtoResponse object representing the retrieved notification.
+     * @see greencity.dto.notification.NotificationDtoResponse
+     */
     NotificationDtoResponse findById(Long notificationId);
 
     /**
@@ -99,7 +105,7 @@ public interface NotificationService {
      * Creates a notification for the specified user based on the provided source and source type.
      *
      * @param userVO     The UserVO for whom the notification is created.
-     * @param source     The source object (e.g., EcoNewsVO, EcoNewsComment and other) providing information for the notification.
+     * @param source     The source object (e.g., EcoNewsVO, EcoNewsComment) providing information for the notification.
      * @param sourceType The type of the notification source.
      */
     void createNotification(UserVO userVO, Object source, NotificationSourceType sourceType);

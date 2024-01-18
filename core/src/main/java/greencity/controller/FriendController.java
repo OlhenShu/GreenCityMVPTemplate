@@ -35,12 +35,17 @@ public class FriendController {
 
     /**
      * Retrieves a paginated list of user friends for the authenticated user.
-     *
      * @param pageable The pagination information for the result set.
      * @param userVO   The authenticated user details.
      * @return A {@link ResponseEntity} containing a {@link PageableDto} of {@link UserFriendDto}.
-     * The page is based on the provided pagination information.
      */
+    @ApiOperation(value = "Searches for current user`s friends.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
     @GetMapping("/all")
     public ResponseEntity<PageableDto<UserFriendDto>> getAllUserFriend(
             @ApiIgnore Pageable pageable,
@@ -120,9 +125,9 @@ public class FriendController {
         friendService.acceptFriendRequest(userVO.getId(), friendId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
     /**
      * Rejects a friend request from another user.
-     *
      * @param friendId The ID of the user who sent the friend request.
      * @param userVO   The authenticated user details.
      * @return A {@link ResponseEntity} representing the result of the operation.
@@ -164,7 +169,6 @@ public class FriendController {
 
     /**
      * Retrieves a paginated list of friends' details with specific filtering criteria.
-     *
      * @param pageable               Pagination information for the resulting list.
      * @param name                   The criteria for filtering friend names (can be null).
      * @param userVO                 User, which friends are being fetched.
@@ -196,10 +200,13 @@ public class FriendController {
     }
 
     /**
-     * Method finds all friends by current user.
+     * Rejects a friend request from a specified user.
+     * This endpoint is mapped to the HTTP PATCH method and is accessible at "/{friendId}/rejectRequest".
      *
-     * @param pageable {@link Pageable} instance.
-     * @return Pageable of {@link UserFriendDto}.
+     * @param friendId The unique identifier of the friend whose request is to be rejected.
+     * @param userVO   The current user information obtained from the authentication context.
+     * @return         A ResponseEntity with an HTTP status code indicating the success or failure of the operation.
+     *
      */
     @ApiOperation(value = "Get current user's friends.")
     @ApiResponses(value = {
@@ -208,39 +215,11 @@ public class FriendController {
             @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-
     @PatchMapping("/{friendId}/rejectRequest")
     public ResponseEntity<ResponseEntity.BodyBuilder> rejectFriendRequest(
             @PathVariable Long friendId, @ApiIgnore @CurrentUser UserVO userVO
     ) {
         friendService.declineFriendRequest(userVO.getId(), friendId);
         return ResponseEntity.status(HttpStatus.OK).build();
-      
-    /**
-    * Retrieves a pageable list of user friends for the specified user.
-    *
-    * This endpoint is mapped to the HTTP GET method and is accessible at "/all".
-    *
-    * @param pageable   The pagination information for retrieving a specific page of user friends.
-    * @param userVO     The current user information obtained from the authentication context.
-    * @return           A ResponseEntity containing a PageableDto of UserFriendDto objects and an HTTP status code.
-    *                   The response body includes information about the user's friends on the specified page.
-    *
-    * @see PageableDto
-    * @see UserFriendDto
-    * @see friendService#findAllUsersFriends
-     */
-    @ApiOperation(value = "Get user's friends")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = HttpStatuses.OK),
-            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
-    })
-    @GetMapping("/all")
-    public ResponseEntity<PageableDto<UserFriendDto>> getUsersFriend(@ApiIgnore Pageable pageable,
-                                                                     @ApiIgnore @CurrentUser UserVO userVO) {
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(friendService.findAllUsersFriends(userVO.getId(), pageable));
     }
 }

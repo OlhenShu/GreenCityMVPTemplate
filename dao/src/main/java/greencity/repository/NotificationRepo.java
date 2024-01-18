@@ -23,6 +23,7 @@ public interface NotificationRepo extends JpaRepository<Notification, Long> {
         + "FROM Notification n LEFT JOIN n.notifiedUsers nu "
         + "WHERE nu.user.id = :receiverId ORDER BY n.creationDate desc")
     List<ShortNotificationDtoResponse> findTop3ByReceiversIdOrderByCreationDate(Long receiverId, Pageable pageable);
+
     /**
      * Method that returns page of {@link NotificationDtoResponse} received by user with specified id.
      *
@@ -36,10 +37,19 @@ public interface NotificationRepo extends JpaRepository<Notification, Long> {
         + "WHERE nu.user.id = :userId ORDER BY n.creationDate DESC")
     Page<NotificationDtoResponse> findAllReceivedNotificationDtoByUserId(Long userId, Pageable page);
 
+    /**
+     * Retrieves a pageable list of friend requests for the specified user.
+     * This query is specifically designed to fetch friend requests by user ID.
+     *
+     * @param userId The unique identifier of the user for whom friend requests are retrieved.
+     * @param page   The pagination information for retrieving a specific page of friend requests.
+     * @return       A Page containing NotificationDtoResponse objects representing friend requests.
+     *               The results are sorted in descending order based on the creation date.
+     * @see greencity.dto.notification.NotificationDtoResponse
+     */
     @Query("SELECT new greencity.dto.notification.NotificationDtoResponse("
             + "n.id, n.author.id, n.author.name, n.title, n.sourceType, n.sourceId, nu.isRead, n.creationDate) "
             + "FROM Notification n LEFT JOIN n.notifiedUsers nu "
             + "WHERE nu.user.id = :userId AND n.sourceType = 'FRIEND_REQUEST' ORDER BY n.creationDate DESC")
     Page<NotificationDtoResponse> findAllFriendRequestsByUserId(Long userId, Pageable page);
-
 }

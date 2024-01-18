@@ -31,11 +31,10 @@ public class NotificationController {
 
     /**
      * Retrieves the three latest notifications for the authenticated user.
-     *
      * @param userVO The UserVO object representing the authenticated user.
      * @return ResponseEntity containing a list of {@link ShortNotificationDtoResponse} objects
-     * representing the three latest notifications.
      */
+
     @ApiOperation(value = "Get three last notifications.")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = HttpStatuses.OK)
@@ -118,14 +117,33 @@ public class NotificationController {
             @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PostMapping("/create")
-    public ResponseEntity<NotificationDtoResponse> createNewNotification(@ApiIgnore @CurrentUser UserVO userVO,
-                                                                         @RequestBody NewNotificationDtoRequest request) {
+    public ResponseEntity<NotificationDtoResponse> createNewNotification(
+            @ApiIgnore @CurrentUser UserVO userVO,
+            @RequestBody NewNotificationDtoRequest request
+    ) {
         return ResponseEntity.ok(notificationService.createNewNotification(userVO.getId(), request));
     }
 
+    /**
+     * Retrieves a pageable list of friend requests for the specified user.
+     * This endpoint is mapped to the HTTP GET method and is accessible at "/friend-requests".
+     *
+     * @param userVO The current user information obtained from the authentication context.
+     * @param page   The pagination information for retrieving a specific page of friend requests.
+     * @return  A ResponseEntity containing a PageableDto of NotificationDtoResponse objects and an HTTP status code.
+     * @see NotificationDtoResponse
+     */
+    @ApiOperation(value = "Get all user friend requests")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
     @GetMapping("/friend-requests")
-    public ResponseEntity<PageableDto<NotificationDtoResponse>> findAllFriendRequestsByUserId(@ApiIgnore @CurrentUser UserVO userVO,
-                                                                                              @ApiIgnore Pageable page) {
+    public ResponseEntity<PageableDto<NotificationDtoResponse>> findAllFriendRequestsByUserId(
+            @ApiIgnore @CurrentUser UserVO userVO,
+            @ApiIgnore Pageable page
+    ) {
         return ResponseEntity.ok(notificationService.findAllFriendRequestsByUserId(userVO.getId(), page));
     }
 
@@ -143,15 +161,15 @@ public class NotificationController {
     })
     @GetMapping("/likes/eco-news")
     public ResponseEntity<List<NotificationsDto>> getLastLikesForEcoNews(@ApiIgnore @CurrentUser UserVO userVO) {
-        return ResponseEntity.ok(notificationService.getNotificationsForCurrentUser(userVO.getId(), NotificationSourceType.NEWS_LIKED));
+        return ResponseEntity.ok(notificationService
+                .getNotificationsForCurrentUser(userVO.getId(), NotificationSourceType.NEWS_LIKED)
+        );
     }
 
     /**
      * Retrieves the last likes notifications for EcoNews comments for the current user.
-     *
      * @param userVO The UserVO representing the current user.
-     * @return A {@link ResponseEntity} containing a list of {@link NotificationsDto} representing the last likes notifications
-     * for EcoNews comments.
+     * @return A {@link ResponseEntity} containing a list of {@link NotificationsDto} representing the last likes
      */
     @ApiOperation(value = "Get likes notification for EcoNews comments")
     @ApiResponses(value = {
@@ -160,8 +178,12 @@ public class NotificationController {
             @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/likes/eco-news-comments")
-    public ResponseEntity<List<NotificationsDto>> getLastLikesForEcoNewsComments(@ApiIgnore @CurrentUser UserVO userVO) {
-        return ResponseEntity.ok(notificationService.getNotificationsForCurrentUser(userVO.getId(), NotificationSourceType.COMMENT_LIKED));
+    public ResponseEntity<List<NotificationsDto>> getLastLikesForEcoNewsComments(
+            @ApiIgnore @CurrentUser UserVO userVO
+    ) {
+        return ResponseEntity.ok(notificationService
+                .getNotificationsForCurrentUser(userVO.getId(), NotificationSourceType.COMMENT_LIKED)
+        );
     }
 
     /**
@@ -178,6 +200,8 @@ public class NotificationController {
     })
     @GetMapping("/comments")
     public ResponseEntity<List<NotificationsDto>> getLastComments(@ApiIgnore @CurrentUser UserVO userVO) {
-        return ResponseEntity.ok(notificationService.getNotificationsForCurrentUser(userVO.getId(), NotificationSourceType.NEWS_COMMENTED));
+        return ResponseEntity.ok(notificationService
+                .getNotificationsForCurrentUser(userVO.getId(), NotificationSourceType.NEWS_COMMENTED)
+        );
     }
 }

@@ -33,6 +33,7 @@ public interface FriendService {
      */
     PageableDto<UserFriendDto> searchFriends(Pageable pageable, String name, UserVO userVO,
                                              Boolean hasSameCity, Boolean hasMutualFriends);
+
     /**
      * Establishes a friendship relationship between a user and another user identified by their IDs.
      *
@@ -40,6 +41,7 @@ public interface FriendService {
      * @param friendId The unique identifier of the user to be added as a friend.
      */
     void addFriend(Long userId, Long friendId);
+
     /**
      * Accepts a friend request from another user, establishing a mutual friendship.
      *
@@ -48,6 +50,7 @@ public interface FriendService {
      * @author Dmytro Klopov
      */
     void acceptFriendRequest(Long userId, Long friendId);
+
     /**
      * Declines a friend request from another user, rejecting the establishment of friendship.
      *

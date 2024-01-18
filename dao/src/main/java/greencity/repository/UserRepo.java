@@ -169,13 +169,12 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
 
     /**
      * Retrieves a paginated list of user friends for a given user.
-     *
      * This method executes a native SQL query to retrieve all users who are friends with the specified user.
      * It considers both sides of the friendship (where the specified user is either the 'user' or the 'friend').
      *
      * @param pageable Pagination information, specifying the page size, page number, sorting, etc.
      * @param userId   The ID of the user for whom to retrieve friends.
-     * @return A {@link org.springframework.data.domain.Page} containing user entities representing friends of the specified user.
+     * @return A {@link org.springframework.data.domain.Page} containing user entities representing friends
      * @author Dmytro Klopov
      */
     @Query(nativeQuery = true, value = "SELECT * FROM users WHERE id IN ( "
@@ -198,7 +197,6 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
   
     /**
      * Accepts a friend request between two users.
-     *
      * This method updates the status of the friendship between the specified user and friend to 'FRIEND'
      * in the 'users_friends' table, indicating that the friend request has been accepted.
      *
@@ -213,7 +211,6 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
     void acceptFriendRequest(Long userId, Long friendId);
     /**
      * Declines a friend request between two users.
-     *
      * This method updates the status of the friendship between the specified user and friend to 'DECLINED'
      * in the 'users_friends' table, indicating that the friend request has been declined.
      *
@@ -221,6 +218,7 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
      * @param friendId The ID of the user who sent the friend request.
      * @author Dmytro Klopov
      */
+
     @Modifying
     @Transactional
     @Query(nativeQuery = true,

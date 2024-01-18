@@ -1,6 +1,5 @@
 package greencity.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
 import greencity.dto.econews.EcoNewsVO;
@@ -71,7 +70,8 @@ public class NotificationServiceImpl implements NotificationService {
                 .map(NotificationDtoResponse::getId)
                 .collect(Collectors.toList());
 
-        List<NotifiedUser> notifiedUsers = notifiedUserRepo.findByUserIdAndNotificationIdIn(userId, unreadNotificationsIds);
+        List<NotifiedUser> notifiedUsers = notifiedUserRepo
+                .findByUserIdAndNotificationIdIn(userId, unreadNotificationsIds);
 
         notifiedUsers.forEach(notifiedUser -> notifiedUser.setIsRead(true));
 
@@ -86,6 +86,9 @@ public class NotificationServiceImpl implements NotificationService {
         );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PageableDto<NotificationDtoResponse> findAllFriendRequestsByUserId(Long userId, Pageable page) {
         Page<NotificationDtoResponse> allFriendRequestsByUserId =
@@ -109,7 +112,7 @@ public class NotificationServiceImpl implements NotificationService {
     public void markAsReadNotification(Long userId, Long notificationId) {
         NotifiedUser notifiedUser = notifiedUserRepo.findByUserIdAndNotificationId(userId, notificationId)
                 .orElseThrow(() -> new NotFoundException("Notified user or notification not found"));
-        if (notifiedUser.getIsRead()) {
+        if (Boolean.TRUE.equals(notifiedUser.getIsRead())) {
             throw new BadRequestException(ErrorMessage.NOTIFICATION_ALREADY_READ);
         }
         notifiedUser.setIsRead(true);
@@ -133,7 +136,8 @@ public class NotificationServiceImpl implements NotificationService {
                 .map(Notification::getId)
                 .collect(Collectors.toList());
 
-        List<NotifiedUser> userNotifications = notifiedUserRepo.findByUserIdAndNotificationIdIn(userId, notificationsIds);
+        List<NotifiedUser> userNotifications = notifiedUserRepo
+                .findByUserIdAndNotificationIdIn(userId, notificationsIds);
 
         userNotifications.forEach(notifiedUser -> notifiedUser.setIsRead(true));
 
@@ -179,8 +183,8 @@ public class NotificationServiceImpl implements NotificationService {
     public NotificationDtoResponse findById(Long notificationId) {
         Notification notification =
                 notificationRepo.findById(notificationId)
-                        .orElseThrow(
-                                () -> new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND_BY_ID + notificationId)
+                        .orElseThrow(() ->
+                                new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND_BY_ID + notificationId)
                         );
         return modelMapper.map(notification, NotificationDtoResponse.class);
     }
@@ -191,7 +195,8 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public List<NotificationsDto> getNotificationsForCurrentUser(Long userId, NotificationSourceType sourceType) {
-        List<NotifiedUser> allUnreadNotificationsByUserId = notifiedUserRepo.findAllUnreadNotificationsByUserId(userId, sourceType);
+        List<NotifiedUser> allUnreadNotificationsByUserId = notifiedUserRepo
+                .findAllUnreadNotificationsByUserId(userId, sourceType);
         List<NotificationsDto> notifications = allUnreadNotificationsByUserId.stream()
                 .map(user -> NotificationsDto.builder()
                         .userName(user.getNotification().getAuthor().getName())
@@ -246,7 +251,8 @@ public class NotificationServiceImpl implements NotificationService {
         NotifiedUser notifiedUser = NotifiedUser.builder()
                 .isRead(false)
                 .user(userRepo.findById(sourceAuthor.getId())
-                        .orElseThrow(() -> new NotFoundException(String.format("User with id: %d not found", sourceAuthor.getId()))))
+                        .orElseThrow(() -> new NotFoundException(String.format(
+                                "User with id: %d not found", sourceAuthor.getId()))))
                 .notification(savedNotification)
                 .build();
 
