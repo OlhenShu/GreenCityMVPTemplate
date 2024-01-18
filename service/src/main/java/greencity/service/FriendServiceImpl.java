@@ -2,17 +2,27 @@ package greencity.service;
 
 import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
+import greencity.dto.user.RecommendFriendDto;
 import greencity.dto.user.UserFriendDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.User;
 import greencity.entity.UserFriend;
 import greencity.exception.exceptions.BadRequestException;
+import greencity.exception.exceptions.NotDeletedException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.repository.UserRepo;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +33,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of {@link FriendService}.
+ */
 @Slf4j
 @Service
 @Transactional(readOnly = true)
@@ -31,11 +44,12 @@ public class FriendServiceImpl implements FriendService {
     private final ModelMapper modelMapper;
     private final UserRepo userRepo;
     private final NotificationService notificationService;
-
+    private final ModelMapper modelMapper;
 
     /**
      * {@inheritDoc}
      */
+
     @Override
     public PageableDto<UserFriendDto> getUserFriendsByUserId(Long userId, Pageable pageable) {
         validateUserExist(userId);
@@ -49,6 +63,22 @@ public class FriendServiceImpl implements FriendService {
                 allUserFriends.getPageable().getPageNumber(),
                 allUserFriends.getTotalPages()
         );
+
+    public PageableDto<UserFriendDto> findAllUsersFriends(Long userId, Pageable pageable) {
+        List<User> friends = userRepo.getAllUserFriends(userId);
+        if (friends.isEmpty()) {
+            throw new NotFoundException(ErrorMessage.NOT_FOUND_ANY_FRIENDS + userId);
+        }
+        List<UserFriendDto> friendsDto = friends.stream()
+            .map(user -> modelMapper.map(user, UserFriendDto.class))
+            .collect(Collectors.toList());
+
+        Page<UserFriendDto> friendDtoPage = new PageImpl<>(friendsDto, pageable, friendsDto.size());
+        return new PageableDto<>(
+            friendDtoPage.getContent(),
+            friendDtoPage.getTotalElements(),
+            friendDtoPage.getPageable().getPageNumber(),
+            friendDtoPage.getTotalPages());
     }
 
     /**
@@ -57,7 +87,6 @@ public class FriendServiceImpl implements FriendService {
     @Override
     public PageableDto<UserFriendDto> searchFriends(Pageable pageable, String name, UserVO userVO,
                                                     Boolean hasSameCity, Boolean hasMutualFriends) {
-        validateUserExist(userVO.getId());
         if (name.isEmpty() || name.length() >= 30) {
             throw new BadRequestException(ErrorMessage.INVALID_LENGTH_OF_QUERY_NAME);
         }
@@ -90,7 +119,6 @@ public class FriendServiceImpl implements FriendService {
     @Override
     @Transactional
     public void addFriend(Long userId, Long friendId) {
-        validateUserExist(userId);
         validateUserExist(friendId);
         validateIsNotSameUsers(userId, friendId);
         User user = userRepo.findById(userId)
@@ -140,6 +168,72 @@ public class FriendServiceImpl implements FriendService {
         userRepo.declineFriendRequest(userId, friendId);
     }
 
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void deleteUserFriend(Long userId, Long friendId) {
+        if (userId.equals(friendId)) {
+            throw new BadRequestException(ErrorMessage.OWN_USER_ID + friendId);
+        }
+        if (!userRepo.existsById(friendId)) {
+            throw new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + friendId);
+        }
+        checkIfFriends(userId, friendId);
+        userRepo.deleteUserFriend(userId, friendId);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PageableDto<RecommendFriendDto> getRecommendedFriends(UserVO user, Pageable pageable) {
+        var recommendedFriends = userRepo.findAllRecommendedFriends(user.getId(),
+            pageable,user.getCity());
+        return new PageableDto<>(recommendedFriends.stream().collect(Collectors.toList()),
+            recommendedFriends.getNumberOfElements(),
+            recommendedFriends.getNumber(),
+            recommendedFriends.getTotalPages());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PageableDto<UserFriendDto> getAllFriendsByDifferentParameters(
+        Pageable pageable, String name, UserVO userVO, Boolean hasSameCity,
+        Double highestPersonalRate, ZonedDateTime dateTimeOfAddingFriend) {
+        if (name.isEmpty() || name.length() >= 30) {
+            throw new BadRequestException(ErrorMessage.INVALID_LENGTH_OF_QUERY_NAME);
+        }
+        String city = null;
+        if (hasSameCity) {
+            city = userVO.getCity();
+        }
+        if (dateTimeOfAddingFriend == null) {
+            dateTimeOfAddingFriend = ZonedDateTime.now().minusWeeks(1);
+        }
+        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+
+        Page<UserFriendDto> listOfUsers = userRepo.findUserFriendDtoByFriendFilterOfUser(
+                replaceCriteria(name), city, highestPersonalRate, dateTimeOfAddingFriend, pageable, userVO.getId())
+            .map(filterDto -> new UserFriendDto(filterDto.getId(), filterDto.getCity(), filterDto.getName(),
+                filterDto.getProfilePicturePath(), filterDto.getRating()));
+
+        return new PageableDto<>(
+            listOfUsers.getContent(),
+            listOfUsers.getTotalElements(),
+            listOfUsers.getPageable().getPageNumber(),
+            listOfUsers.getTotalPages());
+    }
+
+    private void checkIfFriends(Long userId, Long friendId) {
+        if (!userRepo.isFriend(userId, friendId)) {
+            throw new NotDeletedException(ErrorMessage.NOT_FOUND_ANY_FRIENDS + friendId);
+        }
+    }
 
     private void validateUserExist(Long userId) {
         if (!userRepo.existsById(userId)) {
