@@ -1,5 +1,6 @@
 package greencity.entity;
 
+import greencity.enums.NotificationSource;
 import greencity.enums.NotificationSourceType;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -37,6 +38,9 @@ public class Notification {
 
     @Column(nullable = false)
     private Long sourceId;
+
+    @Enumerated(value = EnumType.STRING)
+    private NotificationSource notificationSource;
 
     @OneToMany(mappedBy = "notification")
     private List<NotifiedUser> notifiedUsers;

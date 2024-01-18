@@ -12,6 +12,7 @@ import greencity.entity.EcoNewsComment;
 import greencity.entity.Notification;
 import greencity.entity.NotifiedUser;
 import greencity.entity.User;
+import greencity.enums.NotificationSource;
 import greencity.enums.NotificationSourceType;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
@@ -202,6 +203,7 @@ public class NotificationServiceImpl implements NotificationService {
                         .userName(user.getNotification().getAuthor().getName())
                         .objectTitle(user.getNotification().getTitle())
                         .notificationTime(user.getNotification().getCreationDate())
+                        .notificationSource(user.getNotification().getNotificationSource().name().toLowerCase())
                         .build())
                 .collect(Collectors.toList());
         if (notifications.isEmpty()) {
@@ -222,17 +224,20 @@ public class NotificationServiceImpl implements NotificationService {
         String title;
         Long sourceId;
         UserVO sourceAuthor;
+        NotificationSource source;
 
         if (sourceVO instanceof EcoNewsVO) {
             EcoNewsVO ecoNewsVO = (EcoNewsVO) sourceVO;
             title = ecoNewsVO.getTitle();
             sourceId = ecoNewsVO.getId();
             sourceAuthor = ecoNewsVO.getAuthor();
+            source = NotificationSource.NEWS;
         } else if (sourceVO instanceof EcoNewsComment) {
             EcoNewsComment ecoNewsComment = (EcoNewsComment) sourceVO;
             title = ecoNewsComment.getEcoNews().getTitle();
             sourceId = ecoNewsComment.getEcoNews().getId();
             sourceAuthor = modelMapper.map(ecoNewsComment.getEcoNews().getAuthor(), UserVO.class);
+            source = NotificationSource.COMMENT;
         } else {
             throw new NotFoundException("Not found source author");
         }
@@ -243,6 +248,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .sourceType(sourceType)
                 .author(author)
                 .creationDate(ZonedDateTime.now())
+                .notificationSource(source)
                 .build();
 
         Notification savedNotification = notificationRepo.save(newNotification);
