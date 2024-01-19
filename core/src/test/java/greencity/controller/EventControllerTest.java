@@ -32,7 +32,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import java.security.Principal;
 
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -95,7 +94,7 @@ class EventControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
         objectMapper.readValue(json, AddEcoNewsDtoRequest.class);
-        verify(eventService).save(eq(ModelUtils.getRequestAddEventDto()), eq(userVO), eq(new MultipartFile[0]));
+        verify(eventService).save(ModelUtils.getRequestAddEventDto(), userVO, new MultipartFile[0]);
     }
     @Test
     void testCreateEvent() {

@@ -411,10 +411,11 @@ public class ModelUtils {
                                 .finishDate(ZonedDateTime.parse("2024-01-17T06:00Z[UTC]"))
                                 .onlineLink("http://localhost:8080/swagger-ui.html#/")
                                 .build())
-                ).build();
+                )
+                .build();
     }
 
-    public static EventDto getEventDto(){
+    public static EventDto getEventDto() throws MalformedURLException {
         return EventDto.builder()
                 .title("Eco-Friendly Events Social Media")
                 .description("How to Promote Eco-Friendly Events on Social Media")
@@ -426,7 +427,7 @@ public class ModelUtils {
                                 .finishDate(ZonedDateTime.parse("2024-01-17T06:00Z[UTC]"))
                                 .onlineLink("http://localhost:8080/swagger-ui.html#/")
                                 .build())
-                )
+                ).titleImage(getUrl().toString())
                 .build();
     }
 }

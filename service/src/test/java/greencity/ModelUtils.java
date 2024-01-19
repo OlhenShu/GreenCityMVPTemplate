@@ -9,8 +9,8 @@ import greencity.dto.econewscomment.*;
 import greencity.dto.event.AddEventDtoRequest;
 import greencity.dto.event.EventDateLocationDto;
 import greencity.dto.event.EventDto;
+import greencity.dto.event.AddressDto;
 import greencity.dto.geocoding.AddressLatLngResponse;
-import greencity.dto.geocoding.AddressResponse;
 import greencity.dto.habit.*;
 import greencity.dto.habitfact.*;
 import greencity.dto.language.LanguageDTO;
@@ -19,12 +19,14 @@ import greencity.dto.language.LanguageVO;
 import greencity.dto.ownsecurity.OwnSecurityVO;
 import greencity.dto.ratingstatistics.RatingStatisticsVO;
 import greencity.dto.search.SearchNewsDto;
-import greencity.dto.search.SearchResponseDto;
 import greencity.dto.shoppinglistitem.*;
 import greencity.dto.tag.*;
 import greencity.dto.user.*;
 import greencity.dto.verifyemail.VerifyEmailVO;
 import greencity.entity.*;
+import greencity.entity.event.Address;
+import greencity.entity.event.Event;
+import greencity.entity.event.EventDateLocation;
 import greencity.entity.localization.ShoppingListItemTranslation;
 import greencity.entity.localization.TagTranslation;
 import greencity.enums.*;
@@ -57,6 +59,15 @@ public class ModelUtils {
     public static Tag getTag() {
         return new Tag(1L, TagType.ECO_NEWS, getTagTranslations(), Collections.emptyList(), Collections.emptySet());
     }
+
+    public static Tag getEventTag() {
+        return Tag.builder()
+                .id(1L)
+                .tagTranslations(getEventTagTranslations())
+                .type(TagType.EVENT)
+                .build();
+    }
+
 
     public static Tag getHabitTag() {
         return new Tag(1L, TagType.HABIT, getHabitTagTranslations(), Collections.emptyList(),
@@ -417,12 +428,35 @@ public class ModelUtils {
                         .build());
     }
 
+    public static List<TagTranslationVO> getEventTagTranslationsVO() {
+        return Arrays.asList(TagTranslationVO.builder().id(1L).name("Соціальний")
+                        .languageVO(LanguageVO.builder().id(1L).code("ua").build()).build(),
+                TagTranslationVO.builder().id(2L).name("Social").languageVO(LanguageVO.builder().id(2L).code("en").build())
+                        .build());
+    }
+
     public static LanguageVO getLanguageVO() {
         return new LanguageVO(1L, AppConstant.DEFAULT_LANGUAGE_CODE);
     }
 
     public static TagVO getTagVO() {
         return new TagVO(1L, TagType.ECO_NEWS, getTagTranslationsVO(), null, null);
+    }
+
+    public static TagVO getEventTagVO() {
+        return TagVO.builder()
+                .id(1L)
+                .tagTranslations(getEventTagTranslationsVO())
+                .type(TagType.EVENT)
+                .build();
+    }
+
+    public static TagUaEnDto getTagUaEnDto(){
+        return TagUaEnDto.builder()
+                .id(1L)
+                .nameUa(getEventTagTranslations().get(0).getName())
+                .nameEn(getEventTagTranslations().get(1).getName())
+                .build();
     }
 
     public static TagPostDto getTagPostDto() {
@@ -746,25 +780,25 @@ public class ModelUtils {
 
         AddressComponent route = new AddressComponent();
         route.longName = "вулиця";
-        route.types = new AddressComponentType[] {AddressComponentType.ROUTE};
+        route.types = new AddressComponentType[]{AddressComponentType.ROUTE};
 
         AddressComponent streetNumber = new AddressComponent();
         streetNumber.longName = "13";
-        streetNumber.types = new AddressComponentType[] {AddressComponentType.STREET_NUMBER};
+        streetNumber.types = new AddressComponentType[]{AddressComponentType.STREET_NUMBER};
 
         AddressComponent locality = new AddressComponent();
         locality.longName = "місто";
-        locality.types = new AddressComponentType[] {AddressComponentType.LOCALITY};
+        locality.types = new AddressComponentType[]{AddressComponentType.LOCALITY};
 
         AddressComponent region = new AddressComponent();
         region.longName = "область";
-        region.types = new AddressComponentType[] {AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1};
+        region.types = new AddressComponentType[]{AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1};
 
         AddressComponent country = new AddressComponent();
         country.longName = "країна";
-        country.types = new AddressComponentType[] {AddressComponentType.COUNTRY};
+        country.types = new AddressComponentType[]{AddressComponentType.COUNTRY};
 
-        geocodingResult.addressComponents = new AddressComponent[] {
+        geocodingResult.addressComponents = new AddressComponent[]{
                 locality,
                 streetNumber,
                 region,
@@ -772,7 +806,7 @@ public class ModelUtils {
                 route
         };
 
-        return new GeocodingResult[] {geocodingResult};
+        return new GeocodingResult[]{geocodingResult};
     }
 
     public static GeocodingResult[] getGeocodingResultEn() {
@@ -782,25 +816,25 @@ public class ModelUtils {
 
         AddressComponent route = new AddressComponent();
         route.longName = "fake street name";
-        route.types = new AddressComponentType[] {AddressComponentType.ROUTE};
+        route.types = new AddressComponentType[]{AddressComponentType.ROUTE};
 
         AddressComponent streetNumber = new AddressComponent();
         streetNumber.longName = "13";
-        streetNumber.types = new AddressComponentType[] {AddressComponentType.STREET_NUMBER};
+        streetNumber.types = new AddressComponentType[]{AddressComponentType.STREET_NUMBER};
 
         AddressComponent locality = new AddressComponent();
         locality.longName = "fake city";
-        locality.types = new AddressComponentType[] {AddressComponentType.LOCALITY};
+        locality.types = new AddressComponentType[]{AddressComponentType.LOCALITY};
 
         AddressComponent region = new AddressComponent();
         region.longName = "fake region";
-        region.types = new AddressComponentType[] {AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1};
+        region.types = new AddressComponentType[]{AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1};
 
         AddressComponent country = new AddressComponent();
         country.longName = "fake country";
-        country.types = new AddressComponentType[] {AddressComponentType.COUNTRY};
+        country.types = new AddressComponentType[]{AddressComponentType.COUNTRY};
 
-        geocodingResult.addressComponents = new AddressComponent[] {
+        geocodingResult.addressComponents = new AddressComponent[]{
                 locality,
                 streetNumber,
                 region,
@@ -808,7 +842,7 @@ public class ModelUtils {
                 route
         };
 
-        return new GeocodingResult[] {geocodingResult};
+        return new GeocodingResult[]{geocodingResult};
     }
 
     public static AddEventDtoRequest getRequestAddEventDto() {
@@ -822,11 +856,16 @@ public class ModelUtils {
                                 .startDate(ZonedDateTime.parse("2024-01-17T06:00Z[UTC]"))
                                 .finishDate(ZonedDateTime.parse("2024-01-17T06:00Z[UTC]"))
                                 .onlineLink("http://localhost:8080/swagger-ui.html#/")
-                                .build())
-                ).build();
+                                .coordinates(AddressDto.builder()
+                                        .latitude(45.466272)
+                                        .longitude(9.188604)
+                                        .build())
+                                .build()))
+                .tags(Collections.singletonList(getTagUaEnDto().getNameUa()))
+                .build();
     }
 
-    public static EventDto getEventDto(){
+    public static EventDto getEventDto() {
         return EventDto.builder()
                 .title("Eco-Friendly Events Social Media")
                 .description("How to Promote Eco-Friendly Events on Social Media")
@@ -837,8 +876,32 @@ public class ModelUtils {
                                 .startDate(ZonedDateTime.parse("2024-01-17T06:00Z[UTC]"))
                                 .finishDate(ZonedDateTime.parse("2024-01-17T06:00Z[UTC]"))
                                 .onlineLink("http://localhost:8080/swagger-ui.html#/")
-                                .build())
-                )
+                                .coordinates(AddressDto.builder()
+                                        .latitude(45.466272)
+                                        .longitude(9.188604)
+                                        .build())
+                                .build()))
+                .tags(Collections.singletonList(getTagUaEnDto()))
+                .build();
+    }
+
+    public static Event getEvent() {
+        return Event.builder()
+                .title("Eco-Friendly Events Social Media")
+                .description("How to Promote Eco-Friendly Events on Social Media")
+                .open(true)
+                .dates(
+                        List.of(EventDateLocation.builder()
+                                .id(1L)
+                                .startDate(ZonedDateTime.parse("2024-01-17T06:00Z[UTC]"))
+                                .finishDate(ZonedDateTime.parse("2024-01-17T06:00Z[UTC]"))
+                                .onlineLink("http://localhost:8080/swagger-ui.html#/")
+                                .coordinates(Address.builder()
+                                        .latitude(45.466272)
+                                        .longitude(9.188604)
+                                        .build())
+                                .build()))
+                .tags(Collections.singletonList(getEventTag()))
                 .build();
     }
 }
