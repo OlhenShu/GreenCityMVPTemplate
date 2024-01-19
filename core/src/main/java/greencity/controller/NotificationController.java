@@ -227,6 +227,15 @@ public class NotificationController {
         );
     }
 
+    /**
+     * Get comments reply notifications for the current user.
+     * This endpoint retrieves the latest notifications related to comment replies for the
+     * authenticated user. The notifications include information about who replied to the user's comments.
+     *
+     * @param userVO The authenticated user's information.
+     * @return ResponseEntity containing a list of NotificationsDto representing comment reply notifications.
+     * @author Dmytro Kizerov
+     */
     @ApiOperation(value = "Get comments reply notifications")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = HttpStatuses.OK),

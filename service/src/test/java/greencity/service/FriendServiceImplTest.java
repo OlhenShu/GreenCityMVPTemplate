@@ -1,47 +1,44 @@
 package greencity.service;
 
 import greencity.ModelUtils;
+import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
 import greencity.dto.user.RecommendFriendDto;
 import greencity.dto.user.UserFriendDto;
+import greencity.dto.user.UserFriendFilterDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.User;
 import greencity.entity.UserFriend;
 import greencity.entity.UserFriendPK;
 import greencity.exception.exceptions.BadRequestException;
+import greencity.exception.exceptions.NotDeletedException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.repository.UserRepo;
-import java.time.ZonedDateTime;
-import java.util.*;
-import greencity.constant.ErrorMessage;
-import greencity.exception.exceptions.NotDeletedException;
-import greencity.dto.user.UserFriendFilterDto;
 import org.junit.jupiter.api.Test;
-
-import org.junit.jupiter.api.Test;
-import org.modelmapper.ModelMapper;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.time.ZonedDateTime;
 import java.util.*;
 
 import static greencity.ModelUtils.getUser;
 import static greencity.ModelUtils.getUserVO;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import java.util.*;
-
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class FriendServiceImplTest {
     @Mock
     private ModelMapper modelMapper;
@@ -72,54 +69,54 @@ class FriendServiceImplTest {
         Mockito.verify(modelMapper, Mockito.times(userFriendsList.size())).map(Mockito.any(User.class), Mockito.eq(UserFriendDto.class));
     }
 
-//    @Test
-//    void searchFriendsTest() {
-//        User user = getUser();
-//        User friend1 = getUser();
-//        friend1.setId(2L);
-//        User friend2 = getUser();
-//        friend2.setId(4L);
-//        Set<UserFriend> userFriends = new HashSet<>();
-//        UserFriend userFriend1 = UserFriend.builder()
-//            .primaryKey(new UserFriendPK(user.getId(), friend1.getId()))
-//            .user(user)
-//            .friend(friend1)
-//            .status("REQUEST")
-//            .build();
-//        UserFriend userFriend2 = UserFriend.builder()
-//            .primaryKey(new UserFriendPK(user.getId(), friend2.getId()))
-//            .user(user)
-//            .friend(friend2)
-//            .status("FRIEND")
-//            .build();
-//        userFriends.add(userFriend1);
-//        userFriends.add(userFriend2);
-//        user.setConnections(userFriends);
-//
-//        List<UserFriendDto> userNotYetFriends = new ArrayList<>();
-//        userNotYetFriends.add(new UserFriendDto(friend1.getId(), friend1.getCity(), 1L, friend1.getName(),
-//            friend1.getProfilePicturePath(), friend1.getRating()));
-//        userNotYetFriends.add(new UserFriendDto(3L, "Odesa", 0L, "Friend3",
-//            friend1.getProfilePicturePath(), 25D));
-//
-//        Page<UserFriendDto> userFriendDtos = new PageImpl<>(userNotYetFriends, PageRequest.of(0, 10), 2L);
-//
-//        when(userRepo.findById(anyLong())).thenReturn(Optional.of(user));
-//        when(userRepo.existsById(anyLong())).thenReturn(true);
-//        when(userRepo.findAllUserFriendDtoByFriendFilter(anyString(), any(), anyBoolean(), any(Pageable.class), anyLong()))
-//            .thenReturn(userFriendDtos);
-//
-//        var response = friendService.searchFriends(
-//            PageRequest.of(0, 10), "t_e%s\\t'", userVO, false, false);
-//        var responsePage = response.getPage();
-//
-//        verify(userRepo).findAllUserFriendDtoByFriendFilter(replaceCriteria("t_e%s\\t'"), null,
-//            false, PageRequest.of(0, 10), userVO.getId());
-//        assertEquals(2, response.getTotalElements());
-//        assertEquals(userNotYetFriends.size(), responsePage.size());
-//        assertEquals(userNotYetFriends.get(0), responsePage.get(0));
-//        assertEquals("NOT_FRIEND", responsePage.get(1).getFriendStatus());
-//    }
+    @Test
+    void searchFriendsTest() {
+        User user = getUser();
+        User friend1 = getUser();
+        friend1.setId(2L);
+        User friend2 = getUser();
+        friend2.setId(4L);
+        Set<UserFriend> userFriends = new HashSet<>();
+        UserFriend userFriend1 = UserFriend.builder()
+            .primaryKey(new UserFriendPK(user.getId(), friend1.getId()))
+            .user(user)
+            .friend(friend1)
+            .status("REQUEST")
+            .build();
+        UserFriend userFriend2 = UserFriend.builder()
+            .primaryKey(new UserFriendPK(user.getId(), friend2.getId()))
+            .user(user)
+            .friend(friend2)
+            .status("FRIEND")
+            .build();
+        userFriends.add(userFriend1);
+        userFriends.add(userFriend2);
+        user.setConnections(userFriends);
+
+        List<UserFriendDto> userNotYetFriends = new ArrayList<>();
+        userNotYetFriends.add(new UserFriendDto(friend1.getId(), friend1.getCity(), 1L, friend1.getName(),
+            friend1.getProfilePicturePath(), friend1.getRating()));
+        userNotYetFriends.add(new UserFriendDto(3L, "Odesa", 0L, "Friend3",
+            friend1.getProfilePicturePath(), 25D));
+
+        Page<UserFriendDto> userFriendDtos = new PageImpl<>(userNotYetFriends, PageRequest.of(0, 10), 2L);
+
+        when(userRepo.findById(anyLong())).thenReturn(Optional.of(user));
+        when(userRepo.existsById(anyLong())).thenReturn(true);
+        when(userRepo.findAllUserFriendDtoByFriendFilter(anyString(), any(), anyBoolean(), any(Pageable.class), anyLong()))
+            .thenReturn(userFriendDtos);
+
+        var response = friendService.searchFriends(
+            PageRequest.of(0, 10), "t_e%s\\t'", userVO, false, false);
+        var responsePage = response.getPage();
+
+        verify(userRepo).findAllUserFriendDtoByFriendFilter(replaceCriteria("t_e%s\\t'"), null,
+            false, PageRequest.of(0, 10), userVO.getId());
+        assertEquals(2, response.getTotalElements());
+        assertEquals(userNotYetFriends.size(), responsePage.size());
+        assertEquals(userNotYetFriends.get(0), responsePage.get(0));
+        assertEquals("NOT_FRIEND", responsePage.get(1).getFriendStatus());
+    }
 
     @Test
     void searchFriendsWithHasSameCityFlagTest() {
@@ -262,11 +259,57 @@ class FriendServiceImplTest {
         user.setConnections(userFriends);
 
         doNothing().when(userRepo).acceptFriendRequest(userId, friendId);
+        when(userRepo.existsById(anyLong())).thenReturn(true);
+        when(userRepo.findById(anyLong())).thenReturn(Optional.of(user));
+
+        friendService.acceptFriendRequest(userId, friendId);
 
         assertDoesNotThrow(() -> userRepo.acceptFriendRequest(userId, friendId));
+        verify(userRepo, times(2)).acceptFriendRequest(userId, friendId);
+    }
 
+    @Test
+    void acceptFriendWithWrongStatusUserRequestTest() {
+        Long userId = 1L;
+        Long friendId = 2L;
 
-        verify(userRepo, times(1)).acceptFriendRequest(userId, friendId);
+        User user = ModelUtils.getUser();
+
+        UserFriend userFriend = new UserFriend();
+        userFriend.setFriend(user);
+        userFriend.setStatus("FRIEND");
+
+        Set<UserFriend> userFriends = new HashSet<>();
+        userFriends.add(userFriend);
+
+        user.setConnections(userFriends);
+
+        when(userRepo.existsById(anyLong())).thenReturn(true);
+        when(userRepo.findById(anyLong())).thenReturn(Optional.of(user));
+
+        assertThrows(BadRequestException.class, () -> friendService.acceptFriendRequest(userId, friendId));
+    }
+
+    @Test
+    void declineFriendWithWrongStatusUserRequestTest() {
+        Long userId = 1L;
+        Long friendId = 2L;
+
+        User user = ModelUtils.getUser();
+
+        UserFriend userFriend = new UserFriend();
+        userFriend.setFriend(user);
+        userFriend.setStatus("FRIEND");
+
+        Set<UserFriend> userFriends = new HashSet<>();
+        userFriends.add(userFriend);
+
+        user.setConnections(userFriends);
+
+        when(userRepo.existsById(anyLong())).thenReturn(true);
+        when(userRepo.findById(anyLong())).thenReturn(Optional.of(user));
+
+        assertThrows(BadRequestException.class, () -> friendService.declineFriendRequest(userId, friendId));
     }
 
     @Test
@@ -286,11 +329,14 @@ class FriendServiceImplTest {
         user.setConnections(userFriends);
 
         doNothing().when(userRepo).declineFriendRequest(userId, friendId);
+        when(userRepo.existsById(anyLong())).thenReturn(true);
+        when(userRepo.findById(anyLong())).thenReturn(Optional.of(user));
+
+
+        friendService.declineFriendRequest(userId, friendId);
 
         assertDoesNotThrow(() -> userRepo.declineFriendRequest(userId, friendId));
-
-
-        verify(userRepo, times(1)).declineFriendRequest(userId, friendId);
+        verify(userRepo, times(2)).declineFriendRequest(userId, friendId);
     }
 
     @Test
