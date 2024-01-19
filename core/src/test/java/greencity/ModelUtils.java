@@ -413,4 +413,20 @@ public class ModelUtils {
                                 .build())
                 ).build();
     }
+
+    public static EventDto getEventDto(){
+        return EventDto.builder()
+                .title("How to Promote Eco-Friendly Events on Social Media")
+                .description("How to Promote Eco-Friendly Events on Social Media")
+                .open(true)
+                .dates(
+                        List.of(EventDateLocationDto.builder()
+                                .id(1L)
+                                .startDate(ZonedDateTime.parse("2024-01-17T06:00Z[UTC]"))
+                                .finishDate(ZonedDateTime.parse("2024-01-17T06:00Z[UTC]"))
+                                .onlineLink("http://localhost:8080/swagger-ui.html#/")
+                                .build())
+                )
+                .build();
+    }
 }
