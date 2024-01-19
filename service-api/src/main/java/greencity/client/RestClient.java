@@ -7,8 +7,10 @@ import greencity.dto.econews.EcoNewsForSendEmailDto;
 import greencity.dto.user.*;
 import greencity.enums.EmailNotification;
 import greencity.enums.Role;
+import greencity.message.NotificationDto;
 import greencity.message.SendHabitNotification;
 import greencity.message.SendReportEmailMessage;
+import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
@@ -478,5 +480,12 @@ public class RestClient {
             .findFirst()
             .map(Cookie::getValue).orElse(null);
         return token == null ? null : "Bearer " + token;
+    }
+
+    public void sendNotification(NotificationDto notificationDto, String email) {
+        HttpEntity<NotificationDto> entity = new HttpEntity<>(notificationDto, setHeader());
+        restTemplate.exchange(greenCityUserServerAddress
+                + RestTemplateLinks.NOTIFICATION, HttpMethod.POST, entity, Object.class)
+            .getBody();
     }
 }
