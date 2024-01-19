@@ -2,10 +2,8 @@ package greencity.service;
 
 import com.google.maps.model.LatLng;
 import greencity.ModelUtils;
-import greencity.dto.event.AddEventDtoRequest;
-import greencity.dto.event.AddressDto;
-import greencity.dto.event.EventDateLocationDto;
-import greencity.dto.event.EventDto;
+import greencity.client.RestClient;
+import greencity.dto.event.*;
 import greencity.dto.geocoding.AddressLatLngResponse;
 import greencity.dto.tag.TagVO;
 import greencity.dto.user.UserVO;
@@ -13,6 +11,7 @@ import greencity.entity.Tag;
 import greencity.entity.User;
 import greencity.entity.event.Event;
 import greencity.entity.event.EventDateLocation;
+import greencity.enums.Role;
 import greencity.enums.TagType;
 import greencity.repository.EventRepo;
 import org.apache.commons.lang3.reflect.TypeUtils;
@@ -26,11 +25,15 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
+import static greencity.ModelUtils.TEST_USER_VO;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+
 @ExtendWith(MockitoExtension.class)
-public class EventServiceImplTest {
+class EventServiceImplTest {
     @Mock
     EventRepo eventRepo;
     @Mock
@@ -43,6 +46,8 @@ public class EventServiceImplTest {
     private EventServiceImpl eventService;
     @Mock
     GoogleApiService googleApiService;
+    @Mock
+    private RestClient restClient;
 
     private final AddEventDtoRequest addEventDtoRequest = ModelUtils.getRequestAddEventDto();
     private final EventDto eventDto = ModelUtils.getEventDto();
@@ -76,5 +81,39 @@ public class EventServiceImplTest {
         EventDto actual = eventService.save(addEventDtoRequest, userVO, multipartFiles);
 
         assertEquals(eventDto, actual);
+    }
+
+    @Test
+    void getByIdTest() {
+        Long eventId = 1L;
+        Event event = new Event();
+
+        when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+        when(modelMapper.map(event, EventDto.class)).thenReturn(new EventDto());
+
+        EventDto result = eventService.getById(eventId);
+
+        assertEquals(event.getId(), result.getId());
+    }
+
+    @Test
+    void update() {
+        EventDto eventDto = ModelUtils.getEventDto();
+        Event expectedEvent = ModelUtils.getEvent();
+
+        UpdateEventDto eventToUpdateDto = ModelUtils.getUpdateEventDto();
+        User user = ModelUtils.getUser();
+        user.setRole(Role.ROLE_ADMIN);
+
+        when(eventRepo.findById(1L)).thenReturn(Optional.of(expectedEvent));
+        when(restClient.findByEmail(anyString())).thenReturn(TEST_USER_VO);
+        when(modelMapper.map(TEST_USER_VO, User.class)).thenReturn(user);
+
+        when(modelMapper.map(expectedEvent, EventDto.class)).thenReturn(eventDto);
+        when(eventRepo.save(expectedEvent)).thenReturn(expectedEvent);
+
+        EventDto actualEvent = eventService.update(eventToUpdateDto, user.getEmail(), null);
+
+        assertEquals(eventDto, actualEvent);
     }
 }

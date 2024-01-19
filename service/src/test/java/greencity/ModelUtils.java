@@ -6,10 +6,7 @@ import greencity.constant.AppConstant;
 import greencity.dto.PageableAdvancedDto;
 import greencity.dto.econews.*;
 import greencity.dto.econewscomment.*;
-import greencity.dto.event.AddEventDtoRequest;
-import greencity.dto.event.EventDateLocationDto;
-import greencity.dto.event.EventDto;
-import greencity.dto.event.AddressDto;
+import greencity.dto.event.*;
 import greencity.dto.geocoding.AddressLatLngResponse;
 import greencity.dto.habit.*;
 import greencity.dto.habitfact.*;
@@ -873,8 +870,8 @@ public class ModelUtils {
                 .dates(
                         List.of(EventDateLocationDto.builder()
                                 .id(1L)
-                                .startDate(ZonedDateTime.parse("2024-01-17T06:00Z[UTC]"))
-                                .finishDate(ZonedDateTime.parse("2024-01-17T06:00Z[UTC]"))
+                                .startDate(ZonedDateTime.parse("2026-01-17T06:00Z[UTC]"))
+                                .finishDate(ZonedDateTime.parse("2026-01-17T06:00Z[UTC]"))
                                 .onlineLink("http://localhost:8080/swagger-ui.html#/")
                                 .coordinates(AddressDto.builder()
                                         .latitude(45.466272)
@@ -893,8 +890,8 @@ public class ModelUtils {
                 .dates(
                         List.of(EventDateLocation.builder()
                                 .id(1L)
-                                .startDate(ZonedDateTime.parse("2024-01-17T06:00Z[UTC]"))
-                                .finishDate(ZonedDateTime.parse("2024-01-17T06:00Z[UTC]"))
+                                .startDate(ZonedDateTime.parse("2026-01-17T06:00Z[UTC]"))
+                                .finishDate(ZonedDateTime.parse("2026-01-17T06:00Z[UTC]"))
                                 .onlineLink("http://localhost:8080/swagger-ui.html#/")
                                 .coordinates(Address.builder()
                                         .latitude(45.466272)
@@ -903,5 +900,11 @@ public class ModelUtils {
                                 .build()))
                 .tags(Collections.singletonList(getEventTag()))
                 .build();
+    }
+
+    public static UpdateEventDto getUpdateEventDto() {
+        UpdateEventDto updateEventDto = new UpdateEventDto();
+        updateEventDto.setId(1L);
+        return updateEventDto;
     }
 }
