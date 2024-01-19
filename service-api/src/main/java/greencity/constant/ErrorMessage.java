@@ -138,6 +138,7 @@ public final class ErrorMessage {
     public static final String NOTIFICATION_NOT_FOUND_BY_ID = "Notification doesn't exist by this id: ";
     public static final String INVALID_LENGTH_OF_QUERY_NAME = "The name query must be between 1 and 30 characters.";
     public static final String USER_ALREADY_HAS_CONNECTION = "User already has %s connection with this user";
+    public static final String USER_HAS_WRONG_CONNECTION = "User already has wrong connection with this user";
 
     private ErrorMessage() {
     }

@@ -142,7 +142,8 @@ public class FriendServiceImpl implements FriendService {
         User user = userRepo.findById(friendId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + friendId));
         String status = user.getConnections().stream().filter(c -> Objects.equals(c.getFriend().getId(), userId))
-                .findAny().map(UserFriend::getStatus).orElse(null);
+                .findAny().map(UserFriend::getStatus).orElseThrow(() ->
+                        new NotFoundException(ErrorMessage.USER_HAS_WRONG_CONNECTION));
         if (!status.equals("REQUEST")) {
             throw new BadRequestException(String.format(ErrorMessage.USER_ALREADY_HAS_CONNECTION, status));
         }
@@ -161,7 +162,8 @@ public class FriendServiceImpl implements FriendService {
         User user = userRepo.findById(friendId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + friendId));
         String status = user.getConnections().stream().filter(c -> Objects.equals(c.getFriend().getId(), userId))
-                .findAny().map(UserFriend::getStatus).orElse(null);
+                .findAny().map(UserFriend::getStatus).orElseThrow(() ->
+                        new NotFoundException(ErrorMessage.USER_HAS_WRONG_CONNECTION));
         if (!status.equals("REQUEST")) {
             throw new BadRequestException(String.format(ErrorMessage.USER_ALREADY_HAS_CONNECTION, status));
         }
