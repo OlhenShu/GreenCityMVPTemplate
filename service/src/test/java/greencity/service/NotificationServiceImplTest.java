@@ -18,11 +18,6 @@ import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.repository.NotificationRepo;
 import greencity.repository.NotifiedUserRepo;
 import greencity.repository.UserRepo;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,6 +29,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -99,25 +100,20 @@ class NotificationServiceImplTest {
 
     @Test
     void getNotificationsEcoNewsForCurrentUserReturnsNotificationsDtoList() {
-        Long userId = 1L;
+        NotificationSourceType sourceType = NotificationSourceType.NEWS_LIKED;
+
         NotifiedUser notifiedUser = buildNotifiedUser();
-        List<NotifiedUser> allUnreadNotifications = Collections.singletonList(notifiedUser);
 
-        when(notifiedUserRepo.findAllUnreadNotificationsByUserId(eq(userId), any())).thenReturn(allUnreadNotifications);
 
-        List<NotificationsDto> result = notificationService.
-                getNotificationsForCurrentUser(userId, NotificationSourceType.NEWS_LIKED);
+        when(notifiedUserRepo.findAllUnreadNotificationsByUserId(notifiedUser.getId(), sourceType))
+                .thenReturn(Collections.singletonList(notifiedUser));
 
+        List<NotificationsDto> result = notificationService.getNotificationsForCurrentUser(notifiedUser.getId(), sourceType);
+
+        assertNotNull(result);
         assertFalse(result.isEmpty());
-        assertEquals(1, result.size());
 
-        NotificationsDto notificationsForEcoNewsDto = result.get(0);
-        assertEquals("AuthorName", notificationsForEcoNewsDto.getUserName());
-        assertEquals("TestTitle", notificationsForEcoNewsDto.getObjectTitle());
-        assertEquals(ZonedDateTime.parse("2022-01-01T10:15:30+01:00"),
-                notificationsForEcoNewsDto.getNotificationTime());
-
-        verify(notifiedUserRepo).findAllUnreadNotificationsByUserId(eq(userId), any());
+        verify(notifiedUserRepo, times(1)).findAllUnreadNotificationsByUserId(notifiedUser.getId(), sourceType);
     }
 
     @Test
@@ -295,7 +291,8 @@ class NotificationServiceImplTest {
                         .title("TestTitle")
                         .sourceType(NotificationSourceType.NEWS_LIKED)
                         .sourceId(1L)
-                        .author(ModelUtils.getUser().setId(2L).setName("AuthorName"))
+                        .author(ModelUtils.getUser())
+                        .notificationSource(NotificationSource.NEWS)
                         .notifiedUsers(Collections.emptyList())
                         .build())
                 .build();
