@@ -57,15 +57,15 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
 
     @Override
     public AddEcoNewsCommentDtoResponse save(Long econewsId, AddEcoNewsCommentDtoRequest addEcoNewsCommentDtoRequest,
-        UserVO userVO) {
+                                             UserVO userVO) {
         EcoNewsVO ecoNewsVO = ecoNewsService.findById(econewsId);
         EcoNewsComment ecoNewsComment = modelMapper.map(addEcoNewsCommentDtoRequest, EcoNewsComment.class);
         ecoNewsComment.setUser(modelMapper.map(userVO, User.class));
         ecoNewsComment.setEcoNews(modelMapper.map(ecoNewsVO, EcoNews.class));
         if (addEcoNewsCommentDtoRequest.getParentCommentId() != 0) {
             EcoNewsComment parentComment =
-                ecoNewsCommentRepo.findById(addEcoNewsCommentDtoRequest.getParentCommentId()).orElseThrow(
-                    () -> new BadRequestException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
+                    ecoNewsCommentRepo.findById(addEcoNewsCommentDtoRequest.getParentCommentId()).orElseThrow(
+                            () -> new BadRequestException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
             if (parentComment.getParentComment() == null) {
                 ecoNewsComment.setParentComment(parentComment);
             } else {
@@ -74,8 +74,12 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
         }
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture.runAsync(
-            () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_COMMENT, userVO, accessToken));
-        notificationService.createNotification(userVO, ecoNewsVO, NotificationSourceType.NEWS_COMMENTED);
+                () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_COMMENT, userVO, accessToken));
+        if (ecoNewsComment.getParentComment() != null) {
+            notificationService.createNotification(userVO, ecoNewsComment, NotificationSourceType.COMMENT_REPLY);
+        } else {
+            notificationService.createNotification(userVO, ecoNewsVO, NotificationSourceType.NEWS_COMMENTED);
+        }
         return modelMapper.map(ecoNewsCommentRepo.save(ecoNewsComment), AddEcoNewsCommentDtoResponse.class);
     }
 

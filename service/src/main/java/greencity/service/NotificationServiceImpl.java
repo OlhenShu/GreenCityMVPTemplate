@@ -22,9 +22,6 @@ import greencity.mapping.NotificationDtoResponseMapper;
 import greencity.repository.NotificationRepo;
 import greencity.repository.NotifiedUserRepo;
 import greencity.repository.UserRepo;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -33,6 +30,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static greencity.enums.NotificationSourceType.FRIEND_REQUEST;
 
@@ -127,7 +128,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void delete(Long notificationId, UserVO user) {
         Notification notification = notificationRepo.findById(notificationId)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND_BY_ID + notificationId));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND_BY_ID + notificationId));
         if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(notification.getAuthor().getId())) {
             throw new UserHasNoPermissionToAccessException(ErrorMessage.USER_HAS_NO_PERMISSION);
         }
@@ -233,15 +234,16 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void createNotification(UserVO userVO, Object sourceVO, NotificationSourceType sourceType) {
-        User author = userRepo.findById(userVO.getId())
-                .orElseThrow(() -> new NotFoundException(String.format("User with id: %d not found", userVO.getId())));
+        User author = getUserById(userVO.getId());
 
         String title;
         Long sourceId;
         UserVO sourceAuthor;
         NotificationSource source;
+        UserVO parentCommentAuthor;
 
         if (sourceVO instanceof EcoNewsVO) {
+            parentCommentAuthor = null;
             EcoNewsVO ecoNewsVO = (EcoNewsVO) sourceVO;
             title = ecoNewsVO.getTitle();
             sourceId = ecoNewsVO.getId();
@@ -249,6 +251,7 @@ public class NotificationServiceImpl implements NotificationService {
             source = NotificationSource.NEWS;
         } else if (sourceVO instanceof EcoNewsComment) {
             EcoNewsComment ecoNewsComment = (EcoNewsComment) sourceVO;
+            parentCommentAuthor = getParentCommentAuthor(ecoNewsComment);
             title = ecoNewsComment.getEcoNews().getTitle();
             sourceId = ecoNewsComment.getEcoNews().getId();
             sourceAuthor = modelMapper.map(ecoNewsComment.getEcoNews().getAuthor(), UserVO.class);
@@ -269,16 +272,35 @@ public class NotificationServiceImpl implements NotificationService {
         Notification savedNotification = notificationRepo.save(newNotification);
         log.info("Notification with id: {} was saved", savedNotification.getId());
 
-        NotifiedUser notifiedUser = NotifiedUser.builder()
-                .isRead(false)
-                .user(userRepo.findById(sourceAuthor.getId())
-                        .orElseThrow(() -> new NotFoundException(String.format(
-                                "User with id: %d not found", sourceAuthor.getId()))))
-                .notification(savedNotification)
-                .build();
-
+        NotifiedUser notifiedUser = createNotifiedUser(savedNotification, sourceAuthor);
         NotifiedUser savedUser = notifiedUserRepo.save(notifiedUser);
         log.info("Notified user with id {} was saved", savedUser.getId());
+
+        if (parentCommentAuthor != null) {
+            NotifiedUser notifiedParentUser = createNotifiedUser(savedNotification, parentCommentAuthor);
+            NotifiedUser savedParentUser = notifiedUserRepo.save(notifiedParentUser);
+            log.info("Notification for user with id {} saved for parent comment", savedParentUser.getId());
+        }
+    }
+
+    private NotifiedUser createNotifiedUser(Notification savedNotification, UserVO userVO) {
+        return NotifiedUser.builder()
+                .isRead(false)
+                .user(getUserById(userVO.getId()))
+                .notification(savedNotification)
+                .build();
+    }
+
+    private User getUserById(Long userId) {
+        return userRepo.findById(userId)
+                .orElseThrow(() -> new NotFoundException(String.format("User with id: %d not found", userId)));
+    }
+
+    private UserVO getParentCommentAuthor(EcoNewsComment ecoNewsComment) {
+        if (ecoNewsComment.getParentComment() != null) {
+            return modelMapper.map(ecoNewsComment.getParentComment().getUser(), UserVO.class);
+        }
+        return null;
     }
 
     private Notification createFriendNotification(User author) {

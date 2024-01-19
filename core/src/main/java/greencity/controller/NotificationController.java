@@ -14,13 +14,14 @@ import greencity.service.NotificationService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/notifications")
@@ -30,6 +31,7 @@ public class NotificationController {
 
     /**
      * Retrieves the three latest notifications for the authenticated user.
+     *
      * @param userVO The UserVO object representing the authenticated user.
      * @return ResponseEntity containing a list of {@link ShortNotificationDtoResponse} objects
      */
@@ -131,10 +133,10 @@ public class NotificationController {
      */
     @ApiOperation(value = "Delete notification.")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
-        @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @DeleteMapping("/{notificationId}")
     public ResponseEntity<ResponseEntity.BodyBuilder> delete(@PathVariable Long notificationId,
@@ -149,7 +151,7 @@ public class NotificationController {
      *
      * @param userVO The current user information obtained from the authentication context.
      * @param page   The pagination information for retrieving a specific page of friend requests.
-     * @return  A ResponseEntity containing a PageableDto of NotificationDtoResponse objects and an HTTP status code.
+     * @return A ResponseEntity containing a PageableDto of NotificationDtoResponse objects and an HTTP status code.
      * @see NotificationDtoResponse
      */
     @ApiOperation(value = "Get all user friend requests")
@@ -187,6 +189,7 @@ public class NotificationController {
 
     /**
      * Retrieves the last likes notifications for EcoNews comments for the current user.
+     *
      * @param userVO The UserVO representing the current user.
      * @return A {@link ResponseEntity} containing a list of {@link NotificationsDto} representing the last likes
      */
@@ -222,5 +225,17 @@ public class NotificationController {
         return ResponseEntity.ok(notificationService
                 .getNotificationsForCurrentUser(userVO.getId(), NotificationSourceType.NEWS_COMMENTED)
         );
+    }
+
+    @ApiOperation(value = "Get comments reply notifications")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/comments-reply")
+    public ResponseEntity<List<NotificationsDto>> getLastCommentsReply(@ApiIgnore @CurrentUser UserVO userVO) {
+        return ResponseEntity.ok(notificationService
+                .getNotificationsForCurrentUser(userVO.getId(), NotificationSourceType.COMMENT_REPLY));
     }
 }
