@@ -11,6 +11,7 @@ import greencity.dto.econewscomment.EcoNewsCommentAuthorDto;
 import greencity.dto.econewscomment.EcoNewsCommentDto;
 import greencity.dto.event.EventDateLocationDto;
 import greencity.dto.event.AddEventDtoRequest;
+import greencity.dto.event.EventDto;
 import greencity.dto.habit.*;
 import greencity.dto.habitfact.*;
 import greencity.dto.habitstatistic.AddHabitStatisticDto;
@@ -400,7 +401,7 @@ public class ModelUtils {
 
     public static AddEventDtoRequest getRequestAddEventDto() {
         return AddEventDtoRequest.builder()
-                .title("How to Promote Eco-Friendly Events on Social Media")
+                .title("Eco-Friendly Events Social Media")
                 .description("How to Promote Eco-Friendly Events on Social Media")
                 .open(true)
                 .datesLocations(
