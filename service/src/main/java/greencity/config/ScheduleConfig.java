@@ -4,10 +4,13 @@ import greencity.client.RestClient;
 import greencity.constant.CacheConstants;
 import greencity.dto.user.UserVO;
 import greencity.entity.EcoNews;
+import greencity.entity.HabitAssign;
 import greencity.entity.HabitFactTranslation;
 import greencity.entity.User;
 import static greencity.enums.EmailNotification.*;
 import static greencity.enums.FactOfDayStatus.*;
+
+import greencity.enums.HabitAssignStatus;
 import greencity.message.NotificationDto;
 import greencity.message.SendHabitNotification;
 import greencity.repository.*;
@@ -140,7 +143,14 @@ public class ScheduleConfig {
     @Transactional
     @Scheduled(cron = "0 0 0 * * ?", zone = "Europe/Kiev")
     public void setExpiredStatus() {
-
+        ZonedDateTime now = ZonedDateTime.now();
+        List<HabitAssign> habitsInProgress = habitAssignRepo.findAllInProgressHabitAssigns();
+        habitsInProgress.forEach(h -> {
+            if (h.getCreateDate().plusDays(h.getDuration().longValue()).isBefore(now)) {
+                log.info("Set status expired");
+                h.setStatus(HabitAssignStatus.EXPIRED);
+            }
+        });
     }
 
     /**
@@ -151,12 +161,12 @@ public class ScheduleConfig {
     @Transactional(readOnly = true)
     @Scheduled(cron = "0 0 0 * * ?", zone = "Europe/Kiev")
     public void sendInterestingNews() {
-       List<EcoNews> ecoNews = ecoNewsRepo.getThreeLastEcoNews();
-       newsSubscriberRepo.findAllBy().forEach((email) -> sendNotifications(email, ecoNews));
+        List<EcoNews> ecoNews = ecoNewsRepo.getThreeLastEcoNews();
+        newsSubscriberRepo.findAllBy().forEach((email) -> sendNotifications(email, ecoNews));
     }
 
     private void sendNotifications(String email, List<EcoNews> ecoNews) {
         ecoNews.forEach((news) ->
-            restClient.sendNotification(new NotificationDto(news.getTitle(),news.getText()), email));
+            restClient.sendNotification(new NotificationDto(news.getTitle(), news.getText()), email));
     }
 }

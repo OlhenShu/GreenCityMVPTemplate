@@ -141,7 +141,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .antMatchers(HttpMethod.POST,
                 "/ownSecurity/signUp",
                 "/ownSecurity/signIn",
-                "/ownSecurity/changePassword")
+                "/ownSecurity/changePassword",
+                "/newsSubscriber")
             .permitAll()
             .antMatchers(HttpMethod.GET,
                 "/achievements",
@@ -201,7 +202,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/habit/assign/{habitAssignId}/enroll/**",
                 "/habit/assign/{habitAssignId}/unenroll/{date}",
                 "/habit/statistic/{habitId}",
-                "/newsSubscriber",
                 USER_CUSTOM_SHOPPING_LIST_ITEMS,
                 USER_SHOPPING_LIST,
                 "/user/{userId}/habit",

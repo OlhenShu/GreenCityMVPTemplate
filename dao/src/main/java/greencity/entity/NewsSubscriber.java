@@ -7,6 +7,7 @@ import lombok.*;
 @Table(name = "news_subscribers")
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString

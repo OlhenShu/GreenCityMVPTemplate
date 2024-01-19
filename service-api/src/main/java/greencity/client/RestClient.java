@@ -483,9 +483,13 @@ public class RestClient {
     }
 
     public void sendNotification(NotificationDto notificationDto, String email) {
-        HttpEntity<NotificationDto> entity = new HttpEntity<>(notificationDto, setHeader());
-        restTemplate.exchange(greenCityUserServerAddress
-                + RestTemplateLinks.NOTIFICATION, HttpMethod.POST, entity, Object.class)
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<NotificationDto> entity = new HttpEntity<>(notificationDto, headers);
+        UriComponentsBuilder url = UriComponentsBuilder.fromHttpUrl(greenCityUserServerAddress
+                + RestTemplateLinks.NOTIFICATION)
+            .queryParam("email", email);
+        restTemplate.exchange(url.toUriString(), HttpMethod.POST, entity, Object.class)
             .getBody();
     }
 }
