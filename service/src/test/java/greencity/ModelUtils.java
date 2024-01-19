@@ -11,6 +11,7 @@ import greencity.dto.habitfact.*;
 import greencity.dto.language.LanguageDTO;
 import greencity.dto.language.LanguageTranslationDTO;
 import greencity.dto.language.LanguageVO;
+import greencity.dto.notification.NotificationDtoResponse;
 import greencity.dto.ownsecurity.OwnSecurityVO;
 import greencity.dto.ratingstatistics.RatingStatisticsVO;
 import greencity.dto.search.SearchNewsDto;
@@ -169,6 +170,24 @@ public class ModelUtils {
                 .build())
             .lastActivityTime(LocalDateTime.of(2020, 12, 11, 13, 30))
             .build();
+    }
+
+    public static NotifiedUser getNotifiedUser() {
+        return NotifiedUser.builder()
+                .isRead(false)
+                .id(1L)
+                .user(ModelUtils.getUser())
+                .notification(Notification.builder()
+                        .id(1L)
+                        .creationDate(ZonedDateTime.parse("2022-01-01T10:15:30+01:00"))
+                        .title("TestTitle")
+                        .sourceType(NotificationSourceType.NEWS_LIKED)
+                        .sourceId(1L)
+                        .author(ModelUtils.getUser())
+                        .notificationSource(NotificationSource.NEWS)
+                        .notifiedUsers(Collections.emptyList())
+                        .build())
+                .build();
     }
 
     public static Language getLanguage() {
@@ -713,5 +732,34 @@ public class ModelUtils {
                 .ratingCalculationEnum(RatingCalculationEnum.LIKE_COMMENT)
                 .user(getUser())
                 .build();
+    }
+
+    public static Notification getNotification() {
+        return Notification.builder()
+                .id(1L)
+                .notificationSource(NotificationSource.COMMENT)
+                .author(ModelUtils.getUser())
+                .title("test")
+                .notifiedUsers(List.of(getNotifiedUser()))
+                .creationDate(zonedDateTime)
+                .sourceType(NotificationSourceType.COMMENT_LIKED)
+                .sourceId(4L)
+                .build();
+    }
+
+    public static NotificationDtoResponse getNotificationDtoResponse() {
+        return NotificationDtoResponse.builder()
+                .id(1L)
+                .isRead(false)
+                .author(AuthorDto.builder()
+                        .id(1L)
+                        .name("test")
+                        .build())
+                .title("test")
+                .creationDate(zonedDateTime)
+                .sourceType(NotificationSourceType.COMMENT_LIKED)
+                .sourceId(4L)
+                .build();
+
     }
  }

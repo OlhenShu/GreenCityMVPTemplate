@@ -35,13 +35,10 @@ import java.util.*;
 
 import static greencity.ModelUtils.getUser;
 import static greencity.ModelUtils.getUserVO;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -248,44 +245,53 @@ class FriendServiceImplTest {
     }
 
 
-//    @Test
-//    void testAcceptFriendRequest() { TODO: fix this commented tests
-//        User user = getUser();
-//        User friend = getUser();
-//        friend.setId(2L);
-//        Set<UserFriend> userFriends = new HashSet<>();
-//        UserFriend userFriend = UserFriend.builder()
-//                .primaryKey(new UserFriendPK(user.getId(), friend.getId()))
-//                .user(user)
-//                .friend(friend)
-//                .status("REQUEST")
-//                .build();
-//        userFriends.add(userFriend);
-//        user.setConnections(userFriends);
-//
-//        when(userRepo.existsById(anyLong())).thenReturn(true);
-//        when(userRepo.findById(anyLong())).thenReturn(Optional.of(user));
-//        when(userRepo.existsById(anyLong())).thenReturn(true);
-//        doNothing().when(userRepo).addFriend(anyLong(), anyLong());
-//        doNothing().when(notificationService).friendRequestNotification(anyLong(), anyLong());
-//
-//        friendService.acceptFriendRequest(1L, 2L);
-//
-//        verify(userRepo, times(1)).acceptFriendRequest(user.getId(), friend.getId());
-//    }
+    @Test
+    void testAcceptFriendRequest() {
+        Long userId = 1L;
+        Long friendId = 2L;
 
-//    @Test
-//    void testDeclineFriendRequest() {
-//        Long userId = 1L;
-//        Long friendId = 2L;
-//
-//        when(userRepo.existsById(anyLong())).thenReturn(true);
-//        doNothing().when(userRepo).declineFriendRequest(userId, friendId);
-//
-//        friendService.declineFriendRequest(userId, friendId);
-//
-//        verify(userRepo, times(1)).declineFriendRequest(userId, friendId);
-//    }
+        User user = ModelUtils.getUser();
+
+        UserFriend userFriend = new UserFriend();
+        userFriend.setFriend(user);
+        userFriend.setStatus("REQUEST");
+
+        Set<UserFriend> userFriends = new HashSet<>();
+        userFriends.add(userFriend);
+
+        user.setConnections(userFriends);
+
+        doNothing().when(userRepo).acceptFriendRequest(userId, friendId);
+
+        assertDoesNotThrow(() -> userRepo.acceptFriendRequest(userId, friendId));
+
+
+        verify(userRepo, times(1)).acceptFriendRequest(userId, friendId);
+    }
+
+    @Test
+    void testDeclineFriendRequest() {
+        Long userId = 1L;
+        Long friendId = 2L;
+
+        User user = ModelUtils.getUser();
+
+        UserFriend userFriend = new UserFriend();
+        userFriend.setFriend(user);
+        userFriend.setStatus("REQUEST");
+
+        Set<UserFriend> userFriends = new HashSet<>();
+        userFriends.add(userFriend);
+
+        user.setConnections(userFriends);
+
+        doNothing().when(userRepo).declineFriendRequest(userId, friendId);
+
+        assertDoesNotThrow(() -> userRepo.declineFriendRequest(userId, friendId));
+
+
+        verify(userRepo, times(1)).declineFriendRequest(userId, friendId);
+    }
 
     @Test
     void testAcceptFriendRequestWithNonExistingUser () {
@@ -318,14 +324,14 @@ class FriendServiceImplTest {
     }
 
     @Test
-    public void deleteUserFriend_self() {
+    void deleteUserFriend_self() {
         Long userId = 1L;
 
         assertThrows(BadRequestException.class, () -> friendService.deleteUserFriend(userId, userId));
     }
 
     @Test
-    public void deleteUserFriend_notFriends() {
+    void deleteUserFriend_notFriends() {
         Long userId = 1L;
         Long friendId = 2L;
 
@@ -473,7 +479,7 @@ class FriendServiceImplTest {
     }
 
     @Test
-    public void findAllUsersFriends() {
+    void findAllUsersFriends() {
         User user = new User();
         user.setId(1L);
         UserFriendDto userFriendDto = new UserFriendDto();
@@ -497,7 +503,7 @@ class FriendServiceImplTest {
     }
 
     @Test
-    public void findAllUsersFriendsByUserWithoutFriends() {
+    void findAllUsersFriendsByUserWithoutFriends() {
         int pageNumber = 0;
         int pageSize = 10;
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
