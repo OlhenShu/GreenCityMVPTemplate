@@ -5,11 +5,13 @@ import greencity.constant.CacheConstants;
 import greencity.dto.user.UserVO;
 import greencity.entity.HabitAssign;
 import greencity.entity.HabitFactTranslation;
+import greencity.entity.NewsSubscriber;
 import greencity.entity.User;
 import greencity.enums.HabitAssignStatus;
 import greencity.message.SendHabitNotification;
 import greencity.repository.HabitAssignRepo;
 import greencity.repository.HabitFactTranslationRepo;
+import greencity.repository.NewsSubscriberRepo;
 import greencity.repository.RatingStatisticsRepo;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +42,7 @@ public class ScheduleConfig {
     private final HabitAssignRepo habitAssignRepo;
     private final RatingStatisticsRepo ratingStatisticsRepo;
     private final RestClient restClient;
+    private final NewsSubscriberRepo newsSubscriberRepo;
 
     /**
      * Invoke {@link SendHabitNotification} from EmailMessageReceiver to send email
