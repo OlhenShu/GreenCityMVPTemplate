@@ -6,6 +6,9 @@ import greencity.constant.AppConstant;
 import greencity.dto.PageableAdvancedDto;
 import greencity.dto.econews.*;
 import greencity.dto.econewscomment.*;
+import greencity.dto.event.AddEventDtoRequest;
+import greencity.dto.event.EventDateLocationDto;
+import greencity.dto.event.EventDto;
 import greencity.dto.geocoding.AddressLatLngResponse;
 import greencity.dto.geocoding.AddressResponse;
 import greencity.dto.habit.*;
@@ -806,5 +809,36 @@ public class ModelUtils {
         };
 
         return new GeocodingResult[] {geocodingResult};
+    }
+
+    public static AddEventDtoRequest getRequestAddEventDto() {
+        return AddEventDtoRequest.builder()
+                .title("Eco-Friendly Events Social Media")
+                .description("How to Promote Eco-Friendly Events on Social Media")
+                .open(true)
+                .datesLocations(
+                        List.of(EventDateLocationDto.builder()
+                                .id(1L)
+                                .startDate(ZonedDateTime.parse("2024-01-17T06:00Z[UTC]"))
+                                .finishDate(ZonedDateTime.parse("2024-01-17T06:00Z[UTC]"))
+                                .onlineLink("http://localhost:8080/swagger-ui.html#/")
+                                .build())
+                ).build();
+    }
+
+    public static EventDto getEventDto(){
+        return EventDto.builder()
+                .title("Eco-Friendly Events Social Media")
+                .description("How to Promote Eco-Friendly Events on Social Media")
+                .open(true)
+                .dates(
+                        List.of(EventDateLocationDto.builder()
+                                .id(1L)
+                                .startDate(ZonedDateTime.parse("2024-01-17T06:00Z[UTC]"))
+                                .finishDate(ZonedDateTime.parse("2024-01-17T06:00Z[UTC]"))
+                                .onlineLink("http://localhost:8080/swagger-ui.html#/")
+                                .build())
+                )
+                .build();
     }
 }
