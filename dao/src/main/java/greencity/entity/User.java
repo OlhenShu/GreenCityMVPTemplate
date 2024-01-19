@@ -5,6 +5,7 @@ import greencity.dto.user.RegistrationStatisticsDtoResponse;
 import greencity.enums.EmailNotification;
 import greencity.enums.Role;
 import greencity.enums.UserStatus;
+import java.util.HashSet;
 import lombok.*;
 
 import javax.persistence.*;
@@ -42,6 +43,11 @@ import java.util.Set;
                 })
 })
 @NamedNativeQueries(value = {
+        @NamedNativeQuery(name = "User.findAllRegistrationMonths",
+                query = "SELECT EXTRACT(MONTH FROM date_of_registration) - 1 as month, count(date_of_registration) FROM users "
+                        + "WHERE EXTRACT(YEAR from date_of_registration) = EXTRACT(YEAR FROM CURRENT_DATE) "
+                        + "GROUP BY month",
+                resultSetMapping = "monthsStatisticsMapping"),
         @NamedNativeQuery(name = "User.getAllUsersExceptMainUserAndFriends",
                 query = "SELECT *, (SELECT count(*) "
                         + "        FROM users_friends uf1 "
@@ -153,4 +159,7 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Filter> filters = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UserFriend> connections = new HashSet<>();
 }
