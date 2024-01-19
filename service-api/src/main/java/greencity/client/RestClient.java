@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -482,6 +483,14 @@ public class RestClient {
         return token == null ? null : "Bearer " + token;
     }
 
+    /**
+     * Sends a notification to a user with the specified email address.
+     *
+     * @param notificationDto The {@link NotificationDto} representing the content of the notification.
+     * @param email The email address of the user to whom the notification will be sent.
+     *
+     * @author Nikita Malov
+     */
     public void sendNotification(NotificationDto notificationDto, String email) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

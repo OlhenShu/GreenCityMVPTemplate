@@ -153,9 +153,7 @@ public class ScheduleConfig {
         });
     }
 
-    /**
-     * Every day at 00:00 sends recent notifications to {@link greencity.entity.NewsSubscriber}
-     *
+    /** Every day at 00:00 sends recent notifications to {@link greencity.entity.NewsSubscriber}.
      * @author Nikita Malov
      **/
     @Transactional(readOnly = true)

@@ -14,6 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class NewsSubscriberServiceImpl implements NewsSubscriberService {
     private final NewsSubscriberRepo newsSubscriberRepo;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public void save(String email) {
