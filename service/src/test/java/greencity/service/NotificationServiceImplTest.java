@@ -7,12 +7,11 @@ import greencity.dto.notification.NotificationDtoResponse;
 import greencity.dto.notification.NotificationsDto;
 import greencity.dto.notification.ShortNotificationDtoResponse;
 import greencity.dto.user.UserVO;
-import greencity.entity.Notification;
-import greencity.entity.NotifiedUser;
-import greencity.entity.User;
+import greencity.entity.*;
 import greencity.enums.NotificationSource;
 import greencity.enums.NotificationSourceType;
 import greencity.enums.Role;
+import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.repository.NotificationRepo;
@@ -35,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -82,7 +82,7 @@ class NotificationServiceImplTest {
                         NotificationSourceType.NEWS_LIKED, 1L, false, ZonedDateTime.now()));
         notificationDtoList.add(
                 new NotificationDtoResponse(3L, 1L, "name2", "title",
-                        NotificationSourceType.NEWS_COMMENTED, 23L, true, ZonedDateTime.now()));
+                        NotificationSourceType.NEWS_COMMENTED, 0L, true, ZonedDateTime.now()));
         Page<NotificationDtoResponse> notificationDtoPage =
                 new PageImpl<>(notificationDtoList, PageRequest.of(0, 10), 2L);
 
@@ -344,6 +344,152 @@ class NotificationServiceImplTest {
         when(notificationRepo.findById(anyLong())).thenReturn(Optional.of(notification));
 
         assertThrows(UserHasNoPermissionToAccessException.class, () -> notificationService.delete(1L, userVO));
+    }
+
+    @Test
+    void testMarkAsReadNotification() {
+        Long userId = 1L;
+        Long notificationId = 1L;
+
+        NotifiedUser notifiedUser = buildNotifiedUser();
+
+        when(notifiedUserRepo.findByUserIdAndNotificationId(userId, notificationId))
+                .thenReturn(Optional.of(notifiedUser));
+
+        assertDoesNotThrow(() -> notificationService.markAsReadNotification(userId, notificationId));
+
+        assertTrue(notifiedUser.getIsRead());
+
+        verify(notifiedUserRepo, times(1)).findByUserIdAndNotificationId(userId, notificationId);
+        verify(notifiedUserRepo, times(1)).save(notifiedUser);
+    }
+
+    @Test
+    void testMarkAsReadNotification_NotFound() {
+        Long userId = 1L;
+        Long notificationId = 1L;
+
+        when(notifiedUserRepo.findByUserIdAndNotificationId(userId, notificationId))
+                .thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+                () -> notificationService.markAsReadNotification(userId, notificationId));
+
+        verify(notifiedUserRepo, times(1)).findByUserIdAndNotificationId(userId, notificationId);
+        verifyNoMoreInteractions(notifiedUserRepo);
+    }
+
+    @Test
+    void testMarkAsReadNotification_AlreadyRead() {
+        Long userId = 1L;
+        Long notificationId = 1L;
+
+        NotifiedUser notifiedUser = new NotifiedUser();
+        notifiedUser.setIsRead(true);
+
+        when(notifiedUserRepo.findByUserIdAndNotificationId(userId, notificationId))
+                .thenReturn(Optional.of(notifiedUser));
+
+        assertThrows(BadRequestException.class,
+                () -> notificationService.markAsReadNotification(userId, notificationId));
+
+        verify(notifiedUserRepo, times(1)).findByUserIdAndNotificationId(userId, notificationId);
+        verifyNoMoreInteractions(notifiedUserRepo);
+    }
+
+    @Test
+    void testReadLatestNotification() {
+        Long userId = 1L;
+        User user = ModelUtils.getUser();
+        NotifiedUser notifiedUser = buildNotifiedUser();
+
+
+        List<Notification> unreadNotifications = new ArrayList<>();
+        unreadNotifications.add(
+                new Notification(1L, user, "name1", ZonedDateTime.now(),
+                        NotificationSourceType.NEWS_LIKED, 1L,
+                        NotificationSource.NEWS, List.of(notifiedUser)));
+        unreadNotifications.add(
+                new Notification(2L, user, "name2", ZonedDateTime.now(),
+                        NotificationSourceType.NEWS_LIKED, 1L,
+                        NotificationSource.NEWS, List.of(notifiedUser)));
+        unreadNotifications.add(
+                new Notification(3L, user, "name3", ZonedDateTime.now(),
+                        NotificationSourceType.NEWS_LIKED, 1L,
+                        NotificationSource.NEWS, List.of(notifiedUser)));
+
+        when(notifiedUserRepo.findTop3UnreadNotificationsForUser(userId))
+                .thenReturn(unreadNotifications);
+
+        List<NotifiedUser> userNotifications = unreadNotifications.stream()
+                .map(notification -> {
+                    notifiedUser.setNotification(notification);
+                    return notifiedUser;
+                })
+                .collect(Collectors.toList());
+
+        when(notifiedUserRepo.findByUserIdAndNotificationIdIn(userId,
+                List.of(1L, 2L, 3L)))
+                .thenReturn(userNotifications);
+
+        assertDoesNotThrow(() -> notificationService.readLatestNotification(userId));
+
+        assertTrue(userNotifications.stream().allMatch(NotifiedUser::getIsRead));
+
+        verify(notifiedUserRepo, times(1)).findTop3UnreadNotificationsForUser(userId);
+        verify(notifiedUserRepo, times(1)).findByUserIdAndNotificationIdIn(userId,
+                List.of(1L, 2L, 3L));
+        verify(notifiedUserRepo, times(1)).saveAll(userNotifications);
+    }
+
+    @Test
+    void testReadLatestNotification_NoUnreadNotifications() {
+        Long userId = 1L;
+
+        when(notifiedUserRepo.findTop3UnreadNotificationsForUser(userId))
+                .thenReturn(Collections.emptyList());
+
+        assertThrows(NotFoundException.class, () -> notificationService.readLatestNotification(userId));
+
+        verify(notifiedUserRepo, times(1)).findTop3UnreadNotificationsForUser(userId);
+        verifyNoMoreInteractions(notifiedUserRepo);
+    }
+
+    @Test
+    void testCreateNotification_EcoNewsComment() {
+
+        UserVO userVO = ModelUtils.getUserVO();
+
+        EcoNewsComment ecoNewsComment = ModelUtils.getEcoNewsComment();
+
+        EcoNews ecoNews = ModelUtils.getEcoNews();
+        ecoNewsComment.setEcoNews(ecoNews);
+
+        NotifiedUser notifiedUser = buildNotifiedUser();
+
+        Notification notification = new Notification(1L, ModelUtils.getUser(), "name1", ZonedDateTime.now(),
+                NotificationSourceType.NEWS_LIKED, 1L,
+                NotificationSource.NEWS, List.of(notifiedUser));
+
+        when(userRepo.findById(userVO.getId()))
+                .thenReturn(Optional.of(ModelUtils.getUser())); // mock user retrieval
+        when(modelMapper.map(ecoNewsComment.getEcoNews().getAuthor(), UserVO.class))
+                .thenReturn(userVO);
+        when(notificationRepo.save(any())).thenReturn(notification);
+        when(notifiedUserRepo.save(any(NotifiedUser.class))).thenReturn(notifiedUser);
+
+        assertDoesNotThrow(() -> notificationService.createNotification(userVO, ecoNewsComment,
+                NotificationSourceType.NEWS_COMMENTED));
+
+
+        verify(userRepo, times(2)).findById(userVO.getId());
+        verify(modelMapper, times(1)).map(ecoNewsComment.getEcoNews().getAuthor(), UserVO.class);
+        verify(notificationRepo, times(1)).save(any(Notification.class));
+        verify(userRepo, times(2)).findById(ModelUtils.getEcoNewsVO().getAuthor().getId());
+        verify(modelMapper, times(1)).map(ModelUtils.getUser(), UserVO.class);
+        verify(notifiedUserRepo, times(1)).save(any(NotifiedUser.class));
+
+
     }
 }
 
