@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
+import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.stereotype.Service;
@@ -81,14 +82,13 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public EventDto update(UpdateEventDto eventDto, String email, MultipartFile[] images) {
+    public EventDto update(@NotNull UpdateEventDto eventDto, String email, MultipartFile[] images) {
         Event eventToUpdate = eventRepo.findById(eventDto.getId())
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND));
 
         User organizer = modelMapper.map(restClient.findByEmail(email), User.class);
 
-        if (organizer.getRole() != Role.ROLE_ADMIN && organizer.getRole() != Role.ROLE_MODERATOR
-                && !organizer.getId().equals(eventToUpdate.getOrganizer().getId())) {
+        if (organizer.getRole() != Role.ROLE_ADMIN && !organizer.getId().equals(eventToUpdate.getOrganizer().getId())) {
             throw new UserHasNoPermissionToAccessException(ErrorMessage.USER_HAS_NO_PERMISSION);
         }
 
