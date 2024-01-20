@@ -64,14 +64,14 @@ class EventServiceImplTest {
     private final List<TagVO> tagVOList = Collections.singletonList(ModelUtils.getEventTagVO());
     private final List<Tag> tags = Collections.singletonList(ModelUtils.getEventTag());
     private final MultipartFile file = ModelUtils.getFile();
-    private final MultipartFile[] multipartFiles = new MultipartFile[] {file};
+    private final MultipartFile[] multipartFiles = new MultipartFile[]{file};
     private final EventDateLocationDto eventDateLocationDto = addEventDtoRequest.getDatesLocations().get(0);
     private final AddressDto addressDto = eventDateLocationDto.getCoordinates();
     private final AddressLatLngResponse response = AddressLatLngResponse.builder()
             .latitude(addressDto.getLatitude())
             .longitude(addressDto.getLongitude())
             .build();
-    private final LatLng latLng = new LatLng(addressDto.getLatitude(),addressDto.getLongitude());
+    private final LatLng latLng = new LatLng(addressDto.getLatitude(), addressDto.getLongitude());
 
     @Test
     void saveTest() throws Exception {
@@ -160,7 +160,9 @@ class EventServiceImplTest {
         when(modelMapper.map(TEST_USER_VO, User.class)).thenReturn(user);
 
         assertThrows(BadRequestException.class,
-                () -> eventService.update(eventToUpdateDto, user.getEmail(), null));
+                () -> {
+                    eventService.update(eventToUpdateDto, user.getEmail(), null);
+                });
     }
 
     @Test
@@ -193,8 +195,9 @@ class EventServiceImplTest {
 
         System.out.println("Expected Organizer Email: " + userVO.getEmail());
 
-        assertThrows(UserHasNoPermissionToAccessException.class,
-                () -> eventService.update(eventToUpdateDto, userVO.getEmail(), null));
+        assertThrows(UserHasNoPermissionToAccessException.class, () -> {
+            eventService.update(eventToUpdateDto, userVO.getEmail(), null);
+        });
 
         verify(eventRepo).findById(1L);
         verify(restClient).findByEmail("test@gmail.com");

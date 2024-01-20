@@ -131,10 +131,13 @@ public class EventServiceImpl implements EventService {
 
         if (updateEventDto.getDatesLocations() != null) {
             addAddressToLocation(updateEventDto.getDatesLocations());
-            toUpdate.setDates(updateEventDto.getDatesLocations().stream()
+
+            List<EventDateLocation> updatedDatesLocations = updateEventDto.getDatesLocations().stream()
                     .map(d -> modelMapper.map(d, EventDateLocation.class))
-                    .peek(d -> d.setEvent(toUpdate))
-                    .collect(Collectors.toList()));
+                    .collect(Collectors.toList());
+
+            updatedDatesLocations.forEach(d -> d.setEvent(toUpdate));
+            toUpdate.setDates(updatedDatesLocations);
         }
     }
 
