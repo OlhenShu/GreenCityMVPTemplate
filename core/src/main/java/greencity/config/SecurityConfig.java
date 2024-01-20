@@ -47,7 +47,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String CUSTOM_SHOPPING_LIST_ITEMS = "/{userId}/custom-shopping-list-items";
     private static final String HABIT_ASSIGN_ID = "/habit/assign/{habitId}";
     private static final String USER_SHOPPING_LIST = "/user/shopping-list-items";
-    private static final String NOTIFICATION_URL = "/notification/**";
 
     private final JwtTool jwtTool;
     private final UserService userService;
@@ -101,8 +100,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .antMatchers(HttpMethod.GET,
                 ECONEWS_COMMENTS)
             .hasAnyRole(ADMIN)
-                .antMatchers(NOTIFICATION_URL)
-                .hasAnyRole(ADMIN, USER, MODERATOR, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.GET,
                 "/ownSecurity/verifyEmail",
                 "/ownSecurity/updateAccessToken",
@@ -284,7 +281,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/facts/{factId}",
                 "/comments")
             .hasAnyRole(ADMIN)
-            .anyRequest().hasAnyRole(ADMIN)
+            .anyRequest().hasAnyRole(ADMIN, USER)
             .and()
             .logout()
             .logoutUrl("/logout")
