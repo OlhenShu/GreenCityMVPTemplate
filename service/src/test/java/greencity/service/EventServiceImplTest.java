@@ -26,11 +26,13 @@ import org.modelmapper.ModelMapper;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static greencity.ModelUtils.TEST_USER_VO;
+import static greencity.ModelUtils.getTagUaEnDto;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -117,6 +119,11 @@ class EventServiceImplTest {
                                 .build())
                         .build()));
 
+        eventToUpdateDto.setTags(Collections.singletonList(getTagUaEnDto().getNameUa()));
+        eventToUpdateDto.setTitle("TestTitle");
+        eventToUpdateDto.setDescription("TestDescription");
+        eventToUpdateDto.setOpen(true);
+
         User user = ModelUtils.getUser();
         user.setRole(Role.ROLE_ADMIN);
 
@@ -130,8 +137,10 @@ class EventServiceImplTest {
         when(googleApiService.getResultFromGeoCodeByCoordinates(latLng)).thenReturn(response);
         when(modelMapper.map(response, AddressDto.class)).thenReturn(addressDto);
         when(modelMapper.map(eventToUpdateDto.getDatesLocations().get(0), EventDateLocation.class)).thenReturn(event.getDates().get(0));
+        when(tagService.findAllTranslationsByNamesAndType(eventToUpdateDto.getTags(), TagType.EVENT)).thenReturn(tagVOList);
+        when(modelMapper.map(tagVOList, TypeUtils.parameterize(List.class, Tag.class))).thenReturn(tags);
 
-        EventDto actualEvent = eventService.update(eventToUpdateDto, user.getEmail(), null);
+        EventDto actualEvent = eventService.update(eventToUpdateDto, user.getEmail(), new MultipartFile[0]);
 
         assertEquals(eventDto, actualEvent);
     }
