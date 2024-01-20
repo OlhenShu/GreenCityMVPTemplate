@@ -3,6 +3,7 @@ package greencity.service;
 import com.google.maps.model.LatLng;
 import greencity.ModelUtils;
 import greencity.client.RestClient;
+import greencity.constant.AppConstant;
 import greencity.dto.event.*;
 import greencity.dto.geocoding.AddressLatLngResponse;
 import greencity.dto.tag.TagVO;
@@ -11,6 +12,7 @@ import greencity.entity.Tag;
 import greencity.entity.User;
 import greencity.entity.event.Event;
 import greencity.entity.event.EventDateLocation;
+import greencity.entity.event.EventImages;
 import greencity.enums.Role;
 import greencity.enums.TagType;
 import greencity.exception.exceptions.BadRequestException;
@@ -25,8 +27,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -196,5 +199,44 @@ class EventServiceImplTest {
         verify(eventRepo).findById(1L);
         verify(restClient).findByEmail("test@gmail.com");
         verify(modelMapper).map(userVO, User.class);
+    }
+
+    @Test
+    void updatedEventWithNewData() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        Method method = EventServiceImpl.class.getDeclaredMethod("updatedEventWithNewData", Event.class,
+                UpdateEventDto.class, MultipartFile[].class);
+        method.setAccessible(true);
+        Event event = ModelUtils.getEvent();
+        Event expectedEvent = ModelUtils.getExpectedEvent();
+        UpdateEventDto eventToUpdateDto = ModelUtils.getUpdateEventDto();
+        method.invoke(eventService, event, eventToUpdateDto, null);
+        assertEquals(event.getTitleImage(), expectedEvent.getTitleImage());
+
+        eventToUpdateDto.setTitleImage("New img");
+        eventToUpdateDto.setAdditionalImages(List.of("New additional image"));
+        expectedEvent.setTitleImage("New img");
+        expectedEvent.setAdditionalImages(List.of(EventImages.builder().link("New additional image").build()));
+
+        method.invoke(eventService, event, eventToUpdateDto, null);
+        assertEquals(expectedEvent.getAdditionalImages().get(0).getLink(),
+                event.getAdditionalImages().get(0).getLink());
+        assertEquals(event.getTitleImage(), expectedEvent.getTitleImage());
+
+        eventToUpdateDto.setImagesToDelete(List.of("New additional image"));
+        doNothing().when(fileService).delete(any());
+
+        method.invoke(eventService, event, eventToUpdateDto, null);
+        assertEquals(expectedEvent.getTitleImage(), event.getTitleImage());
+        assertEquals(expectedEvent.getAdditionalImages().get(0).getLink(),
+                event.getAdditionalImages().get(0).getLink());
+
+        eventToUpdateDto.setAdditionalImages(null);
+        method.invoke(eventService, event, eventToUpdateDto, null);
+        assertNull(event.getAdditionalImages());
+
+        eventToUpdateDto.setTitleImage(null);
+        expectedEvent.setTitleImage(AppConstant.DEFAULT_EVENT_IMAGES);
+        method.invoke(eventService, event, eventToUpdateDto, null);
+        assertEquals(expectedEvent.getTitleImage(), event.getTitleImage());
     }
 }

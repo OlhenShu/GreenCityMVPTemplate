@@ -912,6 +912,28 @@ public class ModelUtils {
         return Event.builder()
                 .title("Eco-Friendly Events Social Media")
                 .description("How to Promote Eco-Friendly Events on Social Media")
+                .titleImage(AppConstant.DEFAULT_EVENT_IMAGES)
+                .open(true)
+                .dates(
+                        List.of(EventDateLocation.builder()
+                                .id(1L)
+                                .startDate(ZonedDateTime.parse("2021-01-17T06:00Z[UTC]"))
+                                .finishDate(ZonedDateTime.parse("2021-01-18T06:00Z[UTC]"))
+                                .onlineLink("http://localhost:8080/swagger-ui.html#/")
+                                .coordinates(Address.builder()
+                                        .latitude(45.466272)
+                                        .longitude(9.188604)
+                                        .build())
+                                .build()))
+                .tags(Collections.singletonList(getEventTag()))
+                .build();
+    }
+
+    public static Event getExpectedEvent() {
+        return Event.builder()
+                .title("Eco-Friendly Events Social Media")
+                .description("How to Promote Eco-Friendly Events on Social Media")
+                .titleImage(AppConstant.DEFAULT_EVENT_IMAGES)
                 .open(true)
                 .dates(
                         List.of(EventDateLocation.builder()
