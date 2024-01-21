@@ -106,11 +106,11 @@
     <include file="db/changelog/logs/ch-insert-into-languages-Kozak.xml"/>
     <include file="db/changelog/logs/ch-insert-into-categories-Kozak.xml"/>
     <include file="db/changelog/logs/ch-insert-into-fact-of-the-day-Kozak.xml"/>
-<!--    <include file="db/changelog/logs/ch-insert-into-fact-of-the-day-translations-Kozak.xml"/>-->
+    <include file="db/changelog/logs/ch-insert-into-fact-of-the-day-translations-Kozak.xml"/>
     <include file="db/changelog/logs/ch-insert-into-habits-Kozak.xml"/>
     <include file="db/changelog/logs/ch-insert-into-habit-translation-Kozak.xml"/>
     <include file="db/changelog/logs/ch-insert-into-shopping-list-items-Kozak.xml"/>
-<!--    <include file="db/changelog/logs/ch-insert-into-shopping-list-item-translations-Kozak.xml"/>-->
+    <include file="db/changelog/logs/ch-insert-into-shopping-list-item-translations-Kozak.xml"/>
     <include file="db/changelog/logs/ch-insert-into-habit-shopping-list-items-Kozak.xml"/>
     <include file="db/changelog/logs/ch-insert-into-specifications-Kozak.xml"/>
     <include file="db/changelog/logs/ch-insert-into-tags-Kozak.xml"/>
@@ -119,11 +119,11 @@
     <include file="db/changelog/logs/ch-insert-table-users-service-account-Yezenitskyi.xml"/>
     <include file="db/changelog/logs/ch-change-events-and-create-eventsdate-table-Hlynskyi.xml"/>
     <include file="db/changelog/logs/ch-change-events-events-location-Hlynskyi.xml"/>
-<!--    <include file="db/changelog/logs/ch-add-event-tags-Hlynskyi.xml"/>-->
+    <include file="db/changelog/logs/ch-add-event-tags-Hlynskyi.xml"/>
     <include file="db/changelog/logs/ch-drop-all-tips-and-tricks-tables-Yezenitskyi.xml"/>
     <include file="db/changelog/logs/ch-change-event-date-to-zoned-type-Hlynskyi.xml"/>
     <include file="db/changelog/logs/ch-changed-user-role-to-varchar.xml"/>
-<!--    <include file="db/changelog/logs/ch-add-places-tags.xml"/>-->
+    <include file="db/changelog/logs/ch-add-places-tags.xml"/>
     <include file="db/changelog/logs/ch-change-events-location-add-addresses-Hlynskyi.xml"/>
     <include file="db/changelog/logs/ch-add-table-filters-Hural.xml"/>
     <include file="db/changelog/logs/ch-add-event-organizer-raring-Hlynskyi.xml"/>
