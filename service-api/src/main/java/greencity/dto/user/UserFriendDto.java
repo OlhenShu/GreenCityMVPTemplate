@@ -18,4 +18,42 @@ public class UserFriendDto {
     private String name;
     private String profilePicturePath;
     private Double rating;
+
+    /**
+     * Constructor.
+     *
+     * @param id                  {@link Long} id
+     * @param city                {@link String} city
+     * @param mutualFriends       {@link Long} mutualFriends
+     * @param name                {@link String} name
+     * @param profilePicturePath  {@link String} profilePicturePath
+     * @param rating              {@link Double} rating
+     */
+    public UserFriendDto(
+        Long id, String city, Long mutualFriends, String name, String profilePicturePath, Double rating) {
+        this.id = id;
+        this.city = city;
+        this.mutualFriends = mutualFriends;
+        this.name = name;
+        this.profilePicturePath = profilePicturePath;
+        this.rating = rating;
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param id                  {@link Long} id
+     * @param city                {@link String} city
+     * @param name                {@link String} name
+     * @param profilePicturePath  {@link String} profilePicturePath
+     * @param rating              {@link Double} rating
+     */
+    public UserFriendDto(
+        Long id, String city,  String name, String profilePicturePath, Double rating) {
+        this.id = id;
+        this.city = city;
+        this.name = name;
+        this.profilePicturePath = profilePicturePath;
+        this.rating = rating;
+    }
 }

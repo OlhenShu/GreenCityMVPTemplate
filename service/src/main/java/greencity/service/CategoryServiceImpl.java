@@ -36,6 +36,8 @@ public class CategoryServiceImpl implements CategoryService {
      *
      * @param dto - dto for Category entity
      * @return category
+     * @throws BadCategoryRequestException if a category with the same name already exists
+     * @throws BadRequestException if it's not possible to add the parent category
      * @author Kateryna Horokh
      */
     @Override
