@@ -48,5 +48,4 @@ public class EventComment {
 
     @Transient
     private boolean currentUserLiked = false;
-
 }

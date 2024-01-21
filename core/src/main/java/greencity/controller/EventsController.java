@@ -19,9 +19,13 @@ import java.security.Principal;
 @RequestMapping("/events")
 @RequiredArgsConstructor
 public class EventsController {
-
     private final EventService eventService;
 
+    /**
+     * Method for deleting an event.
+     *
+     * @author Bogdan Veremienko.
+     */
     @ApiOperation(value = "Delete event")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = HttpStatuses.OK),

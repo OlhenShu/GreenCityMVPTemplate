@@ -34,5 +34,4 @@ public class EventCommentServiceImpl implements EventCommentService {
         addEventCommentDtoResponse.setAuthor(modelMapper.map(userVO, EventCommentAuthorDto.class));
         return addEventCommentDtoResponse;
     }
-
 }

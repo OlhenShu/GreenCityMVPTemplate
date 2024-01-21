@@ -23,7 +23,6 @@ import java.util.List;
 @Transactional
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
-
     private final EventRepo eventRepo;
     private final ModelMapper modelMapper;
     private final RestClient restClient;
