@@ -7,12 +7,16 @@
     <changeSet id="add-events-users-likes-table" author="Yurii Osovskyi">
         <createTable tableName="events_users_likes">
             <column name="event_id" type="BIGINT">
-                <constraints nullable="false"/>
+                <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="users_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
         </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="event_id" baseTableName="events_users_likes"
+                                 constraintName="fk_events_users_likes_event_id" referencedColumnNames="id"
+                                 referencedTableName="events"/>
 
         <addForeignKeyConstraint baseColumnNames="users_id" baseTableName="events_users_likes"
                                  constraintName="fk_events_users_likes_user_id" referencedColumnNames="id"

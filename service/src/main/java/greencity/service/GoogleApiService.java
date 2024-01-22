@@ -25,28 +25,6 @@ public class GoogleApiService {
     private final GeoApiContext context;
     private static final Locale UKRAINIAN = new Locale("uk");
     private static final Locale ENGLISH = new Locale("en");
-    private static final List<Locale> LOCALES = List.of(UKRAINIAN, ENGLISH);
-
-    /**
-     * Send request to the Google and receive response with geocoding.
-     *
-     * @param searchRequest - address to search
-     * @return GeocodingResults - return result from geocoding service
-     */
-    public List<GeocodingResult> getResultFromGeoCode(String searchRequest) {
-        List<GeocodingResult> geocodingResults = new ArrayList<>();
-        LOCALES.forEach(locale -> {
-            try {
-                GeocodingResult[] results = GeocodingApi.newRequest(context)
-                        .address(searchRequest).language(locale.getLanguage()).await();
-                Collections.addAll(geocodingResults, results);
-            } catch (IOException | InterruptedException | ApiException e) {
-                log.error("Occurred error during the call on google API, reason: {}", e.getMessage());
-                Thread.currentThread().interrupt();
-            }
-        });
-        return geocodingResults;
-    }
 
     /**
      * Send request to the Google and receive response with geocoding.

@@ -137,7 +137,6 @@ public final class ErrorMessage {
     public static final String USER_ALREADY_HAS_CONNECTION = "User already has %s connection with this user";
     public static final String EVENT_NOT_FOUND = "Event Not Found";
     public static final String EVENT_IS_FINISHED = "Event has already finished and can't be modified";
-
     public static final String ADDRESS_NOT_FOUND_EXCEPTION = "No address found for the given coordinates.";
 
     private ErrorMessage() {
