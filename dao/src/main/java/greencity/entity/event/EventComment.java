@@ -1,5 +1,6 @@
-package greencity.entity;
+package greencity.entity.event;
 
+import greencity.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

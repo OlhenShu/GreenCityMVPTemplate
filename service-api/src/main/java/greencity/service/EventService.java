@@ -5,9 +5,6 @@ import greencity.dto.event.EventDto;
 import greencity.dto.event.UpdateEventDto;
 import greencity.dto.user.UserVO;
 import org.springframework.web.multipart.MultipartFile;
-
-
-
 import greencity.dto.event.EventVO;
 
 public interface EventService {
