@@ -5,10 +5,7 @@ import greencity.ModelUtils;
 import greencity.client.RestClient;
 import greencity.constant.AppConstant;
 import greencity.dto.PageableDto;
-import greencity.dto.event.AddressDto;
-import greencity.dto.event.EventDateLocationDto;
-import greencity.dto.event.EventDto;
-import greencity.dto.event.UpdateEventDto;
+import greencity.dto.event.*;
 import greencity.dto.geocoding.AddressLatLngResponse;
 import greencity.dto.search.SearchEventDto;
 import greencity.dto.tag.TagVO;
@@ -24,10 +21,14 @@ import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.repository.EventRepo;
 import greencity.repository.EventSearchRepo;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.junit.jupiter.api.Test;
@@ -42,7 +43,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static greencity.ModelUtils.TEST_USER_VO;
+import static greencity.ModelUtils.getTagUaEnDto;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -71,7 +74,7 @@ public class EventServiceImplTest {
     private final List<TagVO> tagVOList = Collections.singletonList(ModelUtils.getEventTagVO());
     private final List<Tag> tags = Collections.singletonList(ModelUtils.getEventTag());
     private final MultipartFile file = ModelUtils.getFile();
-    private final MultipartFile[] multipartFiles = new MultipartFile[]{file};
+    private final MultipartFile[] multipartFiles = new MultipartFile[] {file};
     private final EventDateLocationDto eventDateLocationDto = addEventDtoRequest.getDatesLocations().get(0);
     private final AddressDto addressDto = eventDateLocationDto.getCoordinates();
     private final AddressLatLngResponse response = AddressLatLngResponse.builder()

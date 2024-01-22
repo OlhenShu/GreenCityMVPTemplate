@@ -54,7 +54,8 @@ public class ModelUtils {
     public static LocalDateTime localDateTime = LocalDateTime.now();
 
     public static Tag getTag() {
-        return new Tag(1L, TagType.ECO_NEWS, getTagTranslations(), Collections.emptyList(), Collections.emptySet());
+        return new Tag(1L, TagType.ECO_NEWS, getTagTranslations(), Collections.emptyList(),
+            Collections.emptySet(), Collections.emptyList());
     }
 
     public static Tag getEventTag() {
@@ -68,7 +69,7 @@ public class ModelUtils {
 
     public static Tag getHabitTag() {
         return new Tag(1L, TagType.HABIT, getHabitTagTranslations(), Collections.emptyList(),
-                Collections.emptySet());
+                Collections.emptySet(), Collections.emptyList());
     }
 
     public static List<TagTranslation> getTagTranslations() {
