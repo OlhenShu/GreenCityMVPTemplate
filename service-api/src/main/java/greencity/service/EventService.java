@@ -7,6 +7,9 @@ import greencity.dto.user.UserVO;
 import org.springframework.web.multipart.MultipartFile;
 
 
+
+import greencity.dto.event.EventVO;
+
 public interface EventService {
     /**
      * Retrieves an event by its unique identifier.
@@ -27,6 +30,14 @@ public interface EventService {
     EventDto update(UpdateEventDto eventDto, String email, MultipartFile[] images);
 
     /**
+     * Method for deleting Event instance.
+     *
+     * @param eventId - event id.
+     * @param email   - user email.
+     */
+    void delete(Long eventId, String email);
+
+    /**
      * Method for creating {@link EventDto} instance.
      *
      * @param addEventDtoRequest dto with {@link AddEventDtoRequest} entered info about field that need.
@@ -35,4 +46,11 @@ public interface EventService {
      * @return {@link EventDto} instance.
      */
     EventDto save(AddEventDtoRequest addEventDtoRequest, UserVO userVO, MultipartFile[] images);
+
+    /**
+     * Get event by id.
+     *
+     * @param eventId - id of event
+     */
+    EventVO findById(Long eventId);
 }

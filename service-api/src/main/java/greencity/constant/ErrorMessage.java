@@ -133,6 +133,8 @@ public final class ErrorMessage {
     public static final String FILTER_NOT_FOUND_BY_ID = "Filter not found";
     public static final String USER_HAS_NO_FRIEND_WITH_ID = "User has no friend with this id: ";
     public static final String INVALID_DURATION = "The duration for such habit is lower than previously set";
+    public static final String EVENT_NOT_FOUND_BY_ID = "Event doesn't exist by this id: ";
+    public static final String EVENT_COMMENT_NOT_FOUND_BY_ID = "Event comment doesn't exist by this id: ";
     public static final String INVALID_LENGTH_OF_QUERY_NAME = "The name query must be between 1 and 30 characters.";
     public static final String USER_ALREADY_HAS_CONNECTION = "User already has %s connection with this user";
     public static final String EVENT_NOT_FOUND = "Event Not Found";
