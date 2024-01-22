@@ -1,5 +1,6 @@
 package greencity.service;
 
+import greencity.annotations.RatingCalculationEnum;
 import greencity.dto.event.EventVO;
 import greencity.dto.eventcomment.AddEventCommentDtoResponse;
 import greencity.dto.eventcomment.AddEventCommentDtoRequest;
@@ -8,10 +9,15 @@ import greencity.dto.user.UserVO;
 import greencity.entity.User;
 import greencity.entity.event.Event;
 import greencity.entity.event.EventComment;
+import greencity.rating.RatingCalculation;
 import greencity.repository.EventCommentRepo;
+import java.util.concurrent.CompletableFuture;
+import javax.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+
+import static greencity.constant.AppConstant.AUTHORIZATION;
 
 @Service
 @AllArgsConstructor
@@ -19,6 +25,8 @@ public class EventCommentServiceImpl implements EventCommentService {
     private EventCommentRepo eventCommentRepo;
     private EventService eventService;
     private ModelMapper modelMapper;
+    private final HttpServletRequest httpServletRequest;
+    private final RatingCalculation ratingCalculation;
 
     @Override
     public AddEventCommentDtoResponse save(Long eventId, AddEventCommentDtoRequest addEventCommentDtoRequest,
@@ -32,6 +40,10 @@ public class EventCommentServiceImpl implements EventCommentService {
                 eventCommentRepo.save(eventComment), AddEventCommentDtoResponse.class);
 
         addEventCommentDtoResponse.setAuthor(modelMapper.map(userVO, EventCommentAuthorDto.class));
+
+        String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
+        CompletableFuture.runAsync(
+            () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_COMMENT, userVO, accessToken));
         return addEventCommentDtoResponse;
     }
 }

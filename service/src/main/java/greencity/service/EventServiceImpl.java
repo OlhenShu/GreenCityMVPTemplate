@@ -1,6 +1,7 @@
 package greencity.service;
 
 import com.google.maps.model.LatLng;
+import greencity.annotations.RatingCalculationEnum;
 import greencity.client.RestClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
@@ -20,7 +21,10 @@ import greencity.enums.TagType;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
+import greencity.rating.RatingCalculation;
 import greencity.repository.EventRepo;
+import java.util.concurrent.CompletableFuture;
+import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
@@ -37,6 +41,8 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static greencity.constant.AppConstant.AUTHORIZATION;
+
 @Slf4j
 @Service
 @Transactional(readOnly = true)
@@ -49,6 +55,8 @@ public class EventServiceImpl implements EventService {
     private final GoogleApiService googleApiService;
     private final FileService fileService;
     private static final String DEFAULT_TITLE_IMAGE_PATH = AppConstant.DEFAULT_EVENT_IMAGES;
+    private final HttpServletRequest httpServletRequest;
+    private final RatingCalculation ratingCalculation;
 
     @Override
     @Transactional
@@ -72,6 +80,9 @@ public class EventServiceImpl implements EventService {
         EventDto eventDto = modelMapper.map(eventRepo.save(event), EventDto.class);
         tagConvertor(event, eventDto);
 
+        String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
+        CompletableFuture.runAsync(
+            () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_EVENT, userVO, accessToken));
         return eventDto;
     }
 
@@ -118,6 +129,10 @@ public class EventServiceImpl implements EventService {
         } else {
             throw new UserHasNoPermissionToAccessException(ErrorMessage.USER_HAS_NO_PERMISSION);
         }
+
+        String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
+        CompletableFuture.runAsync(
+            () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.DELETE_EVENT, userVO, accessToken));
     }
 
     @Override
