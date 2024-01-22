@@ -1,12 +1,16 @@
 package greencity.service;
 
-import static greencity.ModelUtils.getUserVO;
+import static greencity.ModelUtils.*;
 import greencity.dto.user.UserVO;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.repository.EventRepo;
 import greencity.repository.UserRepo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.time.ZonedDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import com.google.maps.model.LatLng;
 import greencity.ModelUtils;
 import greencity.client.RestClient;
@@ -26,13 +30,17 @@ import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.repository.EventRepo;
 import org.apache.commons.lang3.reflect.TypeUtils;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import org.modelmapper.ModelMapper;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.multipart.MultipartFile;
 
 @ExtendWith(SpringExtension.class)
 public class EventServiceImplTest {
@@ -61,7 +69,7 @@ public class EventServiceImplTest {
     private final List<TagVO> tagVOList = Collections.singletonList(ModelUtils.getEventTagVO());
     private final List<Tag> tags = Collections.singletonList(ModelUtils.getEventTag());
     private final MultipartFile file = ModelUtils.getFile();
-    private final MultipartFile[] multipartFiles = new MultipartFile[]{file};
+    private final MultipartFile[] multipartFiles = new MultipartFile[] {file};
     private final EventDateLocationDto eventDateLocationDto = addEventDtoRequest.getDatesLocations().get(0);
     private final AddressDto addressDto = eventDateLocationDto.getCoordinates();
     private final AddressLatLngResponse response = AddressLatLngResponse.builder()

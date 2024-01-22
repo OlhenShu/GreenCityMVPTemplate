@@ -74,7 +74,7 @@ public class EventControllerTest {
     void findAmountOfEventsTest() throws Exception {
         UserVO userVO = getUserVO();
         mockMvc.perform(get(eventsLink + "/count")
-                .param("userId",String.valueOf(userVO.getId())))
+                .param("userId", String.valueOf(userVO.getId())))
             .andExpect(status().isOk());
 
         verify(eventService).getAmountOfEvents(userVO.getId());
