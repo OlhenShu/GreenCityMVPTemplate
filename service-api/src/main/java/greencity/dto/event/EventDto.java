@@ -8,6 +8,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class EventDto {
     private Long id;
     private String title;
