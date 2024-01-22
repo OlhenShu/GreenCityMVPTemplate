@@ -1,8 +1,11 @@
 package greencity.service;
 
+import greencity.dto.event.AddEventDtoRequest;
 import greencity.dto.event.EventDto;
 import greencity.dto.event.UpdateEventDto;
+import greencity.dto.user.UserVO;
 import org.springframework.web.multipart.MultipartFile;
+
 
 public interface EventService {
     /**
@@ -30,4 +33,14 @@ public interface EventService {
      * @return The total number of events associated with the specified user.
      */
     Long getAmountOfEvents(Long userId);
+
+    /**
+     * Method for creating {@link EventDto} instance.
+     *
+     * @param addEventDtoRequest dto with {@link AddEventDtoRequest} entered info about field that need.
+     * @param userVO             {@link UserVO} - current user.
+     * @param images             optional to fill png files.
+     * @return {@link EventDto} instance.
+     */
+    EventDto save(AddEventDtoRequest addEventDtoRequest, UserVO userVO, MultipartFile[] images);
 }

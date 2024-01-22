@@ -18,6 +18,17 @@ public interface EventRepo extends JpaRepository<Event, Long>, JpaSpecificationE
     void deleteEventDateLocationsByEventId(Long eventId);
 
     /**
+     * Deletes additional images associated with a specific event.
+     * This method performs a native SQL DELETE operation on the "events_images" table,
+     * removing all rows where the "event_id" matches the provided event identifier.
+     *
+     * @param eventId The identifier of the event for which additional images should be deleted.
+     */
+    @Modifying
+    @Query(value = "DELETE FROM events_images WHERE event_id = :eventId", nativeQuery = true)
+    void deleteEventAdditionalImagesByEventId(Long eventId);
+
+    /**
      * Counts the number of events associated with the specified organizer.
      *
      * @param organizerId The unique identifier of the organizer for whom the event count is to be obtained.
