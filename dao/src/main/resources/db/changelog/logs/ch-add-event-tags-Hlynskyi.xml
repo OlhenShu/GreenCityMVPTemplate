@@ -2,7 +2,7 @@
 <databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
-    <changeSet author="Danylo Hlynskyi" id="event-tags-Hlynskyi">
+    <changeSet author="Danylo Hlynskyi" id="event-tags-Hlynskyi" runOnChange="true">
         <insert tableName="tags">
             <column name="id">12</column>
             <column name="type">EVENT</column>
@@ -26,6 +26,11 @@
             <column name="tag_id">12</column>
             <column name="language_id">2</column>
         </insert>
+        <insert tableName="tag_translations">
+            <column name="name">Социальный</column>
+            <column name="tag_id">12</column>
+            <column name="language_id">3</column>
+        </insert>
 
 
         <insert tableName="tag_translations">
@@ -38,6 +43,11 @@
             <column name="tag_id">13</column>
             <column name="language_id">2</column>
         </insert>
+        <insert tableName="tag_translations">
+            <column name="name">Экологический</column>
+            <column name="tag_id">13</column>
+            <column name="language_id">3</column>
+        </insert>
 
         <insert tableName="tag_translations">
             <column name="name">Економічний</column>
@@ -48,6 +58,11 @@
             <column name="name">Economic</column>
             <column name="tag_id">14</column>
             <column name="language_id">2</column>
+        </insert>
+        <insert tableName="tag_translations">
+            <column name="name">Экономический</column>
+            <column name="tag_id">14</column>
+            <column name="language_id">3</column>
         </insert>
 
 

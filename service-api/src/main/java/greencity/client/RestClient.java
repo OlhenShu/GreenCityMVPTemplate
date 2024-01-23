@@ -7,8 +7,10 @@ import greencity.dto.econews.EcoNewsForSendEmailDto;
 import greencity.dto.user.*;
 import greencity.enums.EmailNotification;
 import greencity.enums.Role;
+import greencity.message.NotificationDto;
 import greencity.message.SendHabitNotification;
 import greencity.message.SendReportEmailMessage;
+import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -478,5 +481,24 @@ public class RestClient {
             .findFirst()
             .map(Cookie::getValue).orElse(null);
         return token == null ? null : "Bearer " + token;
+    }
+
+    /**
+     * Sends a notification to a user with the specified email address.
+     *
+     * @param notificationDto The {@link NotificationDto} representing the content of the notification.
+     * @param email The email address of the user to whom the notification will be sent.
+     *
+     * @author Nikita Malov
+     */
+    public void sendNotification(NotificationDto notificationDto, String email) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<NotificationDto> entity = new HttpEntity<>(notificationDto, headers);
+        UriComponentsBuilder url = UriComponentsBuilder.fromHttpUrl(greenCityUserServerAddress
+                + RestTemplateLinks.NOTIFICATION)
+            .queryParam("email", email);
+        restTemplate.exchange(url.toUriString(), HttpMethod.POST, entity, Object.class)
+            .getBody();
     }
 }
