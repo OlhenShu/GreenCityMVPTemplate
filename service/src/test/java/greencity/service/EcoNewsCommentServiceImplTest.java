@@ -52,6 +52,8 @@ class EcoNewsCommentServiceImplTest {
     @Mock
     private ModelMapper modelMapper;
     @Mock
+    private NotificationService notificationService;
+    @Mock
     private SimpMessagingTemplate messagingTemplate;
     @Mock
     private HttpServletRequest httpServletRequest;
@@ -343,7 +345,6 @@ class EcoNewsCommentServiceImplTest {
         when(ecoNewsCommentRepo.findById(commentId)).thenReturn(Optional.of(ecoNewsComment));
         when(modelMapper.map(ecoNewsComment, EcoNewsCommentVO.class)).thenReturn(ecoNewsCommentVO);
         when(modelMapper.map(ecoNewsCommentVO, EcoNewsComment.class)).thenReturn(ecoNewsComment);
-
         ecoNewsCommentService.like(commentId, userVO);
 
         verify(ecoNewsService).likeComment(userVO, ecoNewsCommentVO);

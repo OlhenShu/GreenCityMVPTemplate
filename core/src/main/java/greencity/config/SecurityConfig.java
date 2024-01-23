@@ -47,6 +47,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String CUSTOM_SHOPPING_LIST_ITEMS = "/{userId}/custom-shopping-list-items";
     private static final String HABIT_ASSIGN_ID = "/habit/assign/{habitId}";
     private static final String USER_SHOPPING_LIST = "/user/shopping-list-items";
+
     private final JwtTool jwtTool;
     private final UserService userService;
 
@@ -185,6 +186,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/habit/{habitId}/friends/profile-pictures",
                 "/friends",
                 "/friends/not-friends-yet",
+                "/friends/all",
+                "/habit/{habitId}/friends/profile-pictures",
+                "/notifications/latest",
                 "/friends/recommended,",
                 "/events/count")
             .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
@@ -232,7 +236,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 USER_SHOPPING_LIST + "/{shoppingListItemId}/status/{status}",
                 USER_SHOPPING_LIST + "/{userShoppingListItemId}",
                 "/user/profilePicture",
-                "/user/deleteProfilePicture")
+                "/user/deleteProfilePicture",
+                "/friends/{friendId}/acceptRequest",
+                "/friends/{friendId}/rejectRequest")
             .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.DELETE,
                 ECONEWS_COMMENTS,
@@ -244,7 +250,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/social-networks",
                 "/friends/{friendId}",
                 USER_CUSTOM_SHOPPING_LIST_ITEMS,
-                USER_SHOPPING_LIST + "/user-shopping-list-items")
+                USER_SHOPPING_LIST + "/user-shopping-list-items",
+                "/notifications/{notificationId:[0-9]+}")
             .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.GET,
                 "/newsSubscriber",
@@ -276,7 +283,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/facts/{factId}",
                 "/comments")
             .hasAnyRole(ADMIN)
-            .anyRequest().hasAnyRole(ADMIN)
+            .anyRequest().hasAnyRole(ADMIN, USER)
             .and()
             .logout()
             .logoutUrl("/logout")

@@ -168,6 +168,21 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
                                                            Pageable pageable, Long userId);
 
     /**
+     * Retrieves a paginated list of user friends for a given user.
+     * This method executes a native SQL query to retrieve all users who are friends with the specified user.
+     * It considers both sides of the friendship (where the specified user is either the 'user' or the 'friend').
+     *
+     * @param pageable Pagination information, specifying the page size, page number, sorting, etc.
+     * @param userId   The ID of the user for whom to retrieve friends.
+     * @return A {@link org.springframework.data.domain.Page} containing user entities representing friends
+     * @author Dmytro Klopov
+     */
+    @Query(nativeQuery = true, value = "SELECT * FROM users WHERE id IN ( "
+            + "(SELECT user_id FROM users_friends WHERE friend_id = :userId and status = 'FRIEND')"
+            + "UNION (SELECT friend_id FROM users_friends WHERE user_id = :userId and status = 'FRIEND'))")
+    Page<User> getAllUserFriendsPage(Pageable pageable, Long userId);
+
+    /**
      * Sends a friend request from one user to another.
      *
      * @param userId            The unique identifier of the user initiating the query.
@@ -176,10 +191,40 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
      * @author Denys Liubchenko
      */
     @Modifying
-    @Transactional
     @Query(nativeQuery = true, value = "INSERT INTO users_friends "
             + "(user_id, friend_id, status, created_date) VALUES (:userId, :friendId, 'REQUEST', NOW());")
     void addFriend(Long userId, Long friendId);
+  
+    /**
+     * Accepts a friend request between two users.
+     * This method updates the status of the friendship between the specified user and friend to 'FRIEND'
+     * in the 'users_friends' table, indicating that the friend request has been accepted.
+     *
+     * @param userId   The ID of the user accepting the friend request.
+     * @param friendId The ID of the user who sent the friend request.
+     * @author Dmytro Klopov
+     */
+    @Modifying
+    @Transactional
+    @Query(nativeQuery = true,
+            value = "UPDATE users_friends SET status = 'FRIEND' WHERE user_id = :friendId AND friend_id = :userId")
+    void acceptFriendRequest(Long userId, Long friendId);
+    /**
+     * Declines a friend request between two users.
+     * This method updates the status of the friendship between the specified user and friend to 'DECLINED'
+     * in the 'users_friends' table, indicating that the friend request has been declined.
+     *
+     * @param userId   The ID of the user declining the friend request.
+     * @param friendId The ID of the user who sent the friend request.
+     * @author Dmytro Klopov
+     */
+
+    @Modifying
+    @Transactional
+    @Query(nativeQuery = true,
+            value = "UPDATE users_friends SET status = 'DECLINED' WHERE user_id = :friendId AND friend_id = :userId")
+    void declineFriendRequest(Long userId, Long friendId);
+
 
     /**
      * Checks if users have friend connection.

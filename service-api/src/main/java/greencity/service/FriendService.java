@@ -10,6 +10,18 @@ import java.time.ZonedDateTime;
 
 public interface FriendService {
     /**
+     * Retrieves a pageable list of user friends for the specified user.
+     * This method returns a PageableDto containing a paginated list of UserFriendDto objects representing
+     * the friends of the user identified by the provided userId. The list is pageable based on the given Pageable
+     * parameters.
+     *
+     * @param userId   The ID of the user for whom to retrieve friends.
+     * @param pageable The Pageable object specifying the page, size, and sorting criteria.
+     * @return {@link PageableDto} of {@link UserFriendDto} containing the paginated list of user friends.
+     */
+    PageableDto<UserFriendDto> getUserFriendsByUserId(Long userId, Pageable pageable);
+
+    /**
      * Method that returns PageableDto of UserFriendDto by name, city, mutual friends.
      *
      * @param pageable         {@link Pageable}
@@ -29,6 +41,24 @@ public interface FriendService {
      * @param friendId The unique identifier of the user to be added as a friend.
      */
     void addFriend(Long userId, Long friendId);
+
+    /**
+     * Accepts a friend request from another user, establishing a mutual friendship.
+     *
+     * @param userId   The ID of the user accepting the friend request.
+     * @param friendId The ID of the user who sent the friend request.
+     * @author Dmytro Klopov
+     */
+    void acceptFriendRequest(Long userId, Long friendId);
+
+    /**
+     * Declines a friend request from another user, rejecting the establishment of friendship.
+     *
+     * @param userId   The ID of the user declining the friend request.
+     * @param friendId The ID of the user who sent the friend request.
+     * @author Dmytro Klopov
+     */
+    void declineFriendRequest(Long userId, Long friendId);
 
     /**
      * Deletes a friendship relationship between a user and another user identified by their IDs.
