@@ -33,6 +33,7 @@ public class SearchEventDtoMapperTest {
             .creationDate(LocalDate.now())
             .tags(ModelUtils.getTags())
             .build();
+        event.getOrganizer().setEventOrganizerRating(5D);
         SearchEventDto searchEventDto = SearchEventDto.builder()
             .id(event.getId())
             .title(event.getTitle())
@@ -40,7 +41,9 @@ public class SearchEventDtoMapperTest {
             .tags(event.getTags().stream().flatMap(t -> t.getTagTranslations().stream())
                 .filter(tagTranslation -> tagTranslation.getLanguage().getCode().equals(language))
                 .map(TagTranslation::getName).collect(Collectors.toList()))
-            .organizer(new EventAuthorDto(event.getOrganizer().getId(), event.getOrganizer().getName(),
+            .organizer(new EventAuthorDto(
+                event.getOrganizer().getId(),
+                event.getOrganizer().getName(),
                 event.getOrganizer().getEventOrganizerRating()))
             .build();
 
