@@ -1,4 +1,4 @@
-package greencity.service.ticket292;
+package greencity.service;
 
 import greencity.ModelUtils;
 import greencity.constant.ErrorMessage;

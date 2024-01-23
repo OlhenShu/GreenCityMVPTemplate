@@ -1,4 +1,4 @@
-package greencity.service.ticket292;
+package greencity.service;
 
 import greencity.converters.DateService;
 import greencity.dto.habit.HabitAssignVO;
