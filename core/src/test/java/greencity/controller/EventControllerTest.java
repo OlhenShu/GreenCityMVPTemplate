@@ -1,6 +1,13 @@
 package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import static greencity.ModelUtils.getPrincipal;
+import static greencity.ModelUtils.getUserVO;
+import greencity.converters.UserArgumentResolver;
+import greencity.dto.user.UserVO;
+import greencity.exception.handler.CustomExceptionHandler;
+import greencity.service.*;
+import java.security.Principal;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import greencity.ModelUtils;
 import greencity.converters.UserArgumentResolver;
@@ -12,61 +19,75 @@ import greencity.dto.user.UserVO;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.service.EventService;
 import greencity.service.UserService;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import java.security.Principal;
-
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.*;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
-
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.multipart.MultipartFile;
 
 @ExtendWith(MockitoExtension.class)
-class EventControllerTest {
+@MockitoSettings(strictness = Strictness.LENIENT)
+public class EventControllerTest {
+    private static final String eventsLink = "/events";
     private MockMvc mockMvc;
-    @Mock
-    private EventService eventService;
     @InjectMocks
     private EventsController eventsController;
     @Mock
-    UserService userService;
+    private EventService eventService;
     @Mock
-    ModelMapper modelMapper;
+    private UserService userService;
+    @Mock
+    private ModelMapper modelMapper;
     @Mock
     private ObjectMapper objectMapper;
-    private final ErrorAttributes errorAttributes = new DefaultErrorAttributes();
+
+    private Principal principal = getPrincipal();
+    private ErrorAttributes errorAttributes = new DefaultErrorAttributes();
     private final UserVO userVO = ModelUtils.getUserVO();
     private static final String eventLink = "/events";
 
     @BeforeEach
-    void setup() {
-        this.mockMvc = MockMvcBuilders.standaloneSetup(eventsController)
-                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
-                        new UserArgumentResolver(userService, modelMapper))
-                .setControllerAdvice(new CustomExceptionHandler(errorAttributes, objectMapper.registerModule(new JavaTimeModule())))
-                .build();
+    public void setUp() {
+        this.mockMvc = MockMvcBuilders
+            .standaloneSetup(eventsController)
+            .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
+                new UserArgumentResolver(userService, modelMapper))
+            .setControllerAdvice(new CustomExceptionHandler(errorAttributes, objectMapper))
+            .build();
     }
+
+    @Test
+    void findAmountOfEventsTest() throws Exception {
+        UserVO userVO = getUserVO();
+        mockMvc.perform(get(eventsLink + "/count")
+                .param("userId", String.valueOf(userVO.getId())))
+            .andExpect(status().isOk());
+
+        verify(eventService).getAmountOfEvents(userVO.getId());
+        }
+
     @Test
     void save() throws Exception {
         Principal principal = Mockito.mock(Principal.class);

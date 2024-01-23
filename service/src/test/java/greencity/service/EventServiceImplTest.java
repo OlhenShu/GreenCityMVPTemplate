@@ -1,5 +1,16 @@
 package greencity.service;
 
+import static greencity.ModelUtils.*;
+import greencity.dto.user.UserVO;
+import greencity.exception.exceptions.NotFoundException;
+import greencity.repository.EventRepo;
+import greencity.repository.UserRepo;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.time.ZonedDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import com.google.maps.model.LatLng;
 import greencity.ModelUtils;
 import greencity.client.RestClient;
@@ -19,39 +30,33 @@ import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.repository.EventRepo;
 import org.apache.commons.lang3.reflect.TypeUtils;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import static org.mockito.Mockito.*;
 import org.modelmapper.ModelMapper;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import static greencity.ModelUtils.TEST_USER_VO;
-import static greencity.ModelUtils.getTagUaEnDto;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
-class EventServiceImplTest {
+@ExtendWith(SpringExtension.class)
+public class EventServiceImplTest {
     @Mock
-    EventRepo eventRepo;
+    private UserRepo userRepo;
+    @Mock
+    private EventRepo eventRepo;
+    @InjectMocks
+    private EventServiceImpl eventService;
+
     @Mock
     ModelMapper modelMapper;
     @Mock
     TagsService tagService;
     @Mock
     FileService fileService;
-    @InjectMocks
-    private EventServiceImpl eventService;
     @Mock
     GoogleApiService googleApiService;
     @Mock
@@ -64,14 +69,39 @@ class EventServiceImplTest {
     private final List<TagVO> tagVOList = Collections.singletonList(ModelUtils.getEventTagVO());
     private final List<Tag> tags = Collections.singletonList(ModelUtils.getEventTag());
     private final MultipartFile file = ModelUtils.getFile();
-    private final MultipartFile[] multipartFiles = new MultipartFile[]{file};
+    private final MultipartFile[] multipartFiles = new MultipartFile[] {file};
     private final EventDateLocationDto eventDateLocationDto = addEventDtoRequest.getDatesLocations().get(0);
     private final AddressDto addressDto = eventDateLocationDto.getCoordinates();
     private final AddressLatLngResponse response = AddressLatLngResponse.builder()
-            .latitude(addressDto.getLatitude())
-            .longitude(addressDto.getLongitude())
-            .build();
+        .latitude(addressDto.getLatitude())
+        .longitude(addressDto.getLongitude())
+        .build();
     private final LatLng latLng = new LatLng(addressDto.getLatitude(), addressDto.getLongitude());
+
+
+    @Test
+    void getAmountOfEvents(){
+        UserVO userVO = getUserVO();
+        Long expected = 5L;
+
+        when(userRepo.existsById(userVO.getId())).thenReturn(true);
+        when(eventRepo.countByOrganizerId(userVO.getId())).thenReturn(expected);
+        Long actual = eventService.getAmountOfEvents(userVO.getId());
+
+        verify(userRepo).existsById(userVO.getId());
+        verify(eventRepo).countByOrganizerId(userVO.getId());
+        assertEquals(expected,actual);
+    }
+
+    @Test
+    void getAmountOfEventsByNotExistingUserIdThrowsException(){
+        UserVO userVO = getUserVO();
+        when(userRepo.existsById(userVO.getId())).thenReturn(false);
+
+        assertThrows(NotFoundException.class,
+            () -> eventService.getAmountOfEvents(userVO.getId()));
+        verify(userRepo).existsById(userVO.getId());
+    }
 
     @Test
     void saveTest() throws Exception {
