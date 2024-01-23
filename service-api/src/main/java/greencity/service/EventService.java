@@ -30,7 +30,6 @@ public interface EventService {
     EventDto update(UpdateEventDto eventDto, String email, MultipartFile[] images);
 
     /**
-
      * Method for getting all Events by searchQuery.
      *
      * @param pageable     {@link Pageable}.
