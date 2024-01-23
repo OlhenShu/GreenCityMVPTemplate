@@ -1,26 +1,23 @@
 package greencity.controller;
 
+import greencity.annotations.ApiPageableWithoutSort;
 import greencity.annotations.CurrentUser;
 import greencity.constant.HttpStatuses;
 import greencity.constant.SwaggerExampleModel;
+import greencity.dto.PageableAdvancedDto;
 import greencity.dto.event.AddEventDtoRequest;
 import greencity.dto.event.EventDto;
 import greencity.dto.event.UpdateEventDto;
 import greencity.dto.user.UserVO;
-import greencity.constant.HttpStatuses;
 import greencity.service.EventService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -28,10 +25,6 @@ import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.annotation.Nullable;
-import java.security.Principal;
-import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
-
 import java.security.Principal;
 
 @Validated
@@ -46,7 +39,7 @@ public class EventsController {
      *
      * @param eventId The unique identifier of the event.
      * @return A ResponseEntity with the event DTO if found (HTTP 200),
-     *         or an empty body with an appropriate HTTP status if not found.
+     * or an empty body with an appropriate HTTP status if not found.
      */
     @ApiOperation(value = "Get the event")
     @ApiResponses(value = {
@@ -89,7 +82,7 @@ public class EventsController {
      * Method for creating an event.
      *
      * @param addEventDtoRequest {@link AddEventDtoRequest} The DTO containing information for create event.
-     * @param images      Optional array of images related to the event.
+     * @param images             Optional array of images related to the event.
      * @return {@link EventDto}.
      * @author Vlada Proskurina.
      */
@@ -139,11 +132,30 @@ public class EventsController {
     @ApiOperation(value = "Find count of events")
     @GetMapping("/count")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 404,message = HttpStatuses.NOT_FOUND)
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     public ResponseEntity<Long> findAmountOfEvents(@RequestParam Long userId) {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getAmountOfEvents(userId));
+    }
+
+    /**
+     * Method for getting pages of events.
+     *
+     * @return a page of {@link EventDto} instance.
+     * @author Max Bohonko, Olena Sotnik.
+     */
+    @ApiOperation(value = "Get all events")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @ApiPageableWithoutSort
+    @GetMapping
+    public ResponseEntity<PageableAdvancedDto<EventDto>> getEvent(
+            @ApiIgnore Pageable pageable, @ApiIgnore Principal principal) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(eventService.getAll(pageable, principal));
     }
 }

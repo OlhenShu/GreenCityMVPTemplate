@@ -1,5 +1,6 @@
 package greencity.service;
 
+import greencity.dto.PageableAdvancedDto;
 import greencity.dto.PageableDto;
 import greencity.dto.event.AddEventDtoRequest;
 import greencity.dto.event.EventDto;
@@ -9,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import greencity.dto.user.UserVO;
 import org.springframework.web.multipart.MultipartFile;
 import greencity.dto.event.EventVO;
+
+import java.security.Principal;
 
 public interface EventService {
     /**
@@ -73,4 +76,17 @@ public interface EventService {
      * @param eventId - id of event
      */
     EventVO findById(Long eventId);
+
+    /**
+     * Retrieves a paginated list of events associated with the authenticated user.
+     * This method fetches a pageable collection of events, considering the provided pagination parameters,
+     * and filters the results based on the authenticated user's principal information.
+     *
+     * @param page      Pageable object specifying the pagination parameters such as page number, size, and sorting.
+     * @param principal A Principal object representing the authenticated user's information.
+     *                  It can be used to filter events based on the user's context or permissions.
+     * @return A Page object containing the requested events as EventDto instances.
+     *         The events are sorted and paginated according to the provided Pageable parameters.
+     */
+    PageableAdvancedDto<EventDto> getAll(Pageable page, Principal principal);
 }

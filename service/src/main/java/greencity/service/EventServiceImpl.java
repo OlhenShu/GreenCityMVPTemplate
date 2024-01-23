@@ -5,6 +5,7 @@ import greencity.annotations.RatingCalculationEnum;
 import greencity.client.RestClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
+import greencity.dto.PageableAdvancedDto;
 import greencity.dto.PageableDto;
 import greencity.dto.event.*;
 import greencity.dto.geocoding.AddressLatLngResponse;
@@ -26,13 +27,18 @@ import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.rating.RatingCalculation;
 import greencity.repository.EventRepo;
 import greencity.repository.EventSearchRepo;
+
+import java.security.Principal;
 import java.util.concurrent.CompletableFuture;
 import javax.servlet.http.HttpServletRequest;
+
 import greencity.repository.UserRepo;
+
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
@@ -94,7 +100,7 @@ public class EventServiceImpl implements EventService {
 
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture.runAsync(
-            () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_EVENT, userVO, accessToken));
+                () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_EVENT, userVO, accessToken));
         return eventDto;
     }
 
@@ -132,7 +138,7 @@ public class EventServiceImpl implements EventService {
     public void delete(Long eventId, String email) {
         UserVO userVO = restClient.findByEmail(email);
         Event toDelete =
-            eventRepo.findById(eventId).orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND));
+                eventRepo.findById(eventId).orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND));
         List<String> eventImages = new ArrayList<>();
         eventImages.add(toDelete.getTitleImage());
 
@@ -144,14 +150,21 @@ public class EventServiceImpl implements EventService {
 
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture.runAsync(
-            () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.DELETE_EVENT, userVO, accessToken));
+                () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.DELETE_EVENT, userVO, accessToken));
     }
 
     @Override
     public EventVO findById(Long eventId) {
         Event event = eventRepo.findById(eventId)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND_BY_ID + eventId));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND_BY_ID + eventId));
         return modelMapper.map(event, EventVO.class);
+    }
+
+    @Override
+    public PageableAdvancedDto<EventDto> getAll(Pageable page, Principal principal) {
+        Page<Event> events = eventRepo.findAllByOrderByIdDesc(page);
+
+        return buildPageableAdvancedDto(events);
     }
 
     /**
@@ -159,20 +172,20 @@ public class EventServiceImpl implements EventService {
      */
     @Override
     public PageableDto<SearchEventDto> search(Pageable pageable, String searchQuery, String languageCode) {
-        Page<Event> eventPage = eventSearchRepo.find(pageable,searchQuery,languageCode);
+        Page<Event> eventPage = eventSearchRepo.find(pageable, searchQuery, languageCode);
         return getSearchEventDtoPageableDto(eventPage);
     }
 
     private PageableDto<SearchEventDto> getSearchEventDtoPageableDto(Page<Event> page) {
         List<SearchEventDto> searchEventDtos = page.stream()
-            .map(event -> modelMapper.map(event, SearchEventDto.class))
-            .collect(Collectors.toList());
+                .map(event -> modelMapper.map(event, SearchEventDto.class))
+                .collect(Collectors.toList());
 
         return new PageableDto<>(
-            searchEventDtos,
-            page.getTotalElements(),
-            page.getPageable().getPageNumber(),
-            page.getTotalPages());
+                searchEventDtos,
+                page.getTotalElements(),
+                page.getPageable().getPageNumber(),
+                page.getTotalPages());
     }
 
     /**
@@ -348,4 +361,22 @@ public class EventServiceImpl implements EventService {
             event.setTitleImage(AppConstant.DEFAULT_EVENT_IMAGES);
         }
     }
+
+    private PageableAdvancedDto<EventDto> buildPageableAdvancedDto(Page<Event> eventsPage) {
+        List<EventDto> eventDtos = modelMapper.map(eventsPage.getContent(),
+                new TypeToken<List<EventDto>>() {
+                }.getType());
+
+        return new PageableAdvancedDto<>(
+                eventDtos,
+                eventsPage.getTotalElements(),
+                eventsPage.getPageable().getPageNumber(),
+                eventsPage.getTotalPages(),
+                eventsPage.getNumber(),
+                eventsPage.hasPrevious(),
+                eventsPage.hasNext(),
+                eventsPage.isFirst(),
+                eventsPage.isLast());
+    }
+
 }
