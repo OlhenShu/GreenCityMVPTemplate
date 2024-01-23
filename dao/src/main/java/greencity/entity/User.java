@@ -109,6 +109,9 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.PERSIST)
     private VerifyEmail verifyEmail;
 
+    @Column(name = "telegram_chat_id")
+    private Long chatId;
+
     @OneToOne(mappedBy = "user")
     private RestorePasswordEmail restorePasswordEmail;
 
