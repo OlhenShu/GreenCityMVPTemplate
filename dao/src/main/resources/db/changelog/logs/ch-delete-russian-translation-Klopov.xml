@@ -16,11 +16,7 @@
             <where>language_id = 3</where>
         </delete>
 
-        <delete tableName="fact_of_the_day_translations">
-            <where>language_id = 3</where>
-        </delete>
-
-        <delete tableName="habit_translation">
+        <delete tableName="habit_fact_translations">
             <where>language_id = 3</where>
         </delete>
     </changeSet>
