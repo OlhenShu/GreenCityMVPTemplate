@@ -7,10 +7,6 @@ import greencity.dto.user.UserFriendFilterDto;
 import greencity.dto.user.UserVO;
 import greencity.service.FriendService;
 import greencity.service.UserService;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,24 +14,26 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static greencity.ModelUtils.getUserVO;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -220,27 +218,56 @@ public class FriendControllerTest {
     }
 
     @Test
-    public void getUsersFriend() throws Exception {
-        int pageNumber = 0;
-        int pageSize = 10;
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
-
-        List<UserFriendDto> friendDtoList = Collections.singletonList(new UserFriendDto());
-        Page<UserFriendDto> friendDtoPage = new PageImpl<>(friendDtoList, pageable, friendDtoList.size());
-        PageableDto<UserFriendDto> userFriendPageableDto = new PageableDto<>(
-                friendDtoPage.getContent(),
-                friendDtoPage.getTotalElements(),
-                friendDtoPage.getPageable().getPageNumber(),
-                friendDtoPage.getTotalPages());
-
+    void acceptFriendRequestTest() throws Exception {
+        Long friendId = 2L;
+        doNothing().when(friendService).acceptFriendRequest(userVO.getId(), friendId);
         when(userService.findByEmail(anyString())).thenReturn(userVO);
-        when(friendService.findAllUsersFriends(userVO.getId(), pageable))
-                .thenReturn(userFriendPageableDto);
-        mockMvc.perform(MockMvcRequestBuilders.get(link)
-                        .param("page", String.valueOf(pageNumber))
-                        .param("size", String.valueOf(pageSize))
+
+        mockMvc.perform(patch(link + "/{friendId}/acceptRequest", friendId)
+                    .principal(userVO::getEmail))
+                .andExpect(status().isOk());
+
+        verify(userService).findByEmail(userVO.getEmail());
+        verify(friendService).acceptFriendRequest(userVO.getId(), friendId);
+
+    }
+
+    @Test
+    void declineFriendRequestTest() throws Exception {
+        Long friendId = 2L;
+        doNothing().when(friendService).declineFriendRequest(userVO.getId(), friendId);
+        when(userService.findByEmail(anyString())).thenReturn(userVO);
+
+        mockMvc.perform(patch(link + "/{friendId}/rejectRequest", friendId)
                         .principal(userVO::getEmail))
                 .andExpect(status().isOk());
-        verify(friendService).findAllUsersFriends(userVO.getId(), pageable);
+
+        verify(userService).findByEmail(userVO.getEmail());
+        verify(friendService).declineFriendRequest(userVO.getId(), friendId);
+
+    }
+
+    @Test
+    void testGetUserFriendsByUserId() throws Exception {
+        Long userId = 1L;
+        int pageNumber = 5;
+        int pageSize = 20;
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+        List<UserFriendDto> mockUserList = Arrays.asList(new UserFriendDto(), new UserFriendDto()); // Replace User with your actual entity class
+        var userFriendDtoPageableDto = new PageableDto<>(mockUserList, 2, 0, 1);
+        when(friendService.getUserFriendsByUserId(anyLong(), any(Pageable.class))).thenReturn(userFriendDtoPageableDto);
+        when(userService.findByEmail(anyString())).thenReturn(userVO);
+
+        mockMvc.perform(get(link + "/all")
+                        .principal(userVO::getEmail)
+                        .param("page", String.valueOf(pageNumber))
+                        .param("size", String.valueOf(pageSize))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+
+
+        verify(friendService, times(1)).getUserFriendsByUserId(userId, pageable);
     }
 }

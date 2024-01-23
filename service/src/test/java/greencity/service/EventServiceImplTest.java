@@ -18,9 +18,11 @@ import greencity.entity.event.EventImages;
 import greencity.enums.Role;
 import greencity.enums.TagType;
 import greencity.exception.exceptions.BadRequestException;
+import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.repository.EventRepo;
 import greencity.repository.EventSearchRepo;
+import greencity.repository.UserRepo;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDate;
@@ -43,13 +45,16 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
-import static greencity.ModelUtils.TEST_USER_VO;
-import static greencity.ModelUtils.getTagUaEnDto;
+import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class EventServiceImplTest {
+    @Mock
+    private UserRepo userRepo;
     @Mock
     private ModelMapper modelMapper;
     @Mock
@@ -70,7 +75,7 @@ public class EventServiceImplTest {
     private final AddEventDtoRequest addEventDtoRequest = ModelUtils.getRequestAddEventDto();
     private final EventDto eventDto = ModelUtils.getEventDto();
     private final Event event = ModelUtils.getEvent();
-    private final UserVO userVO = ModelUtils.getUserVO();
+    private final UserVO userVO = getUserVO();
     private final List<TagVO> tagVOList = Collections.singletonList(ModelUtils.getEventTagVO());
     private final List<Tag> tags = Collections.singletonList(ModelUtils.getEventTag());
     private final MultipartFile file = ModelUtils.getFile();
@@ -127,13 +132,38 @@ public class EventServiceImplTest {
         assertEquals(searchEventDtoPageableDto, eventDtoPage);
     }
 
+
+    @Test
+    void getAmountOfEvents(){
+        UserVO userVO = getUserVO();
+        Long expected = 5L;
+
+        when(userRepo.existsById(userVO.getId())).thenReturn(true);
+        when(eventRepo.countByOrganizerId(userVO.getId())).thenReturn(expected);
+        Long actual = eventService.getAmountOfEvents(userVO.getId());
+
+        verify(userRepo).existsById(userVO.getId());
+        verify(eventRepo).countByOrganizerId(userVO.getId());
+        assertEquals(expected,actual);
+    }
+
+    @Test
+    void getAmountOfEventsByNotExistingUserIdThrowsException(){
+        UserVO userVO = getUserVO();
+        when(userRepo.existsById(userVO.getId())).thenReturn(false);
+
+        assertThrows(NotFoundException.class,
+            () -> eventService.getAmountOfEvents(userVO.getId()));
+        verify(userRepo).existsById(userVO.getId());
+    }
+
     @Test
     void saveTest() throws Exception {
         when(modelMapper.map(addEventDtoRequest, Event.class)).thenReturn(event);
         when(googleApiService.getResultFromGeoCodeByCoordinates(latLng)).thenReturn(response);
         when(modelMapper.map(response, AddressDto.class)).thenReturn(addressDto);
         when(modelMapper.map(addEventDtoRequest.getDatesLocations().get(0), EventDateLocation.class)).thenReturn(event.getDates().get(0));
-        when(modelMapper.map(ModelUtils.getUserVO(), User.class)).thenReturn(ModelUtils.getUser());
+        when(modelMapper.map(getUserVO(), User.class)).thenReturn(ModelUtils.getUser());
         when(fileService.upload(file)).thenReturn(ModelUtils.getUrl().toString());
         when(eventRepo.save(event)).thenReturn(event);
         when(tagService.findAllTranslationsByNamesAndType(addEventDtoRequest.getTags(), TagType.EVENT)).thenReturn(tagVOList);

@@ -100,4 +100,21 @@ public class EventsController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(eventService.save(addEventDtoRequest, userVO, images));
     }
+
+    /**
+     * The method for getting count of events.
+     *
+     * @return count of events.
+     * @author Nikita Malov
+     */
+    @ApiOperation(value = "Find count of events")
+    @GetMapping("/count")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = HttpStatuses.OK),
+        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(code = 404,message = HttpStatuses.NOT_FOUND)
+    })
+    public ResponseEntity<Long> findAmountOfEvents(@RequestParam Long userId) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getAmountOfEvents(userId));
+    }
 }

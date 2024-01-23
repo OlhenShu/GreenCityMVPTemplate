@@ -40,6 +40,14 @@ public interface EventService {
     PageableDto<SearchEventDto> search(Pageable pageable, String searchQuery, String languageCode);
 
     /**
+     * Retrieves the total number of events associated with the specified user.
+     *
+     * @param userId The unique identifier of the user for whom the event count is to be obtained.
+     * @return The total number of events associated with the specified user.
+     */
+    Long getAmountOfEvents(Long userId);
+
+    /**
      * Method for creating {@link EventDto} instance.
      *
      * @param addEventDtoRequest dto with {@link AddEventDtoRequest} entered info about field that need.
