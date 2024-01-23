@@ -1,6 +1,5 @@
 package greencity.config;
 
-import greencity.dto.telegram.TelegramUserDto;
 import greencity.service.TelegramBotService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +16,7 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 public class TelegramBotConfig extends TelegramLongPollingBot {
     private String botUsername;
     private final TelegramBotService botService;
+
     public TelegramBotConfig(
             @Value("${telegram.bot.token}") String botToken,
             @Value("${telegram.bot.name}") String botName,
@@ -38,8 +38,7 @@ public class TelegramBotConfig extends TelegramLongPollingBot {
 
             if (botService.isRegister(chatId)) {
                 //register user block
-            }
-            else {
+            } else {
                 sendMessage(chatId, "Please enter your email");
                 botService.saveTelegramUser(chatId, messageText);
                 sendMessage(chatId, "Thanks for registration, now yor register in " + getBotUsername());

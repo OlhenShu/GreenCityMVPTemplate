@@ -4,20 +4,20 @@ import greencity.dto.habit.HabitVO;
 import greencity.dto.user.*;
 import greencity.entity.User;
 import greencity.repository.options.UserFilter;
-import java.sql.Timestamp;
-import java.time.ZonedDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import greencity.dto.user.UserFriendFilterDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.sql.Timestamp;
+import java.time.ZonedDateTime;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
@@ -196,7 +196,7 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
     @Query(nativeQuery = true, value = "INSERT INTO users_friends "
             + "(user_id, friend_id, status, created_date) VALUES (:userId, :friendId, 'REQUEST', NOW());")
     void addFriend(Long userId, Long friendId);
-  
+
     /**
      * Accepts a friend request between two users.
      * This method updates the status of the friendship between the specified user and friend to 'FRIEND'
