@@ -52,11 +52,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import static greencity.constant.AppConstant.AUTHORIZATION;
 
 @Slf4j
@@ -99,8 +94,8 @@ public class EventServiceImpl implements EventService {
         tagConvertor(event, eventDto);
 
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
-        CompletableFuture.runAsync(
-                () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_EVENT, userVO, accessToken));
+        CompletableFuture.runAsync(() -> ratingCalculation
+                .ratingCalculation(RatingCalculationEnum.ADD_EVENT, userVO, accessToken));
         return eventDto;
     }
 
@@ -149,8 +144,8 @@ public class EventServiceImpl implements EventService {
         }
 
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
-        CompletableFuture.runAsync(
-                () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.DELETE_EVENT, userVO, accessToken));
+        CompletableFuture.runAsync(() -> ratingCalculation
+                .ratingCalculation(RatingCalculationEnum.DELETE_EVENT, userVO, accessToken));
     }
 
     @Override
@@ -378,5 +373,4 @@ public class EventServiceImpl implements EventService {
                 eventsPage.isFirst(),
                 eventsPage.isLast());
     }
-
 }

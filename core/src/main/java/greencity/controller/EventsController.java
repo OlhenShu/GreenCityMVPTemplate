@@ -39,7 +39,7 @@ public class EventsController {
      *
      * @param eventId The unique identifier of the event.
      * @return A ResponseEntity with the event DTO if found (HTTP 200),
-     * or an empty body with an appropriate HTTP status if not found.
+     *          or an empty body with an appropriate HTTP status if not found.
      */
     @ApiOperation(value = "Get the event")
     @ApiResponses(value = {
@@ -153,7 +153,7 @@ public class EventsController {
     })
     @ApiPageableWithoutSort
     @GetMapping
-    public ResponseEntity<PageableAdvancedDto<EventDto>> getEvent(
+    public ResponseEntity<PageableAdvancedDto<EventDto>> getAllEvents(
             @ApiIgnore Pageable pageable, @ApiIgnore Principal principal) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(eventService.getAll(pageable, principal));
