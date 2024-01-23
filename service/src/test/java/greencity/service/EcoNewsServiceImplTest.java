@@ -69,6 +69,9 @@ class EcoNewsServiceImplTest {
     HttpServletRequest httpServletRequest;
 
     @Mock
+    NotificationService notificationService;
+
+    @Mock
     EcoNewsSearchRepo ecoNewsSearchRepo;
 
     @InjectMocks
@@ -563,7 +566,7 @@ class EcoNewsServiceImplTest {
         EcoNews ecoNews = ModelUtils.getEcoNews();
         EcoNewsVO ecoNewsVO = ModelUtils.getEcoNewsVO();
         ecoNewsVO.setUsersLikedNews(new HashSet<>());
-        when(ecoNewsRepo.findById(1L)).thenReturn(Optional.of(ecoNews));
+        when(ecoNewsRepo.findById(anyLong())).thenReturn(Optional.of(ecoNews));
         when(modelMapper.map(ecoNews, EcoNewsVO.class)).thenReturn(ecoNewsVO);
         when(modelMapper.map(ecoNewsVO, EcoNews.class)).thenReturn(ecoNews);
 

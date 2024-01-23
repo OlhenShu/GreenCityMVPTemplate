@@ -33,6 +33,14 @@ public interface EventService {
      * @param email   - user email.
      */
     void delete(Long eventId, String email);
+   
+    /**
+     * Retrieves the total number of events associated with the specified user.
+     *
+     * @param userId The unique identifier of the user for whom the event count is to be obtained.
+     * @return The total number of events associated with the specified user.
+     */
+    Long getAmountOfEvents(Long userId);
 
     /**
      * Method for creating {@link EventDto} instance.

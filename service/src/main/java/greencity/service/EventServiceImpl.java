@@ -25,6 +25,7 @@ import greencity.rating.RatingCalculation;
 import greencity.repository.EventRepo;
 import java.util.concurrent.CompletableFuture;
 import javax.servlet.http.HttpServletRequest;
+import greencity.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
@@ -53,6 +54,7 @@ public class EventServiceImpl implements EventService {
     private final RestClient restClient;
     private final TagsService tagsService;
     private final GoogleApiService googleApiService;
+    private final UserRepo userRepo;
     private final FileService fileService;
     private static final String DEFAULT_TITLE_IMAGE_PATH = AppConstant.DEFAULT_EVENT_IMAGES;
     private final HttpServletRequest httpServletRequest;
@@ -140,6 +142,15 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepo.findById(eventId)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND_BY_ID + eventId));
         return modelMapper.map(event, EventVO.class);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Long getAmountOfEvents(Long userId) {
+        if (!userRepo.existsById(userId)) {
+            throw new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + userId);
+        }
+        return eventRepo.countByOrganizerId(userId);
     }
 
     private EventDto buildEventDto(Event event) {
