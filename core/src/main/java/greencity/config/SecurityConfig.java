@@ -142,7 +142,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .antMatchers(HttpMethod.POST,
                 "/ownSecurity/signUp",
                 "/ownSecurity/signIn",
-                "/ownSecurity/changePassword")
+                "/ownSecurity/changePassword",
+                "/newsSubscriber")
             .permitAll()
             .antMatchers(HttpMethod.GET,
                 "/achievements",
@@ -192,6 +193,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
             .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.POST,
+                    "/events/create",
                 "/category",
                 "/econews",
                 "/econews/like",
@@ -206,7 +208,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/habit/assign/{habitAssignId}/enroll/**",
                 "/habit/assign/{habitAssignId}/unenroll/{date}",
                 "/habit/statistic/{habitId}",
-                "/newsSubscriber",
                 USER_CUSTOM_SHOPPING_LIST_ITEMS,
                 USER_SHOPPING_LIST,
                 "/user/{userId}/habit",
@@ -247,6 +248,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 CUSTOM_SHOPPING_LIST_URL,
                 "/favorite_place/{placeId}",
                 "/social-networks",
+                "/friends/{friendId}",
                 USER_CUSTOM_SHOPPING_LIST_ITEMS,
                 USER_SHOPPING_LIST + "/user-shopping-list-items",
                 "/notifications/{notificationId:[0-9]+}")
