@@ -29,6 +29,8 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
      */
     Optional<User> findByEmail(String email);
 
+    Optional<User> findUserByChatId(Long chatId);
+
     /**
      * Find all {@link UserManagementVO}.
      *
