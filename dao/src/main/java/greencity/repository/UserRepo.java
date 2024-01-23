@@ -263,6 +263,6 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
                     + "AND (:city IS NULL OR uf.friend.city = :city) "
                     + "AND uf.user.id = :userId ")
     Page<UserFriendFilterDto> findUserFriendDtoByFriendFilterOfUser(
-            String nameCriteria, String city, Double highestPersonalRate,
-            ZonedDateTime dateTimeOfAddingFriend, Pageable pageable, Long userId);
+        String nameCriteria, String city, Double highestPersonalRate,
+        ZonedDateTime dateTimeOfAddingFriend, Pageable pageable, Long userId);
 }
