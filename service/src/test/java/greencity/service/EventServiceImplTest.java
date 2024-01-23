@@ -20,6 +20,7 @@ import greencity.enums.TagType;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
+import greencity.rating.RatingCalculation;
 import greencity.repository.EventRepo;
 import greencity.repository.EventSearchRepo;
 import greencity.repository.UserRepo;
@@ -32,6 +33,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -71,6 +73,10 @@ public class EventServiceImplTest {
     GoogleApiService googleApiService;
     @Mock
     private RestClient restClient;
+    @Mock
+    private HttpServletRequest httpServletRequest;
+    @Mock
+    private RatingCalculation ratingCalculation;
 
     private final AddEventDtoRequest addEventDtoRequest = ModelUtils.getRequestAddEventDto();
     private final EventDto eventDto = ModelUtils.getEventDto();
@@ -170,6 +176,7 @@ public class EventServiceImplTest {
         when(modelMapper.map(tagVOList, TypeUtils.parameterize(List.class, Tag.class))).thenReturn(tags);
         when(eventRepo.save(event)).thenReturn(event);
         when(modelMapper.map(event, EventDto.class)).thenReturn(eventDto);
+        when(httpServletRequest.getHeader(anyString())).thenReturn("Authorization");
         EventDto actual = eventService.save(addEventDtoRequest, userVO, multipartFiles);
 
         assertEquals(eventDto, actual);

@@ -381,12 +381,14 @@ class RestClientTest {
         String accessToken = "accessToken";
         HttpHeaders headers = new HttpHeaders();
         headers.set(AUTHORIZATION, accessToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<UserVO> entity = new HttpEntity<>(userVO, headers);
-        when(restTemplate.exchange(greenCityUserServerAddress
+        restClient.setGreenCityUserServerAddress("http://localhost:8060");
+        when(restTemplate.exchange("http://localhost:8060"
             + RestTemplateLinks.USER, HttpMethod.POST, entity, Object.class)).thenReturn(ResponseEntity.ok(Object));
         restClient.save(userVO, accessToken);
 
-        verify(restTemplate).exchange(greenCityUserServerAddress
+        verify(restTemplate).exchange("http://localhost:8060"
             + RestTemplateLinks.USER, HttpMethod.POST, entity, Object.class);
 
     }

@@ -8,6 +8,7 @@ import greencity.dto.search.SearchEventDto;
 import org.springframework.data.domain.Pageable;
 import greencity.dto.user.UserVO;
 import org.springframework.web.multipart.MultipartFile;
+import greencity.dto.event.EventVO;
 
 public interface EventService {
     /**
@@ -29,6 +30,7 @@ public interface EventService {
     EventDto update(UpdateEventDto eventDto, String email, MultipartFile[] images);
 
     /**
+
      * Method for getting all Events by searchQuery.
      *
      * @param pageable     {@link Pageable}.
@@ -38,6 +40,15 @@ public interface EventService {
      * @author Nikita Malov & Denys Liubchenko
      */
     PageableDto<SearchEventDto> search(Pageable pageable, String searchQuery, String languageCode);
+
+    /**
+     * Method for deleting Event instance.
+     *
+     * @param eventId - event id.
+     * @param email   - user email.
+     */
+    void delete(Long eventId, String email);
+   
 
     /**
      * Retrieves the total number of events associated with the specified user.
@@ -56,4 +67,11 @@ public interface EventService {
      * @return {@link EventDto} instance.
      */
     EventDto save(AddEventDtoRequest addEventDtoRequest, UserVO userVO, MultipartFile[] images);
+
+    /**
+     * Get event by id.
+     *
+     * @param eventId - id of event
+     */
+    EventVO findById(Long eventId);
 }

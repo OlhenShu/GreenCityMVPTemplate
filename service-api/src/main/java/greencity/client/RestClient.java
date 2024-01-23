@@ -7,6 +7,7 @@ import greencity.dto.econews.EcoNewsForSendEmailDto;
 import greencity.dto.user.*;
 import greencity.enums.EmailNotification;
 import greencity.enums.Role;
+import greencity.exception.exceptions.BadRequestException;
 import greencity.message.NotificationDto;
 import greencity.message.SendHabitNotification;
 import greencity.message.SendReportEmailMessage;
@@ -423,10 +424,11 @@ public class RestClient {
     public void save(UserVO userVO, String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.set(AUTHORIZATION, accessToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        UriComponentsBuilder url = UriComponentsBuilder.fromHttpUrl(greenCityUserServerAddress
+            + RestTemplateLinks.USER);
         HttpEntity<UserVO> entity = new HttpEntity<>(userVO, headers);
-        restTemplate.exchange(greenCityUserServerAddress
-            + RestTemplateLinks.USER, HttpMethod.POST, entity, Object.class)
-            .getBody();
+        restTemplate.exchange(url.toUriString(), HttpMethod.POST, entity, Object.class).getBody();
     }
 
     /**
