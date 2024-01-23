@@ -135,6 +135,24 @@ public class NotificationServiceImpl implements NotificationService {
         notificationRepo.deleteById(notificationId);
     }
 
+    @Override
+    public List<NotificationsDto> findAllUnreadNotificationByUserId(Long userId) {
+        return notifiedUserRepo.findAllUnreadNotificationsByUserId(userId)
+                .orElseThrow(() -> new NotFoundException("User don't have unread notification"))
+                .stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    private NotificationsDto convertToDto(NotifiedUser notifiedUser) {
+        return NotificationsDto.builder()
+                .userName(notifiedUser.getUser().getName())
+                .notificationTime(notifiedUser.getNotification().getCreationDate())
+                .objectTitle(notifiedUser.getNotification().getTitle())
+                .notificationSource(notifiedUser.getNotification().getSourceType().name().toLowerCase())
+                .build();
+    }
+
     /**
      * {@inheritDoc}
      */

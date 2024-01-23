@@ -8,4 +8,6 @@ public interface TelegramBotService {
     void saveTelegramUser(Long chatId, String email);
 
     boolean isRegister(Long chatId);
+
+    String getAllUnreadNotification(Long chatId);
 }

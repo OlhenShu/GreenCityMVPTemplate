@@ -37,7 +37,9 @@ public class TelegramBotConfig extends TelegramLongPollingBot {
             long chatId = update.getMessage().getChatId();
 
             if (botService.isRegister(chatId)) {
-                //register user block
+                if (messageText.startsWith("/notification")) {
+                    sendMessage(chatId, botService.getAllUnreadNotification(chatId));
+                }
             } else {
                 sendMessage(chatId, "Please enter your email");
                 botService.saveTelegramUser(chatId, messageText);
