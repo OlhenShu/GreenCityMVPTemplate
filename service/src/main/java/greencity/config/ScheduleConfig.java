@@ -3,14 +3,19 @@ package greencity.config;
 import greencity.client.RestClient;
 import greencity.constant.CacheConstants;
 import greencity.dto.user.UserVO;
+import greencity.entity.EcoNews;
 import greencity.entity.HabitAssign;
 import greencity.entity.HabitFactTranslation;
 import greencity.entity.User;
+import static greencity.enums.EmailNotification.*;
+import static greencity.enums.FactOfDayStatus.*;
+
 import greencity.enums.HabitAssignStatus;
+import greencity.message.NotificationDto;
 import greencity.message.SendHabitNotification;
-import greencity.repository.HabitAssignRepo;
-import greencity.repository.HabitFactTranslationRepo;
-import greencity.repository.RatingStatisticsRepo;
+import greencity.repository.*;
+import java.time.ZonedDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -18,12 +23,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.ZonedDateTime;
-import java.util.List;
-
-import static greencity.enums.EmailNotification.*;
-import static greencity.enums.FactOfDayStatus.*;
 
 /**
  * Config for scheduling.
@@ -40,6 +39,8 @@ public class ScheduleConfig {
     private final HabitAssignRepo habitAssignRepo;
     private final RatingStatisticsRepo ratingStatisticsRepo;
     private final RestClient restClient;
+    private final NewsSubscriberRepo newsSubscriberRepo;
+    private final EcoNewsRepo ecoNewsRepo;
 
     /**
      * Invoke {@link SendHabitNotification} from EmailMessageReceiver to send email
@@ -150,5 +151,20 @@ public class ScheduleConfig {
                 h.setStatus(HabitAssignStatus.EXPIRED);
             }
         });
+    }
+
+    /** Every day at 00:00 sends recent notifications to {@link greencity.entity.NewsSubscriber}.
+     * @author Nikita Malov
+     **/
+    @Transactional(readOnly = true)
+    @Scheduled(cron = "0 0 0 * * ?", zone = "Europe/Kiev")
+    public void sendInterestingNews() {
+        List<EcoNews> ecoNews = ecoNewsRepo.getThreeLastEcoNews();
+        newsSubscriberRepo.findAllBy().forEach((email) -> sendNotifications(email, ecoNews));
+    }
+
+    private void sendNotifications(String email, List<EcoNews> ecoNews) {
+        ecoNews.forEach((news) ->
+            restClient.sendNotification(new NotificationDto(news.getTitle(), news.getText()), email));
     }
 }
