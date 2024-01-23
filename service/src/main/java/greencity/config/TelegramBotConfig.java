@@ -1,6 +1,5 @@
 package greencity.config;
 
-import greencity.dto.telegram.TelegramUserDto;
 import greencity.service.TelegramBotService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
