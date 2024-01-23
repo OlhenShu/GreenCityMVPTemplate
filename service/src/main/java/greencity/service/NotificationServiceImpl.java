@@ -1,5 +1,6 @@
 package greencity.service;
 
+import greencity.config.TelegramBotConfig;
 import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
 import greencity.dto.econews.EcoNewsVO;
@@ -48,6 +49,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotifiedUserRepo notifiedUserRepo;
     private final UserRepo userRepo;
     private final ModelMapper modelMapper;
+    private final TelegramBotConfig telegramBot;
 
     /**
      * {@inheritDoc}
@@ -142,6 +144,17 @@ public class NotificationServiceImpl implements NotificationService {
                 .stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void sendNotificationToTelegramBot(Long userId, NotificationsDto notificationsDto) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User with current id not found"));
+        telegramBot.sendNotification(user.getChatId(), convertToMessage(notificationsDto));
+    }
+
+    private String convertToMessage(NotificationsDto notificationsDto) {
+        return String.format("");
     }
 
     private NotificationsDto convertToDto(NotifiedUser notifiedUser) {

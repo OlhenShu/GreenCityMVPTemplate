@@ -5,6 +5,7 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
 import greencity.dto.econews.EcoNewsVO;
 import greencity.dto.econewscomment.*;
+import greencity.dto.notification.NotificationsDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.EcoNews;
 import greencity.entity.EcoNewsComment;
@@ -211,6 +212,7 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
         }
         ecoNewsCommentRepo.save(modelMapper.map(ecoNewsCommentVO, EcoNewsComment.class));
         notificationService.createNotification(userVO, comment, NotificationSourceType.COMMENT_LIKED);
+        notificationService.sendNotificationToTelegramBot(userVO.getId(), "");
     }
 
     /**

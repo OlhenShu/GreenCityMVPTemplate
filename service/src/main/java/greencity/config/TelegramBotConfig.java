@@ -53,6 +53,17 @@ public class TelegramBotConfig extends TelegramLongPollingBot {
         return botUsername;
     }
 
+    public void sendNotification(Long chatId, String message) {
+        var msg = new SendMessage();
+        msg.setChatId(chatId);
+        msg.setText(message);
+        try {
+            execute(msg);
+        } catch (TelegramApiException e) {
+            log.info("Error");
+        }
+    }
+
     private void register() {
         try {
             TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
