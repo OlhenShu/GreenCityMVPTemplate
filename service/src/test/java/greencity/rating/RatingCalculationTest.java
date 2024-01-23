@@ -65,4 +65,38 @@ class RatingCalculationTest {
         verify(ratingStatisticsService).save(ratingStatisticsVO);
 
     }
+
+    @Test
+    void ratingCalculationLocalTest() {
+        RatingCalculationEnum rating = RatingCalculationEnum.ACQUIRED_HABIT_14_DAYS;
+        User user = ModelUtils.getUser();
+        user.setRating(1D);
+        ZonedDateTime now = ZonedDateTime.now();
+        RatingStatistics ratingStatistics = RatingStatistics
+            .builder()
+            .rating(user.getRating() + rating.getRatingPoints())
+            .ratingCalculationEnum(rating)
+            .user(user)
+            .pointsChanged(rating.getRatingPoints())
+            .build();
+
+        ModelMapper modelMapper1 = new ModelMapper();
+
+        UserVO userVO = modelMapper1.map(user, UserVO.class);
+
+        RatingStatisticsVO ratingStatisticsVO = RatingStatisticsVO.builder()
+            .id(1L)
+            .rating(userVO.getRating())
+            .ratingCalculationEnum(rating)
+            .user(userVO)
+            .createDate(now)
+            .pointsChanged(rating.getRatingPoints())
+            .build();
+
+        when(modelMapper.map(ratingStatistics, RatingStatisticsVO.class)).thenReturn(ratingStatisticsVO);
+        when(ratingStatisticsService.save(ratingStatisticsVO)).thenReturn(ratingStatisticsVO);
+
+        ratingCalculation.ratingCalculation(rating, user);
+        verify(ratingStatisticsService).save(ratingStatisticsVO);
+    }
 }

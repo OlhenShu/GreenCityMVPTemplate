@@ -5,7 +5,7 @@ import greencity.dto.event.EventDto;
 import greencity.dto.event.UpdateEventDto;
 import greencity.dto.user.UserVO;
 import org.springframework.web.multipart.MultipartFile;
-
+import greencity.dto.event.EventVO;
 
 public interface EventService {
     /**
@@ -27,6 +27,14 @@ public interface EventService {
     EventDto update(UpdateEventDto eventDto, String email, MultipartFile[] images);
 
     /**
+     * Method for deleting Event instance.
+     *
+     * @param eventId - event id.
+     * @param email   - user email.
+     */
+    void delete(Long eventId, String email);
+   
+    /**
      * Retrieves the total number of events associated with the specified user.
      *
      * @param userId The unique identifier of the user for whom the event count is to be obtained.
@@ -43,4 +51,11 @@ public interface EventService {
      * @return {@link EventDto} instance.
      */
     EventDto save(AddEventDtoRequest addEventDtoRequest, UserVO userVO, MultipartFile[] images);
+
+    /**
+     * Get event by id.
+     *
+     * @param eventId - id of event
+     */
+    EventVO findById(Long eventId);
 }
