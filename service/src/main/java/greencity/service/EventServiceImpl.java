@@ -142,6 +142,8 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepo.findById(eventId)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND_BY_ID + eventId));
         return modelMapper.map(event, EventVO.class);
+    }
+
     /**
      * {@inheritDoc}
      */

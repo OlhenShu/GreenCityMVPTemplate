@@ -129,7 +129,7 @@ public class EventsController {
         eventService.delete(eventId, principal.getName());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
-}
+
     /**
      * The method for getting count of events.
      *
