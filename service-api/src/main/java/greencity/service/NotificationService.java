@@ -120,6 +120,4 @@ public interface NotificationService {
     void delete(Long notificationId, UserVO user);
 
     List<NotificationsDto> findAllUnreadNotificationByUserId(Long userId);
-
-    void sendNotificationToTelegramBot(Long userId, NotificationsDto notificationsDto);
 }
