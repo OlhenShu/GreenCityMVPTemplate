@@ -47,6 +47,7 @@ public class FriendController {
             @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @GetMapping
+    @ApiPageable
     public ResponseEntity<PageableDto<UserFriendDto>> getAllUserFriend(
             @ApiIgnore Pageable pageable,
             @ApiIgnore @CurrentUser UserVO userVO) {
