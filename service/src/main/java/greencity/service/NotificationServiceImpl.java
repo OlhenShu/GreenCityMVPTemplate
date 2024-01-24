@@ -1,5 +1,6 @@
 package greencity.service;
 
+import greencity.config.TelegramBotConfig;
 import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
 import greencity.dto.econews.EcoNewsVO;
@@ -25,12 +26,17 @@ import greencity.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.ws.rs.core.UriBuilder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -209,6 +215,11 @@ public class NotificationServiceImpl implements NotificationService {
                 .user(friend)
                 .isRead(false)
                 .build());
+        if (friend.getChatId() != null) {
+            //telegramBotConfig.sendNotificationViaTelegramApi(friend.getChatId());
+        }
+
+
     }
 
     /**
@@ -330,4 +341,6 @@ public class NotificationServiceImpl implements NotificationService {
                 .sourceId(3L)
                 .build();
     }
+
+
 }
