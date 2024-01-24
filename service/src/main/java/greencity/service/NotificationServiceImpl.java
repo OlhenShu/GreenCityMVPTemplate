@@ -54,6 +54,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotifiedUserRepo notifiedUserRepo;
     private final UserRepo userRepo;
     private final ModelMapper modelMapper;
+    private final TelegramBotConfig telegramBotConfig;
 
     /**
      * {@inheritDoc}
@@ -216,7 +217,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .isRead(false)
                 .build());
         if (friend.getChatId() != null) {
-            //telegramBotConfig.sendNotificationViaTelegramApi(friend.getChatId());
+            telegramBotConfig.sendNotificationViaTelegramApi(friend.getChatId());
         }
 
 

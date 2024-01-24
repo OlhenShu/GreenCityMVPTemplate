@@ -15,8 +15,10 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 import javax.ws.rs.core.UriBuilder;
+import java.io.IOException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -163,7 +165,7 @@ public class TelegramBotConfig extends TelegramLongPollingBot {
 
         UriBuilder builder = UriBuilder
                 .fromUri("https://api.telegram.org")
-                .path("/{token}/sendMessage")
+                .path("/{botToken}/sendMessage")
                 .queryParam("chat_id", chatId)
                 .queryParam("text", "friend request");
 
@@ -172,5 +174,18 @@ public class TelegramBotConfig extends TelegramLongPollingBot {
                 .uri(builder.build("bot" + this.getBotToken()))
                 .timeout(Duration.ofSeconds(5))
                 .build();
+
+        HttpResponse<String> response = null;
+        try {
+            response = client
+                    .send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        System.out.println(response.statusCode());
+        System.out.println(response.body());
     }
 }
