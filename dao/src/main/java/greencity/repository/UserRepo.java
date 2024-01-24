@@ -62,6 +62,8 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
     @Query("SELECT id FROM User WHERE email=:email")
     Optional<Long> findIdByEmail(String email);
 
+    Optional<User> findUserByPhoneNumber(String phoneNumber);
+
     /**
      * Updates last activity time for a given user.
      *

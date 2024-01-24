@@ -143,6 +143,9 @@ public class User {
     @Column(name = "city")
     private String city;
 
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
     @Column(name = "user_credo")
     private String userCredo;
 

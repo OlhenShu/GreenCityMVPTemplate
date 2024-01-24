@@ -212,7 +212,6 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
         }
         ecoNewsCommentRepo.save(modelMapper.map(ecoNewsCommentVO, EcoNewsComment.class));
         notificationService.createNotification(userVO, comment, NotificationSourceType.COMMENT_LIKED);
-        notificationService.sendNotificationToTelegramBot(userVO.getId(), "");
     }
 
     /**
