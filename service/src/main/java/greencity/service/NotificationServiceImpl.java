@@ -49,7 +49,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotifiedUserRepo notifiedUserRepo;
     private final UserRepo userRepo;
     private final ModelMapper modelMapper;
-    private final TelegramBotConfig telegramBot;
+    private final TelegramBotConfig telegramBotConfig;
 
     /**
      * {@inheritDoc}
@@ -150,7 +150,7 @@ public class NotificationServiceImpl implements NotificationService {
     public void sendNotificationToTelegramBot(Long userId, NotificationsDto notificationsDto) {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User with current id not found"));
-        telegramBot.sendNotification(user.getChatId(), convertToMessage(notificationsDto));
+        telegramBotConfig.sendNotification(user.getChatId(), convertToMessage(notificationsDto));
     }
 
     private String convertToMessage(NotificationsDto notificationsDto) {
@@ -222,6 +222,9 @@ public class NotificationServiceImpl implements NotificationService {
                 .user(friend)
                 .isRead(false)
                 .build());
+        if (friend.getChatId() != null) {
+            telegramBotConfig.sendNotificationViaTelegramApi(friend.getChatId(), "friend request");
+        }
     }
 
     /**
@@ -280,6 +283,7 @@ public class NotificationServiceImpl implements NotificationService {
             sourceId = ecoNewsVO.getId();
             sourceAuthor = ecoNewsVO.getAuthor();
             source = NotificationSource.NEWS;
+            telegramBotConfig.sendNotificationViaTelegramApi(sourceAuthor.getChatId(), "new comment for our news");
         } else if (sourceVO instanceof EcoNewsComment) {
             EcoNewsComment ecoNewsComment = (EcoNewsComment) sourceVO;
             parentCommentAuthor = getParentCommentAuthor(ecoNewsComment);
@@ -287,6 +291,7 @@ public class NotificationServiceImpl implements NotificationService {
             sourceId = ecoNewsComment.getEcoNews().getId();
             sourceAuthor = modelMapper.map(ecoNewsComment.getEcoNews().getAuthor(), UserVO.class);
             source = NotificationSource.NEWS;
+            telegramBotConfig.sendNotificationViaTelegramApi(sourceAuthor.getChatId(), "new like for you comment");
         } else {
             throw new NotFoundException("Not found source author");
         }

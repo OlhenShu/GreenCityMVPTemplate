@@ -72,8 +72,9 @@ public class TelegramBotServiceImpl implements TelegramBotService {
         for (NotificationDtoResponse notification : notifications) {
             joiner.add("Повідомлення від: " + notification.getAuthor()  +
                     "\nТекст: " + notification.getTitle()
-                    + "\nКоли: " + notification.getCreationDate()
-                    .format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)));
+                       + "\nКоли: " + notification.getCreationDate()
+                               .format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM))
+                       + "\n");
         }
         return joiner.toString();
     }

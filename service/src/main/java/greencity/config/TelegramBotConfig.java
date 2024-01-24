@@ -26,7 +26,7 @@ import java.util.List;
 @Slf4j
 @Component
 public class TelegramBotConfig extends TelegramLongPollingBot {
-    private String botUsername;
+    private final String botUsername;
     private final TelegramBotService botService;
 
     public TelegramBotConfig(
@@ -111,10 +111,6 @@ public class TelegramBotConfig extends TelegramLongPollingBot {
         }
     }
 
-    private void helpMessage(long chatId) {
-        sendMessage(chatId, "/start for registration in bot");
-    }
-
     private void sendMessage(long chatId, String message) {
         var msg = new SendMessage();
         msg.setText(message);
@@ -168,7 +164,7 @@ public class TelegramBotConfig extends TelegramLongPollingBot {
         }
     }
 
-    public void sendNotificationViaTelegramApi(Long chatId) {
+    public void sendNotificationViaTelegramApi(Long chatId, String message) {
         HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(5))
                 .version(HttpClient.Version.HTTP_2)
@@ -178,7 +174,7 @@ public class TelegramBotConfig extends TelegramLongPollingBot {
                 .fromUri("https://api.telegram.org")
                 .path("/{botToken}/sendMessage")
                 .queryParam("chat_id", chatId)
-                .queryParam("text", "friend request");
+                .queryParam("text", message);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
