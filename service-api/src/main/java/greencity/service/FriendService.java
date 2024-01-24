@@ -34,6 +34,8 @@ public interface FriendService {
     PageableDto<UserFriendDto> searchFriends(Pageable pageable, String name, UserVO userVO,
                                              Boolean hasSameCity, Boolean hasMutualFriends);
 
+    PageableDto<UserFriendDto> allFriendRequests(Long userId, Pageable pageable);
+
     /**
      * Establishes a friendship relationship between a user and another user identified by their IDs.
      *

@@ -146,6 +146,11 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
             + "UNION (SELECT friend_id FROM users_friends WHERE user_id = :userId and status = 'FRIEND'));")
     List<User> getAllUserFriends(Long userId);
 
+    @Query(nativeQuery = true, value = "SELECT * FROM users WHERE id IN ( "
+            + "(SELECT user_id FROM users_friends WHERE friend_id = :userId and status = 'REQUEST')"
+            + "UNION (SELECT friend_id FROM users_friends WHERE user_id = :userId and status = 'REQUEST'))")
+    Page<User> getAllUserFriendRequests(Pageable pageable, Long userId);
+
     /**
      * Retrieves a filtered list of users and their friend-related details based on specified criteria.
      *

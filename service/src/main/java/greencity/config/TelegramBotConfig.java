@@ -70,11 +70,13 @@ public class TelegramBotConfig extends TelegramLongPollingBot {
                     sendMessage(chatId, "Ви ще не прив'язували цей номер до аккаунту GreenCity. " +
                             "Прив'язати: /subscribe");
                 }
+            } else if (messageText.equals("/help")) {
+                sendHelpCommand(chatId);
             }
             else {
                 sendMessage(update.getMessage().getChatId(),
                         "Не знайома мені команда. Повний перелік: " +
-                                "\n/start, /subscribe, /notification, /unsubscribe");
+                                "\n1/ /start, /subscribe, /notification, /unsubscribe, /help");
             }
         } else {
             if (update.getMessage().hasContact()) {
@@ -125,7 +127,21 @@ public class TelegramBotConfig extends TelegramLongPollingBot {
     private void sendGreeting(long chatId) {
         String text = "Привіт! \uD83D\uDC7D \n\nЗа допомогою бота можна отримувати " +
                 "нові повідомлення за вашим профілем на GreenCity. \n\nСписок команд, які можна використовувати зараз: " +
-                "\n/start, /subscribe, /notification, /unsubscribe";
+                "\n/start, /subscribe, /notification, /unsubscribe, /help";
+
+        SendMessage message = SendMessage.builder()
+                .text(text)
+                .chatId(chatId)
+                .build();
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            log.info("Error");
+        }
+    }
+
+    private void sendHelpCommand(long chatId) {
+        String text = "Список команд, які можна використовувати зараз: \n/start, /subscribe, /notification, /unsubscribe, /help";
 
         SendMessage message = SendMessage.builder()
                 .text(text)

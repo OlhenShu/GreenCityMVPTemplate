@@ -46,7 +46,8 @@ public class FriendController {
             @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/all")
+    @ApiPageable
+    @GetMapping
     public ResponseEntity<PageableDto<UserFriendDto>> getAllUserFriend(
             @ApiIgnore Pageable pageable,
             @ApiIgnore @CurrentUser UserVO userVO) {
@@ -118,7 +119,7 @@ public class FriendController {
             @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
 
-    @PatchMapping("/{friendId}/acceptRequest")
+    @PatchMapping("/{friendId}/acceptFriend")
     public ResponseEntity<ResponseEntity.BodyBuilder> acceptFriendRequest(
             @PathVariable Long friendId, @ApiIgnore @CurrentUser UserVO userVO
     ) {
@@ -166,6 +167,17 @@ public class FriendController {
             friendService.getRecommendedFriends(user,
                 PageRequest.of(pageable.getPageNumber(), pageable.getPageSize())));
     }
+
+    @ApiPageable
+    @GetMapping("/friendRequests")
+    public ResponseEntity<PageableDto<UserFriendDto>> getAllFriendRequest(
+            @ApiIgnore Pageable pageable, @ApiIgnore @CurrentUser UserVO user
+    ) {
+        return ResponseEntity.ok(
+                friendService.allFriendRequests(user.getId(), pageable)
+        );
+    }
+
 
     /**
      * Retrieves a paginated list of friends' details with specific filtering criteria.
@@ -215,7 +227,7 @@ public class FriendController {
             @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PatchMapping("/{friendId}/rejectRequest")
+    @DeleteMapping("/{friendId}/declineFriend")
     public ResponseEntity<ResponseEntity.BodyBuilder> rejectFriendRequest(
             @PathVariable Long friendId, @ApiIgnore @CurrentUser UserVO userVO
     ) {

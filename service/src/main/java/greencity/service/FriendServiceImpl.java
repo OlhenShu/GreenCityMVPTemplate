@@ -111,6 +111,26 @@ public class FriendServiceImpl implements FriendService {
             listOfUsers.getTotalPages());
     }
 
+    @Override
+    public PageableDto<UserFriendDto> allFriendRequests(Long userId, Pageable pageable) {
+        validateUserExist(userId);
+        Page<User> allUserFriendRequests = userRepo.getAllUserFriendRequests(pageable, userId);
+
+        List<UserFriendDto> friendsDto = allUserFriendRequests.stream()
+                .map(user -> modelMapper.map(user, UserFriendDto.class))
+                .collect(Collectors.toList());
+
+        Page<UserFriendDto> friendRequestDtoPage = new PageImpl<>(friendsDto, pageable, friendsDto.size());
+
+        return new PageableDto<>(
+                friendRequestDtoPage.getContent(),
+                friendRequestDtoPage.getTotalElements(),
+                friendRequestDtoPage.getPageable().getPageNumber(),
+                friendRequestDtoPage.getTotalPages()
+        );
+
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -129,6 +149,8 @@ public class FriendServiceImpl implements FriendService {
         notificationService.friendRequestNotification(userId, friendId);
         userRepo.addFriend(userId, friendId);
     }
+
+
 
     /**
      * {@inheritDoc}
