@@ -46,7 +46,7 @@ public class FriendController {
             @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/all")
+    @GetMapping
     public ResponseEntity<PageableDto<UserFriendDto>> getAllUserFriend(
             @ApiIgnore Pageable pageable,
             @ApiIgnore @CurrentUser UserVO userVO) {
