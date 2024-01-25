@@ -121,8 +121,6 @@ public class EventServiceImpl implements EventService {
 
         Event updatedEvent = eventRepo.save(eventToUpdate);
 
-        notificationService.createNotificationForEventChanges(restClient.findByEmail(email), updatedEvent.getId(), NotificationSourceType.EVENT_EDITED);
-
         return buildEventDto(updatedEvent);
     }
 
