@@ -139,6 +139,12 @@ public class NotificationServiceImpl implements NotificationService {
         notifiedUserRepo.save(notifiedUser);
         log.info("Successfully update status");
     }
+
+    /**
+     * Notifies users about the cancellation of an event.
+     *
+     * @param event The event that has been canceled.
+     */
     @Transactional
     public void notifyUsersForEventCanceled(Event event) {
         eventRepo.findUsersByUsersLikedEvents_Id(event.getId())
@@ -146,6 +152,11 @@ public class NotificationServiceImpl implements NotificationService {
                         String.format("Unfortunately, event %s was cancelled. %s", event.getTitle(), ZonedDateTime.now())));
     }
 
+    /**
+     * Notifies users about updates to an event.
+     *
+     * @param event The event that has been updated.
+     */
     @Transactional
     public void notifyUsersForEventUpdated(Event event) {
         eventRepo.findUsersByUsersLikedEvents_Id(event.getId())
@@ -153,6 +164,14 @@ public class NotificationServiceImpl implements NotificationService {
                         String.format("Event %s was updated. New name is %s. %s", event.getTitle(), event.getTitle(), event.getCreationDate())));
     }
 
+    /**
+     * Creates a notification for changes in an event and notifies users based on the source type.
+     *
+     * @param userVO     The UserVO initiating the event changes.
+     * @param eventId    The ID of the event for which the notification is created.
+     * @param sourceType The type of the notification source.
+     * @throws NotFoundException If the event with the specified ID is not found.
+     */
     @Override
     @Transactional
     public void createNotificationForEventChanges(UserVO userVO, Long eventId, NotificationSourceType sourceType) {
