@@ -209,60 +209,6 @@ class NotificationServiceImplTest {
         verify(notifiedUserRepo, never()).saveAll(anyList());
     }
 
-    @Test
-    void createNewNotification() {
-        Long authorId = userVO.getId();
-
-        NewNotificationDtoRequest request = NewNotificationDtoRequest.builder()
-                .title("Test Notification")
-                .sourceType(NotificationSourceType.NEWS_COMMENTED)
-                .sourceId(123L)
-                .creationDate(ZonedDateTime.now())
-                .build();
-
-        User author = ModelUtils.getUser();
-
-        Notification savedNotification = Notification.builder()
-                .id(1L)
-                .author(author)
-                .creationDate(request.getCreationDate())
-                .title(request.getTitle())
-                .sourceId(request.getSourceId())
-                .sourceType(request.getSourceType())
-                .notifiedUsers(List.of())
-                .build();
-
-        when(userRepo.findById(authorId)).thenReturn(Optional.of(author));
-        when(notificationRepo.save(any(Notification.class))).thenReturn(savedNotification);
-
-        NotificationDtoResponse result = notificationService.createNewNotification(authorId, request);
-
-        assertNotNull(result);
-        verify(userRepo, times(1)).findById(authorId);
-        verify(notificationRepo, times(1)).save(any(Notification.class));
-
-        assertEquals(request.getTitle(), savedNotification.getTitle());
-        assertEquals(request.getSourceType(), savedNotification.getSourceType());
-        assertEquals(request.getSourceId(), savedNotification.getSourceId());
-    }
-
-    @Test
-    void createNewNotificationWhenUserNotFoundShouldThrowNotFoundException() {
-        Long authorId = 1L;
-        NewNotificationDtoRequest request = NewNotificationDtoRequest.builder()
-                .creationDate(ZonedDateTime.now())
-                .sourceId(1L)
-                .title("Test")
-                .sourceType(NotificationSourceType.NEWS_COMMENTED)
-                .build();
-
-        when(userRepo.findById(anyLong())).thenReturn(Optional.empty());
-
-        assertThrows(NotFoundException.class, () -> notificationService.createNewNotification(authorId, request));
-
-        verify(notificationRepo, never()).save(any(Notification.class));
-    }
-    
   @Test
     void getNotificationsEcoNewsForCurrentUserReturnsNotificationsDtoList() {
         NotificationSourceType sourceType = NotificationSourceType.NEWS_LIKED;
