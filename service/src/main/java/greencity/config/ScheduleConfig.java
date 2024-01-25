@@ -1,5 +1,6 @@
 package greencity.config;
 
+import greencity.annotations.RatingCalculationEnum;
 import greencity.client.RestClient;
 import greencity.constant.CacheConstants;
 import greencity.dto.user.UserVO;
@@ -13,6 +14,10 @@ import static greencity.enums.FactOfDayStatus.*;
 import greencity.enums.HabitAssignStatus;
 import greencity.message.NotificationDto;
 import greencity.message.SendHabitNotification;
+import greencity.rating.RatingCalculation;
+import greencity.repository.HabitAssignRepo;
+import greencity.repository.HabitFactTranslationRepo;
+import greencity.repository.RatingStatisticsRepo;
 import greencity.repository.*;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -39,6 +44,7 @@ public class ScheduleConfig {
     private final HabitAssignRepo habitAssignRepo;
     private final RatingStatisticsRepo ratingStatisticsRepo;
     private final RestClient restClient;
+    private final RatingCalculation ratingCalculation;
     private final NewsSubscriberRepo newsSubscriberRepo;
     private final EcoNewsRepo ecoNewsRepo;
 
@@ -149,6 +155,16 @@ public class ScheduleConfig {
             if (h.getCreateDate().plusDays(h.getDuration().longValue()).isBefore(now)) {
                 log.info("Set status expired");
                 h.setStatus(HabitAssignStatus.EXPIRED);
+            } else {
+                RatingCalculationEnum ratingCalculationEnum = RatingCalculationEnum.DAY_OF_ECO_HABIT;
+                if (h.getCreateDate().toLocalDate().plusDays(14).equals(now.toLocalDate())) {
+                    ratingCalculationEnum = RatingCalculationEnum.ACQUIRED_HABIT_14_DAYS;
+                } else if (h.getCreateDate().toLocalDate().plusDays(21).equals(now.toLocalDate())) {
+                    ratingCalculationEnum = RatingCalculationEnum.ACQUIRED_HABIT_21_DAYS;
+                } else if (h.getCreateDate().toLocalDate().plusDays(30).equals(now.toLocalDate())) {
+                    ratingCalculationEnum = RatingCalculationEnum.ACQUIRED_HABIT_30_DAYS;
+                }
+                ratingCalculation.ratingCalculation(ratingCalculationEnum, h.getUser());
             }
         });
     }

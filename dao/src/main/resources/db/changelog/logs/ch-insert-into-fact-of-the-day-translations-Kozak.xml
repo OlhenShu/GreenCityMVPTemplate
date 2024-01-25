@@ -2,7 +2,7 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
-    <changeSet id="Natalia-4" author="Kozak" runOnChange="true">
+    <changeSet id="Natalia-4" author="Kozak">
         <insert tableName="fact_of_the_day_translations">
             <column name="id">1</column>
             <column name="content">На заводі плівка знімається з стаканчиків, і картон може бути перероблений. Але зараз проблеми з логістикою між Львовом і Харківською областю. На це поки немає коштів</column>

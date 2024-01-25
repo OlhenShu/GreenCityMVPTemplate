@@ -1,26 +1,38 @@
 package greencity.service;
 
 import com.google.maps.model.LatLng;
+import greencity.annotations.RatingCalculationEnum;
 import greencity.client.RestClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
+import greencity.dto.PageableDto;
 import greencity.dto.event.*;
 import greencity.dto.geocoding.AddressLatLngResponse;
+import greencity.dto.search.SearchEventDto;
 import greencity.dto.tag.TagUaEnDto;
 import greencity.dto.tag.TagVO;
+
 import greencity.dto.user.UserVO;
-import greencity.entity.event.EventDateLocation;
-import greencity.entity.event.Event;
 import greencity.entity.Tag;
 import greencity.entity.User;
+import greencity.entity.event.Event;
+import greencity.entity.event.EventDateLocation;
 import greencity.entity.event.EventImages;
 import greencity.enums.Role;
 import greencity.enums.TagType;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
+import greencity.rating.RatingCalculation;
 import greencity.repository.EventRepo;
+import greencity.repository.EventSearchRepo;
+import java.util.concurrent.CompletableFuture;
+import javax.servlet.http.HttpServletRequest;
 import greencity.repository.UserRepo;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
@@ -28,6 +40,8 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,9 +51,11 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static greencity.constant.AppConstant.AUTHORIZATION;
+
 @Slf4j
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
     private final EventRepo eventRepo;
@@ -47,11 +63,15 @@ public class EventServiceImpl implements EventService {
     private final RestClient restClient;
     private final TagsService tagsService;
     private final GoogleApiService googleApiService;
+    private final EventSearchRepo eventSearchRepo;
     private final UserRepo userRepo;
     private final FileService fileService;
     private static final String DEFAULT_TITLE_IMAGE_PATH = AppConstant.DEFAULT_EVENT_IMAGES;
+    private final HttpServletRequest httpServletRequest;
+    private final RatingCalculation ratingCalculation;
 
     @Override
+    @Transactional
     public EventDto save(AddEventDtoRequest addEventDtoRequest, UserVO userVO, MultipartFile[] images) {
         addAddressToLocation(addEventDtoRequest.getDatesLocations());
         Event event = modelMapper.map(addEventDtoRequest, Event.class);
@@ -72,6 +92,9 @@ public class EventServiceImpl implements EventService {
         EventDto eventDto = modelMapper.map(eventRepo.save(event), EventDto.class);
         tagConvertor(event, eventDto);
 
+        String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
+        CompletableFuture.runAsync(
+            () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_EVENT, userVO, accessToken));
         return eventDto;
     }
 
@@ -102,6 +125,54 @@ public class EventServiceImpl implements EventService {
         Event updatedEvent = eventRepo.save(eventToUpdate);
 
         return buildEventDto(updatedEvent);
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long eventId, String email) {
+        UserVO userVO = restClient.findByEmail(email);
+        Event toDelete =
+            eventRepo.findById(eventId).orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND));
+        List<String> eventImages = new ArrayList<>();
+        eventImages.add(toDelete.getTitleImage());
+
+        if (toDelete.getOrganizer().getId().equals(userVO.getId()) || userVO.getRole() == Role.ROLE_ADMIN) {
+            eventRepo.delete(toDelete);
+        } else {
+            throw new UserHasNoPermissionToAccessException(ErrorMessage.USER_HAS_NO_PERMISSION);
+        }
+
+        String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
+        CompletableFuture.runAsync(
+            () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.DELETE_EVENT, userVO, accessToken));
+    }
+
+    @Override
+    public EventVO findById(Long eventId) {
+        Event event = eventRepo.findById(eventId)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND_BY_ID + eventId));
+        return modelMapper.map(event, EventVO.class);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PageableDto<SearchEventDto> search(Pageable pageable, String searchQuery, String languageCode) {
+        Page<Event> eventPage = eventSearchRepo.find(pageable,searchQuery,languageCode);
+        return getSearchEventDtoPageableDto(eventPage);
+    }
+
+    private PageableDto<SearchEventDto> getSearchEventDtoPageableDto(Page<Event> page) {
+        List<SearchEventDto> searchEventDtos = page.stream()
+            .map(event -> modelMapper.map(event, SearchEventDto.class))
+            .collect(Collectors.toList());
+
+        return new PageableDto<>(
+            searchEventDtos,
+            page.getTotalElements(),
+            page.getPageable().getPageNumber(),
+            page.getTotalPages());
     }
 
     /**

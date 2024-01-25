@@ -1,22 +1,13 @@
 package greencity.service;
 
-import static greencity.ModelUtils.*;
-import greencity.dto.user.UserVO;
-import greencity.exception.exceptions.NotFoundException;
-import greencity.repository.EventRepo;
-import greencity.repository.UserRepo;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 import com.google.maps.model.LatLng;
 import greencity.ModelUtils;
 import greencity.client.RestClient;
 import greencity.constant.AppConstant;
+import greencity.dto.PageableDto;
 import greencity.dto.event.*;
 import greencity.dto.geocoding.AddressLatLngResponse;
+import greencity.dto.search.SearchEventDto;
 import greencity.dto.tag.TagVO;
 import greencity.dto.user.UserVO;
 import greencity.entity.Tag;
@@ -27,32 +18,53 @@ import greencity.entity.event.EventImages;
 import greencity.enums.Role;
 import greencity.enums.TagType;
 import greencity.exception.exceptions.BadRequestException;
+import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
+import greencity.rating.RatingCalculation;
 import greencity.repository.EventRepo;
+import greencity.repository.EventSearchRepo;
+import greencity.repository.UserRepo;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.reflect.TypeUtils;
-import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
-@ExtendWith(SpringExtension.class)
+import static greencity.ModelUtils.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 public class EventServiceImplTest {
     @Mock
     private UserRepo userRepo;
     @Mock
-    private EventRepo eventRepo;
+    private ModelMapper modelMapper;
+    @Mock
+    private EventSearchRepo eventSearchRepo;
     @InjectMocks
     private EventServiceImpl eventService;
-
     @Mock
-    ModelMapper modelMapper;
+    EventRepo eventRepo;
     @Mock
     TagsService tagService;
     @Mock
@@ -61,11 +73,15 @@ public class EventServiceImplTest {
     GoogleApiService googleApiService;
     @Mock
     private RestClient restClient;
+    @Mock
+    private HttpServletRequest httpServletRequest;
+    @Mock
+    private RatingCalculation ratingCalculation;
 
     private final AddEventDtoRequest addEventDtoRequest = ModelUtils.getRequestAddEventDto();
     private final EventDto eventDto = ModelUtils.getEventDto();
     private final Event event = ModelUtils.getEvent();
-    private final UserVO userVO = ModelUtils.getUserVO();
+    private final UserVO userVO = getUserVO();
     private final List<TagVO> tagVOList = Collections.singletonList(ModelUtils.getEventTagVO());
     private final List<Tag> tags = Collections.singletonList(ModelUtils.getEventTag());
     private final MultipartFile file = ModelUtils.getFile();
@@ -77,6 +93,50 @@ public class EventServiceImplTest {
         .longitude(addressDto.getLongitude())
         .build();
     private final LatLng latLng = new LatLng(addressDto.getLatitude(), addressDto.getLongitude());
+
+    @Test
+    void searchTest () {
+        List<Event> eventList = new ArrayList<>();
+        eventList.add(Event.builder()
+            .id(1L)
+            .title("title1")
+            .description("description1")
+            .titleImage("img")
+            .open(false)
+            .organizer(ModelUtils.getUser())
+            .creationDate(LocalDate.now())
+            .tags(ModelUtils.getTags())
+            .build());
+        eventList.add(Event.builder()
+            .id(2L)
+            .title("title2")
+            .description("description2")
+            .titleImage("img")
+            .open(false)
+            .organizer(ModelUtils.getUser())
+            .creationDate(LocalDate.now())
+            .tags(ModelUtils.getTags())
+            .build());
+        Page<Event> eventPage = new PageImpl<>(eventList, PageRequest.of(0,5), eventList.size());
+
+        when(eventSearchRepo.find(any(Pageable.class), anyString(), anyString())).thenReturn(eventPage);
+        ModelMapper modelMapper1 = new ModelMapper();
+        when(modelMapper.map(eventList.get(0), SearchEventDto.class))
+            .thenReturn(modelMapper1.map(eventList.get(0), SearchEventDto.class));
+        when(modelMapper.map(eventList.get(1), SearchEventDto.class))
+            .thenReturn(modelMapper1.map(eventList.get(1), SearchEventDto.class));
+
+        var eventDtoPage = eventService.search(PageRequest.of(0,10), "Test", "ua");
+
+        var expectedEventDtoPage = eventPage.stream().map(event -> modelMapper.map(event, SearchEventDto.class)).collect(
+            Collectors.toList());
+
+        PageableDto<SearchEventDto> searchEventDtoPageableDto =
+            new PageableDto<>(expectedEventDtoPage, expectedEventDtoPage.size(), 0, 1);
+
+        verify(eventSearchRepo).find(PageRequest.of(0,10), "Test", "ua");
+        assertEquals(searchEventDtoPageableDto, eventDtoPage);
+    }
 
 
     @Test
@@ -109,13 +169,14 @@ public class EventServiceImplTest {
         when(googleApiService.getResultFromGeoCodeByCoordinates(latLng)).thenReturn(response);
         when(modelMapper.map(response, AddressDto.class)).thenReturn(addressDto);
         when(modelMapper.map(addEventDtoRequest.getDatesLocations().get(0), EventDateLocation.class)).thenReturn(event.getDates().get(0));
-        when(modelMapper.map(ModelUtils.getUserVO(), User.class)).thenReturn(ModelUtils.getUser());
+        when(modelMapper.map(getUserVO(), User.class)).thenReturn(ModelUtils.getUser());
         when(fileService.upload(file)).thenReturn(ModelUtils.getUrl().toString());
         when(eventRepo.save(event)).thenReturn(event);
         when(tagService.findAllTranslationsByNamesAndType(addEventDtoRequest.getTags(), TagType.EVENT)).thenReturn(tagVOList);
         when(modelMapper.map(tagVOList, TypeUtils.parameterize(List.class, Tag.class))).thenReturn(tags);
         when(eventRepo.save(event)).thenReturn(event);
         when(modelMapper.map(event, EventDto.class)).thenReturn(eventDto);
+        when(httpServletRequest.getHeader(anyString())).thenReturn("Authorization");
         EventDto actual = eventService.save(addEventDtoRequest, userVO, multipartFiles);
 
         assertEquals(eventDto, actual);

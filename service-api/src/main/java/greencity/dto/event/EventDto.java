@@ -9,8 +9,11 @@ import java.util.List;
 
 @Data
 @Builder
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode
 public class EventDto {
     private Long id;
     private String title;
