@@ -8,24 +8,13 @@ import greencity.converters.UserArgumentResolver;
 import greencity.dto.PageableDto;
 import greencity.dto.notification.NewNotificationDtoRequest;
 import greencity.dto.notification.NotificationDtoResponse;
+import greencity.dto.notification.NotificationsDto;
 import greencity.dto.user.AuthorDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.Notification;
 import greencity.enums.NotificationSourceType;
 import greencity.service.NotificationService;
 import greencity.service.UserService;
-import greencity.ModelUtils;
-import greencity.converters.UserArgumentResolver;
-import greencity.dto.PageableDto;
-import greencity.dto.notification.NotificationDtoResponse;
-import greencity.dto.notification.NotificationsDto;
-import greencity.dto.user.UserVO;
-import greencity.enums.NotificationSourceType;
-import greencity.service.NotificationService;
-import greencity.service.UserService;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,19 +35,6 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-@ExtendWith(MockitoExtension.class)
-public class NotificationControllerTest {
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
