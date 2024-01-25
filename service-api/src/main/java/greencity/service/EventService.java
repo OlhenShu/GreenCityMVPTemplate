@@ -1,14 +1,14 @@
 package greencity.service;
 
 import greencity.dto.PageableDto;
-import greencity.dto.event.AddEventDtoRequest;
-import greencity.dto.event.EventDto;
-import greencity.dto.event.UpdateEventDto;
+import greencity.dto.event.*;
 import greencity.dto.search.SearchEventDto;
+import greencity.enums.NotificationSourceType;
 import org.springframework.data.domain.Pageable;
 import greencity.dto.user.UserVO;
 import org.springframework.web.multipart.MultipartFile;
-import greencity.dto.event.EventVO;
+
+import java.util.List;
 
 public interface EventService {
     /**
@@ -73,4 +73,8 @@ public interface EventService {
      * @param eventId - id of event
      */
     EventVO findById(Long eventId);
+
+    void like(Long id, UserVO userVO, NotificationSourceType sourceType);
+
+    List<EventDtoForSubscribedUser> getAllSubscribedEvents(Long id);
 }

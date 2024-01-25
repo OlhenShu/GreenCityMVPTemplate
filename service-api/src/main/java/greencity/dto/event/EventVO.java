@@ -3,6 +3,9 @@ package greencity.dto.event;
 import greencity.dto.user.UserVO;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -15,4 +18,5 @@ public class EventVO {
     private String titleImage;
     private UserVO organizer;
     private String description;
+    private Set<UserVO> usersLikedEvents = new HashSet<>();
 }
