@@ -138,7 +138,8 @@ public class NotificationServiceImpl implements NotificationService {
     public void notifyUsersForEventCanceled(Event event) {
         eventRepo.findUsersByUsersLikedEvents_Id(event.getId())
                 .forEach(user -> telegramBotConfig.sendNotificationViaTelegramApi(user.getChatId(),
-                        String.format("Unfortunately, event %s was cancelled. %s", event.getTitle(), ZonedDateTime.now())));
+                        String.format("Unfortunately, event %s was cancelled. %s", event.getTitle(),
+                                ZonedDateTime.now())));
     }
 
     /**
@@ -150,7 +151,8 @@ public class NotificationServiceImpl implements NotificationService {
     public void notifyUsersForEventUpdated(Event event) {
         eventRepo.findUsersByUsersLikedEvents_Id(event.getId())
                 .forEach(user -> telegramBotConfig.sendNotificationViaTelegramApi(user.getChatId(),
-                        String.format("Event %s was updated. New name is %s. %s", event.getTitle(), event.getTitle(), event.getCreationDate())));
+                        String.format("Event %s was updated. New name is %s. %s", event.getTitle(),
+                                event.getTitle(), event.getCreationDate())));
     }
 
     /**
@@ -236,7 +238,8 @@ public class NotificationServiceImpl implements NotificationService {
                 break;
             case EVENT_COMMENTED:
                 telegramBotConfig.sendNotificationViaTelegramApi(author.getChatId(),
-                        String.format("%s commented on your event %s. Date: %s", userVO.getName(), eventVO.getTitle(), ZonedDateTime.now()));
+                        String.format("%s commented on your event %s. Date: %s", userVO.getName(), eventVO.getTitle(),
+                                ZonedDateTime.now()));
                 break;
             default:
                 return;

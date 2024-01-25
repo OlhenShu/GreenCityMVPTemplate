@@ -168,8 +168,9 @@ public class EventsController {
      * @return ResponseEntity containing a list of EventDtoForSubscribedUser for subscribed events.
      */
     @ApiOperation(value = "Get all subscribed events for current user")
-    @GetMapping
-    public ResponseEntity<List<EventDtoForSubscribedUser>> getAllSubscribedEvents(@ApiIgnore @CurrentUser UserVO userVO) {
+    @GetMapping("/getAllSubscribers/{eventId}")
+    public ResponseEntity<List<EventDtoForSubscribedUser>> getAllSubscribedEvents(
+            @ApiIgnore @CurrentUser UserVO userVO) {
         return ResponseEntity.ok(eventService.getAllSubscribedEvents(userVO.getId()));
     }
 
