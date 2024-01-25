@@ -5,6 +5,7 @@ import greencity.annotations.RatingCalculationEnum;
 import greencity.client.RestClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
+import greencity.dto.PageableAdvancedDto;
 import greencity.dto.PageableDto;
 import greencity.dto.event.*;
 import greencity.dto.geocoding.AddressLatLngResponse;
@@ -41,6 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.security.Principal;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -142,9 +144,6 @@ public class EventServiceImpl implements EventService {
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture.runAsync(() -> ratingCalculation
                 .ratingCalculation(RatingCalculationEnum.DELETE_EVENT, userVO, accessToken));
-
-        notificationService
-                .createNotificationForEventChanges(userVO, toDelete.getId(), NotificationSourceType.EVENT_CANCELED);
     }
 
     /**
@@ -159,6 +158,13 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND_BY_ID + eventId));
         return modelMapper.map(event, EventVO.class);
+    }
+
+    @Override
+    public PageableAdvancedDto<EventDto> getAll(Pageable page, Principal principal) {
+        Page<Event> events = eventRepo.findAllByOrderByIdDesc(page);
+
+        return buildPageableAdvancedDto(events);
     }
 
     /**
@@ -391,5 +397,22 @@ public class EventServiceImpl implements EventService {
         } else {
             event.setTitleImage(AppConstant.DEFAULT_EVENT_IMAGES);
         }
+    }
+
+    private PageableAdvancedDto<EventDto> buildPageableAdvancedDto(Page<Event> eventsPage) {
+        List<EventDto> eventDtos = modelMapper.map(eventsPage.getContent(),
+                new TypeToken<List<EventDto>>() {
+                }.getType());
+
+        return new PageableAdvancedDto<>(
+                eventDtos,
+                eventsPage.getTotalElements(),
+                eventsPage.getPageable().getPageNumber(),
+                eventsPage.getTotalPages(),
+                eventsPage.getNumber(),
+                eventsPage.hasPrevious(),
+                eventsPage.hasNext(),
+                eventsPage.isFirst(),
+                eventsPage.isLast());
     }
 }

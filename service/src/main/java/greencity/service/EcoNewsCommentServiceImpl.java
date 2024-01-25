@@ -5,7 +5,6 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
 import greencity.dto.econews.EcoNewsVO;
 import greencity.dto.econewscomment.*;
-import greencity.dto.notification.NotificationsDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.EcoNews;
 import greencity.entity.EcoNewsComment;

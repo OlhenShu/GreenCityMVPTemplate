@@ -39,7 +39,6 @@ public class Event {
     @Column
     private String titleImage;
 
-    @NotNull
     @OrderBy("finishDate ASC")
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
     private List<EventDateLocation> dates = new ArrayList<>();

@@ -4,10 +4,6 @@ import greencity.dto.PageableDto;
 import greencity.dto.event.EventVO;
 import greencity.dto.notification.NewNotificationDtoRequest;
 import greencity.dto.notification.NotificationDtoResponse;
-import greencity.dto.notification.ShortNotificationDtoResponse;
-import org.springframework.data.domain.Pageable;
-
-import java.util.List;
 import greencity.dto.notification.NotificationsDto;
 import greencity.dto.notification.ShortNotificationDtoResponse;
 import greencity.dto.user.UserVO;
@@ -15,7 +11,6 @@ import greencity.enums.NotificationSourceType;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Service handling operations related to notifications.
@@ -54,8 +49,8 @@ public interface NotificationService {
     List<ShortNotificationDtoResponse> getTheLatestThreeNotifications(Long receiverId);
 
     /**
-     * Creates a new notification based on the provided data in the
-     * request and returns the corresponding notification DTO.
+     * Creates a new notification based on the provided data in the request and returns
+     * the corresponding notification DTO.
      * @param authorId the ID of the author for the notification
      * @param request  the object containing data to create the notification
      * @return the DTO representing the notification {@link NotificationDtoResponse}

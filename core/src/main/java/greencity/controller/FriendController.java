@@ -52,7 +52,7 @@ public class FriendController {
             @ApiIgnore Pageable pageable,
             @ApiIgnore @CurrentUser UserVO userVO) {
         return ResponseEntity.status(HttpStatus.OK).body(
-                friendService.getUserFriendsByUserId(userVO.getId(), pageable)
+                friendService.findAllUsersFriends(userVO.getId(), pageable)
         );
     }
 

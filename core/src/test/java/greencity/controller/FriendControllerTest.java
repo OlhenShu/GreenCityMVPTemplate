@@ -256,7 +256,7 @@ public class FriendControllerTest {
 
         List<UserFriendDto> mockUserList = Arrays.asList(new UserFriendDto(), new UserFriendDto()); // Replace User with your actual entity class
         var userFriendDtoPageableDto = new PageableDto<>(mockUserList, 2, 0, 1);
-        when(friendService.getUserFriendsByUserId(anyLong(), any(Pageable.class))).thenReturn(userFriendDtoPageableDto);
+        when(friendService.findAllUsersFriends(anyLong(), any(Pageable.class))).thenReturn(userFriendDtoPageableDto);
         when(userService.findByEmail(anyString())).thenReturn(userVO);
 
         mockMvc.perform(get(link)
@@ -266,8 +266,6 @@ public class FriendControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-
-
-        verify(friendService, times(1)).getUserFriendsByUserId(userId, pageable);
+        verify(friendService, times(1)).findAllUsersFriends(userId, pageable);
     }
 }

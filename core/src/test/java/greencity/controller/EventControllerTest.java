@@ -1,17 +1,8 @@
 package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import static greencity.ModelUtils.getPrincipal;
-import static greencity.ModelUtils.getUserVO;
-import greencity.converters.UserArgumentResolver;
-import greencity.dto.user.UserVO;
-import greencity.exception.handler.CustomExceptionHandler;
-import greencity.service.*;
-import java.security.Principal;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import greencity.ModelUtils;
 import greencity.converters.UserArgumentResolver;
-import greencity.dto.econews.AddEcoNewsDtoRequest;
 import greencity.dto.event.AddEventDtoRequest;
 import greencity.dto.event.EventDto;
 import greencity.dto.event.UpdateEventDto;
@@ -19,19 +10,15 @@ import greencity.dto.user.UserVO;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.service.EventService;
 import greencity.service.UserService;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.*;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
@@ -41,15 +28,22 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.security.Principal;
+
+import static greencity.ModelUtils.getUserVO;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class EventControllerTest {
+class EventControllerTest {
     private static final String eventsLink = "/events";
     private MockMvc mockMvc;
     @InjectMocks
@@ -62,14 +56,12 @@ public class EventControllerTest {
     private ModelMapper modelMapper;
     @Mock
     private ObjectMapper objectMapper;
-
-    private Principal principal = getPrincipal();
-    private ErrorAttributes errorAttributes = new DefaultErrorAttributes();
+    private final ErrorAttributes errorAttributes = new DefaultErrorAttributes();
     private final UserVO userVO = ModelUtils.getUserVO();
     private static final String eventLink = "/events";
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         this.mockMvc = MockMvcBuilders
             .standaloneSetup(eventsController)
             .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
@@ -114,7 +106,7 @@ public class EventControllerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
-        objectMapper.readValue(json, AddEcoNewsDtoRequest.class);
+        objectMapper.readValue(json, AddEventDtoRequest.class);
         verify(eventService).save(ModelUtils.getRequestAddEventDto(), userVO, new MultipartFile[0]);
     }
     @Test

@@ -258,8 +258,8 @@ public class NotificationController {
      */
     @GetMapping("/likes/event")
     public ResponseEntity<List<NotificationsDto>> getAllLikesForEvent(@ApiIgnore @CurrentUser UserVO userVO) {
-        return ResponseEntity.ok(notificationService
-                .getNotificationsForCurrentUser(userVO.getId(), NotificationSourceType.EVENT_LIKED));
+        return ResponseEntity.ok(notificationService.getNotificationsForCurrentUser(userVO.getId(),
+                NotificationSourceType.EVENT_LIKED));
     }
 
     /**
@@ -269,9 +269,8 @@ public class NotificationController {
      * @return ResponseEntity containing a list of NotificationsDto for event comments.
      */
     @GetMapping("/events/comments")
-    public ResponseEntity<List<NotificationsDto>> getAllCommentsForCurrentUser(
-            @ApiIgnore @CurrentUser UserVO userVO) {
-        return ResponseEntity.ok(notificationService
-                .getNotificationsForCurrentUser(userVO.getId(), NotificationSourceType.EVENT_COMMENTED));
+    public ResponseEntity<List<NotificationsDto>> getAllCommentsForCurrentUser(@ApiIgnore @CurrentUser UserVO userVO) {
+        return ResponseEntity.ok(notificationService.getNotificationsForCurrentUser(userVO.getId(),
+                NotificationSourceType.EVENT_COMMENTED));
     }
 }

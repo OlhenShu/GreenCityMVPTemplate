@@ -1,8 +1,10 @@
 package greencity.controller;
 
+import greencity.annotations.ApiPageableWithoutSort;
 import greencity.annotations.CurrentUser;
 import greencity.constant.HttpStatuses;
 import greencity.constant.SwaggerExampleModel;
+import greencity.dto.PageableAdvancedDto;
 import greencity.dto.event.AddEventDtoRequest;
 import greencity.dto.event.EventDto;
 import greencity.dto.event.EventDtoForSubscribedUser;
@@ -15,6 +17,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +42,7 @@ public class EventsController {
      *
      * @param eventId The unique identifier of the event.
      * @return A ResponseEntity with the event DTO if found (HTTP 200),
-     *      or an empty body with an appropriate HTTP status if not found.
+     *          or an empty body with an appropriate HTTP status if not found.
      */
     @ApiOperation(value = "Get the event")
     @ApiResponses(value = {
@@ -165,9 +168,28 @@ public class EventsController {
      * @return ResponseEntity containing a list of EventDtoForSubscribedUser for subscribed events.
      */
     @ApiOperation(value = "Get all subscribed events for current user")
-    @GetMapping
+    @GetMapping("/getAllSubscribers/{eventId}")
     public ResponseEntity<List<EventDtoForSubscribedUser>> getAllSubscribedEvents(
             @ApiIgnore @CurrentUser UserVO userVO) {
         return ResponseEntity.ok(eventService.getAllSubscribedEvents(userVO.getId()));
+    }
+
+    /**
+     * Method for getting pages of events.
+     *
+     * @return a page of {@link EventDto} instance.
+     * @author Max Bohonko, Olena Sotnik.
+     */
+    @ApiOperation(value = "Get all events")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST)
+    })
+    @ApiPageableWithoutSort
+    @GetMapping
+    public ResponseEntity<PageableAdvancedDto<EventDto>> getAllEvents(
+            @ApiIgnore Pageable pageable, @ApiIgnore Principal principal) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(eventService.getAll(pageable, principal));
     }
 }
