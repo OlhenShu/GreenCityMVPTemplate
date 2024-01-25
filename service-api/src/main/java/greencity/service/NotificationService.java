@@ -4,6 +4,10 @@ import greencity.dto.PageableDto;
 import greencity.dto.event.EventVO;
 import greencity.dto.notification.NewNotificationDtoRequest;
 import greencity.dto.notification.NotificationDtoResponse;
+import greencity.dto.notification.ShortNotificationDtoResponse;
+import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 import greencity.dto.notification.NotificationsDto;
 import greencity.dto.notification.ShortNotificationDtoResponse;
 import greencity.dto.user.UserVO;
@@ -50,8 +54,7 @@ public interface NotificationService {
     List<ShortNotificationDtoResponse> getTheLatestThreeNotifications(Long receiverId);
 
     /**
-     * Creates a new notification based on the provided data in the request and returns the corresponding notification.
-     *
+     * Creates a new notification based on the provided data in the request and returns the corresponding notification DTO.
      * @param authorId the ID of the author for the notification
      * @param request  the object containing data to create the notification
      * @return the DTO representing the notification {@link NotificationDtoResponse}
@@ -129,6 +132,21 @@ public interface NotificationService {
      */
     List<NotificationsDto> findAllUnreadNotificationByUserId(Long userId);
 
+    /**
+     * Creates a notification for a specific event and notifies users based on the source type.
+     *
+     * @param userVO     The UserVO initiating the event notification.
+     * @param eventVO    The EventVO for which the notification is created.
+     * @param sourceType The type of the notification source.
+     */
     void createNotificationForEvent(UserVO userVO, EventVO eventVO, NotificationSourceType sourceType);
+
+    /**
+     * Creates a notification for changes in an event and notifies users based on the source type.
+     *
+     * @param userVO     The UserVO initiating the event changes.
+     * @param eventId    The ID of the event for which the notification is created.
+     * @param sourceType The type of the notification source.
+     */
     void createNotificationForEventChanges(UserVO userVO, Long eventId, NotificationSourceType sourceType);
 }

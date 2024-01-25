@@ -57,6 +57,7 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional(readOnly = true)
     public List<ShortNotificationDtoResponse> getTheLatestThreeNotifications(Long receiverId) {
         return notificationRepo.findTop3ByReceiversIdOrderByCreationDate(receiverId, PageRequest.of(0, 3));
     }
@@ -127,6 +128,12 @@ public class NotificationServiceImpl implements NotificationService {
         notifiedUserRepo.save(notifiedUser);
         log.info("Successfully update status");
     }
+
+    /**
+     * Notifies users about the cancellation of an event.
+     *
+     * @param event The event that has been canceled.
+     */
     @Transactional
     public void notifyUsersForEventCanceled(Event event) {
         eventRepo.findUsersByUsersLikedEvents_Id(event.getId())
@@ -134,6 +141,11 @@ public class NotificationServiceImpl implements NotificationService {
                         String.format("Unfortunately, event %s was cancelled. %s", event.getTitle(), ZonedDateTime.now())));
     }
 
+    /**
+     * Notifies users about updates to an event.
+     *
+     * @param event The event that has been updated.
+     */
     @Transactional
     public void notifyUsersForEventUpdated(Event event) {
         eventRepo.findUsersByUsersLikedEvents_Id(event.getId())
@@ -141,6 +153,14 @@ public class NotificationServiceImpl implements NotificationService {
                         String.format("Event %s was updated. New name is %s. %s", event.getTitle(), event.getTitle(), event.getCreationDate())));
     }
 
+    /**
+     * Creates a notification for changes in an event and notifies users based on the source type.
+     *
+     * @param userVO     The UserVO initiating the event changes.
+     * @param eventId    The ID of the event for which the notification is created.
+     * @param sourceType The type of the notification source.
+     * @throws NotFoundException If the event with the specified ID is not found.
+     */
     @Override
     @Transactional
     public void createNotificationForEventChanges(UserVO userVO, Long eventId, NotificationSourceType sourceType) {
@@ -159,9 +179,13 @@ public class NotificationServiceImpl implements NotificationService {
         switch (sourceType) {
             case EVENT_CANCELED:
                 notifyUsersForEventCanceled(event);
+                break;
             case EVENT_EDITED:
                 //TODO: add all 3 possible variants
                 notifyUsersForEventUpdated(event);
+                break;
+            default:
+                return;
         }
     }
 
@@ -214,6 +238,8 @@ public class NotificationServiceImpl implements NotificationService {
                 telegramBotConfig.sendNotificationViaTelegramApi(author.getChatId(),
                         String.format("%s commented on your event %s. Date: %s", userVO.getName(), eventVO.getTitle(), ZonedDateTime.now()));
                 break;
+            default:
+                return;
         }
     }
 

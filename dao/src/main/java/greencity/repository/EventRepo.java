@@ -40,7 +40,19 @@ public interface EventRepo extends JpaRepository<Event, Long>, JpaSpecificationE
     @Query("select count(*) from Event e where e.organizer.id =:organizerId")
     Long countByOrganizerId(Long organizerId);
 
+    /**
+     * Retrieves a list of events liked by a user based on the user's ID.
+     *
+     * @param userId The ID of the user for whom liked events are retrieved.
+     * @return A list of Event objects representing events liked by the user.
+     */
     List<Event> findByUsersLikedEvents_id(Long userId);
 
+    /**
+     * Retrieves a list of users who have liked a specific event based on the event's ID.
+     *
+     * @param eventId The ID of the event for which users who liked the event are retrieved.
+     * @return A list of User objects representing users who have liked the event.
+     */
     List<User> findUsersByUsersLikedEvents_Id(Long eventId);
 }

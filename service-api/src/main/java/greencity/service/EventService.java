@@ -74,7 +74,20 @@ public interface EventService {
      */
     EventVO findById(Long eventId);
 
+    /**
+     * Handles the like functionality for an event.
+     *
+     * @param id          The ID of the event to be liked.
+     * @param userVO      The UserVO who is performing the like action.
+     * @param sourceType  The type of the notification source.
+     */
     void like(Long id, UserVO userVO, NotificationSourceType sourceType);
 
+    /**
+     * Retrieves a list of EventDtoForSubscribedUser objects for all events subscribed by a user.
+     *
+     * @param id The ID of the user for whom subscribed events are retrieved.
+     * @return A list of EventDtoForSubscribedUser objects representing subscribed events for the user.
+     */
     List<EventDtoForSubscribedUser> getAllSubscribedEvents(Long id);
 }

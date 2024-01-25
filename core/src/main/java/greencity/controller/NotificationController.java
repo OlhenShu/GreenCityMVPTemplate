@@ -6,6 +6,8 @@ import greencity.constant.HttpStatuses;
 import greencity.dto.PageableDto;
 import greencity.dto.notification.NewNotificationDtoRequest;
 import greencity.dto.notification.NotificationDtoResponse;
+import greencity.dto.notification.ShortNotificationDtoResponse;
+import greencity.dto.user.UserVO;
 import greencity.dto.notification.NotificationsDto;
 import greencity.dto.notification.ShortNotificationDtoResponse;
 import greencity.dto.user.UserVO;
@@ -34,8 +36,8 @@ public class NotificationController {
      *
      * @param userVO The UserVO object representing the authenticated user.
      * @return ResponseEntity containing a list of {@link ShortNotificationDtoResponse} objects
+     * representing the three latest notifications.
      */
-
     @ApiOperation(value = "Get three last notifications.")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = HttpStatuses.OK)
@@ -248,11 +250,23 @@ public class NotificationController {
                 .getNotificationsForCurrentUser(userVO.getId(), NotificationSourceType.COMMENT_REPLY));
     }
 
+    /**
+     * Retrieves all notifications related to liked events for the current user.
+     *
+     * @param userVO The UserVO representing the current user.
+     * @return ResponseEntity containing a list of NotificationsDto for liked events.
+     */
     @GetMapping("/likes/event")
     public ResponseEntity<List<NotificationsDto>> getAllLikesForEvent(@ApiIgnore @CurrentUser UserVO userVO) {
         return ResponseEntity.ok(notificationService.getNotificationsForCurrentUser(userVO.getId(), NotificationSourceType.EVENT_LIKED));
     }
 
+    /**
+     * Retrieves all notifications related to comments on events for the current user.
+     *
+     * @param userVO The UserVO representing the current user.
+     * @return ResponseEntity containing a list of NotificationsDto for event comments.
+     */
     @GetMapping("/events/comments")
     public ResponseEntity<List<NotificationsDto>> getAllCommentsForCurrentUser(@ApiIgnore @CurrentUser UserVO userVO) {
         return ResponseEntity.ok(notificationService.getNotificationsForCurrentUser(userVO.getId(), NotificationSourceType.EVENT_COMMENTED));

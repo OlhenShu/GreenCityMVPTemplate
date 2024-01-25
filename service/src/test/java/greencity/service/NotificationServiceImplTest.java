@@ -30,10 +30,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -68,7 +65,6 @@ class NotificationServiceImplTest {
                 .thenReturn(expected);
 
         var actual = notificationService.getTheLatestThreeNotifications(userVO.getId());
-
         verify(notificationRepo)
                 .findTop3ByReceiversIdOrderByCreationDate(userVO.getId(), PageRequest.of(0, 3));
         assertEquals(expected, actual);
@@ -99,6 +95,120 @@ class NotificationServiceImplTest {
     }
 
     @Test
+    void markAsReadNotificationByUserIdAndNotificationId() {
+        Long userId = 10L;
+        Long notificationId = 2L;
+
+        NotifiedUser notifiedUser = NotifiedUser.builder()
+                .isRead(false)
+                .notification(Notification.builder()
+                        .notifiedUsers(List.of())
+                        .sourceType(NotificationSourceType.COMMENT_REPLY)
+                        .id(notificationId)
+                        .title("TEST")
+                        .author(ModelUtils.getUser())
+                        .creationDate(ZonedDateTime.now())
+                        .sourceId(1L)
+                        .build())
+                .id(userId)
+                .user(ModelUtils.getUser().setId(2L))
+                .build();
+
+        when(notifiedUserRepo.findByUserIdAndNotificationId(userId, notificationId)).thenReturn(java.util.Optional.of(notifiedUser));
+
+        notificationService.markAsReadNotification(userId, notificationId);
+
+        verify(notifiedUserRepo, times(1)).save(notifiedUser);
+        assertTrue(notifiedUser.getIsRead());
+    }
+
+    @Test
+    void markAsReadNotificationWhenNotificationAlreadyReadShouldThrowException() {
+        Long userId = 1L;
+        Long notificationId = 2L;
+
+        NotifiedUser notifiedUser = new NotifiedUser();
+        notifiedUser.setUser(ModelUtils.getUser());
+        notifiedUser.setId(notificationId);
+        notifiedUser.setIsRead(true);
+
+        when(notifiedUserRepo.findByUserIdAndNotificationId(userId, notificationId)).thenReturn(java.util.Optional.of(notifiedUser));
+
+        assertThrows(BadRequestException.class, () -> notificationService.markAsReadNotification(userId, notificationId));
+
+        verify(notifiedUserRepo, never()).save(any());
+    }
+
+    @Test
+    void markAsReadNotificationWhenNotificationNotFoundShouldThrowException() {
+        Long userId = 1L;
+        Long notificationId = 2L;
+
+        when(notifiedUserRepo.findByUserIdAndNotificationId(userId, notificationId)).thenReturn(java.util.Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> notificationService.markAsReadNotification(userId, notificationId));
+
+        verify(notifiedUserRepo, never()).save(any());
+    }
+
+    @Test
+    void readLatestNotification() {
+        Long userId = 1L;
+        Notification notification1 = Notification.builder()
+                .id(1L)
+                .title("Notification 1")
+                .build();
+        Notification notification2 = Notification.builder()
+                .id(2L)
+                .title("Notification 2")
+                .build();
+        Notification notification3 = Notification.builder()
+                .id(3L)
+                .title("Notification 3")
+                .build();
+        List<Notification> unreadNotificationsForUser = Arrays.asList(notification1, notification2, notification3);
+
+        when(notifiedUserRepo.findTop3UnreadNotificationsForUser(userId)).thenReturn(unreadNotificationsForUser);
+
+        List<Long> notificationIds = Arrays.asList(1L, 2L, 3L);
+        List<NotifiedUser> userNotifications = Arrays.asList(
+                NotifiedUser.builder()
+                        .id(userId)
+                        .notification(notification1)
+                        .isRead(false)
+                        .build(),
+                NotifiedUser.builder()
+                        .id(userId)
+                        .notification(notification2)
+                        .isRead(false)
+                        .build(),
+                NotifiedUser.builder()
+                        .id(userId)
+                        .notification(notification3)
+                        .isRead(false)
+                        .build()
+        );
+
+        when(notifiedUserRepo.findByUserIdAndNotificationIdIn(userId, notificationIds)).thenReturn(userNotifications);
+
+        notificationService.readLatestNotification(userId);
+
+        verify(notifiedUserRepo, times(1)).saveAll(userNotifications);
+        assertTrue(userNotifications.stream().allMatch(NotifiedUser::getIsRead));
+    }
+
+    @Test
+    void readLatestNotificationWhenNoUnreadNotificationsShouldThrowException() {
+        Long userId = 1L;
+
+        when(notifiedUserRepo.findTop3UnreadNotificationsForUser(userId)).thenReturn(List.of());
+
+        assertThrows(NotFoundException.class, () -> notificationService.readLatestNotification(userId));
+
+        verify(notifiedUserRepo, never()).saveAll(anyList());
+    }
+
+  @Test
     void getNotificationsEcoNewsForCurrentUserReturnsNotificationsDtoList() {
         NotificationSourceType sourceType = NotificationSourceType.NEWS_LIKED;
 
@@ -492,4 +602,3 @@ class NotificationServiceImplTest {
 
     }
 }
-

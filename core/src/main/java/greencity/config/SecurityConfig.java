@@ -185,6 +185,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/habit/tags/search",
                 "/habit/search",
                 "/habit/{habitId}/friends/profile-pictures",
+                "/notifications/latest",
                 "/friends",
                 "/friends/not-friends-yet",
                 "/friends/all",

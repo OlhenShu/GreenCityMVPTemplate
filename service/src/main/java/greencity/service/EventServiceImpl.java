@@ -105,7 +105,6 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public EventDto update(@NotNull UpdateEventDto eventDto, String email, MultipartFile[] images) {
-        UserVO userVO = restClient.findByEmail(email);
         Event eventToUpdate = eventRepo.findById(eventDto.getId())
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND));
 
@@ -121,8 +120,6 @@ public class EventServiceImpl implements EventService {
         updatedEventWithNewData(eventToUpdate, eventDto, images);
 
         Event updatedEvent = eventRepo.save(eventToUpdate);
-
-        notificationService.createNotificationForEventChanges(userVO, updatedEvent.getId(), NotificationSourceType.EVENT_EDITED);
 
         return buildEventDto(updatedEvent);
     }
@@ -149,6 +146,13 @@ public class EventServiceImpl implements EventService {
         notificationService.createNotificationForEventChanges(userVO, toDelete.getId(), NotificationSourceType.EVENT_CANCELED);
     }
 
+    /**
+     * Retrieves an EventVO by its ID.
+     *
+     * @param eventId The ID of the event to be retrieved.
+     * @return The corresponding EventVO if found.
+     * @throws NotFoundException If no event is found with the specified ID.
+     */
     @Override
     public EventVO findById(Long eventId) {
         Event event = eventRepo.findById(eventId)
@@ -156,6 +160,13 @@ public class EventServiceImpl implements EventService {
         return modelMapper.map(event, EventVO.class);
     }
 
+    /**
+     * Handles the like functionality for an event.
+     *
+     * @param id          The ID of the event to be liked.
+     * @param userVO      The UserVO who is performing the like action.
+     * @param sourceType  The type of the notification source.
+     */
     @Override
     @Transactional
     public void like(Long id, UserVO userVO, NotificationSourceType sourceType) {

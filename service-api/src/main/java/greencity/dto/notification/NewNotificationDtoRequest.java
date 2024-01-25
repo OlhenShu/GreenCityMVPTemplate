@@ -11,6 +11,7 @@ import java.time.ZonedDateTime;
 @Getter
 @Setter
 @EqualsAndHashCode
+@ToString
 public class NewNotificationDtoRequest {
     private String title;
     private ZonedDateTime creationDate;
