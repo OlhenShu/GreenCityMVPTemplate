@@ -46,7 +46,8 @@ public class FriendController {
             @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/all")
+    @ApiPageable
+    @GetMapping
     public ResponseEntity<PageableDto<UserFriendDto>> getAllUserFriend(
             @ApiIgnore Pageable pageable,
             @ApiIgnore @CurrentUser UserVO userVO) {
@@ -118,7 +119,7 @@ public class FriendController {
             @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
 
-    @PatchMapping("/{friendId}/acceptRequest")
+    @PatchMapping("/{friendId}/acceptFriend")
     public ResponseEntity<ResponseEntity.BodyBuilder> acceptFriendRequest(
             @PathVariable Long friendId, @ApiIgnore @CurrentUser UserVO userVO
     ) {
@@ -168,6 +169,30 @@ public class FriendController {
     }
 
     /**
+     * Retrieves a paginated list of friend requests for the authenticated user.
+     * This endpoint allows the authenticated user to retrieve a pageable list of friend requests they have received.
+     *
+     * @param pageable   the pagination information, specifying the page number, size, and sorting criteria
+     * @param user       the authenticated user for whom friend requests are being retrieved
+     * @return ResponseEntity with a PageableDto containing a list of UserFriendDto representing friend requests,
+     */
+    @ApiOperation(value = "Get all friend requests of current user")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
+    @ApiPageable
+    @GetMapping("/friendRequests")
+    public ResponseEntity<PageableDto<UserFriendDto>> getAllFriendRequest(
+            @ApiIgnore Pageable pageable, @ApiIgnore @CurrentUser UserVO user
+    ) {
+        return ResponseEntity.ok(
+                friendService.allFriendRequests(user.getId(), pageable)
+        );
+    }
+
+
+    /**
      * Retrieves a paginated list of friends' details with specific filtering criteria.
      * @param pageable               Pagination information for the resulting list.
      * @param name                   The criteria for filtering friend names (can be null).
@@ -215,7 +240,7 @@ public class FriendController {
             @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
-    @PatchMapping("/{friendId}/rejectRequest")
+    @DeleteMapping("/{friendId}/declineFriend")
     public ResponseEntity<ResponseEntity.BodyBuilder> rejectFriendRequest(
             @PathVariable Long friendId, @ApiIgnore @CurrentUser UserVO userVO
     ) {

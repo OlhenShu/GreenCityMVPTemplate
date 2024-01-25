@@ -223,7 +223,7 @@ public class FriendControllerTest {
         doNothing().when(friendService).acceptFriendRequest(userVO.getId(), friendId);
         when(userService.findByEmail(anyString())).thenReturn(userVO);
 
-        mockMvc.perform(patch(link + "/{friendId}/acceptRequest", friendId)
+        mockMvc.perform(patch(link + "/{friendId}/acceptFriend", friendId)
                     .principal(userVO::getEmail))
                 .andExpect(status().isOk());
 
@@ -238,7 +238,7 @@ public class FriendControllerTest {
         doNothing().when(friendService).declineFriendRequest(userVO.getId(), friendId);
         when(userService.findByEmail(anyString())).thenReturn(userVO);
 
-        mockMvc.perform(patch(link + "/{friendId}/rejectRequest", friendId)
+        mockMvc.perform(delete(link + "/{friendId}/declineFriend", friendId)
                         .principal(userVO::getEmail))
                 .andExpect(status().isOk());
 
@@ -259,7 +259,7 @@ public class FriendControllerTest {
         when(friendService.getUserFriendsByUserId(anyLong(), any(Pageable.class))).thenReturn(userFriendDtoPageableDto);
         when(userService.findByEmail(anyString())).thenReturn(userVO);
 
-        mockMvc.perform(get(link + "/all")
+        mockMvc.perform(get(link)
                         .principal(userVO::getEmail)
                         .param("page", String.valueOf(pageNumber))
                         .param("size", String.valueOf(pageSize))

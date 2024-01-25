@@ -1,5 +1,6 @@
 package greencity.service;
 
+import greencity.config.TelegramBotConfig;
 import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
 import greencity.dto.econews.EcoNewsVO;
@@ -19,6 +20,7 @@ import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.mapping.NotificationDtoResponseMapper;
+import greencity.repository.EcoNewsRepo;
 import greencity.repository.NotificationRepo;
 import greencity.repository.NotifiedUserRepo;
 import greencity.repository.UserRepo;
@@ -35,7 +37,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static greencity.enums.NotificationSourceType.FRIEND_REQUEST;
+import static greencity.enums.NotificationSourceType.*;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +50,8 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotifiedUserRepo notifiedUserRepo;
     private final UserRepo userRepo;
     private final ModelMapper modelMapper;
+    private final TelegramBotConfig telegramBotConfig;
+    private final EcoNewsRepo ecoNewsRepo;
 
     /**
      * {@inheritDoc}
@@ -135,6 +139,24 @@ public class NotificationServiceImpl implements NotificationService {
         notificationRepo.deleteById(notificationId);
     }
 
+    @Override
+    public List<NotificationsDto> findAllUnreadNotificationByUserId(Long userId) {
+        return notifiedUserRepo.findAllUnreadNotificationsByUserId(userId)
+                .orElseThrow(() -> new NotFoundException("User don't have unread notification"))
+                .stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    private NotificationsDto convertToDto(NotifiedUser notifiedUser) {
+        return NotificationsDto.builder()
+                .userName(notifiedUser.getUser().getName())
+                .notificationTime(notifiedUser.getNotification().getCreationDate())
+                .objectTitle(notifiedUser.getNotification().getTitle())
+                .notificationSource(notifiedUser.getNotification().getSourceType().name().toLowerCase())
+                .build();
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -191,6 +213,10 @@ public class NotificationServiceImpl implements NotificationService {
                 .user(friend)
                 .isRead(false)
                 .build());
+        if (friend.getChatId() != null) {
+            telegramBotConfig.sendNotificationViaTelegramApi(friend.getChatId(),
+                    "New friend request from user: " + author.getName());
+        }
     }
 
     /**
@@ -249,6 +275,17 @@ public class NotificationServiceImpl implements NotificationService {
             sourceId = ecoNewsVO.getId();
             sourceAuthor = ecoNewsVO.getAuthor();
             source = NotificationSource.NEWS;
+
+            if (sourceAuthor.getChatId() != null) {
+                if (sourceType.equals(NEWS_LIKED)) {
+                    telegramBotConfig.sendNotificationViaTelegramApi(sourceAuthor.getChatId(),
+                            "New like for you news: " + ecoNewsVO.getTitle() + "\nFrom user: " + author.getName());
+                }
+                if (sourceType.equals(NEWS_COMMENTED)) {
+                    telegramBotConfig.sendNotificationViaTelegramApi(sourceAuthor.getChatId(),
+                            "New comment for your news: " + ecoNewsVO.getTitle() + "\nFrom user: " + author.getName());
+                }
+            }
         } else if (sourceVO instanceof EcoNewsComment) {
             EcoNewsComment ecoNewsComment = (EcoNewsComment) sourceVO;
             parentCommentAuthor = getParentCommentAuthor(ecoNewsComment);
@@ -256,6 +293,14 @@ public class NotificationServiceImpl implements NotificationService {
             sourceId = ecoNewsComment.getEcoNews().getId();
             sourceAuthor = modelMapper.map(ecoNewsComment.getEcoNews().getAuthor(), UserVO.class);
             source = NotificationSource.NEWS;
+
+            if (sourceAuthor.getChatId() != null) {
+                if (sourceType.equals(COMMENT_LIKED)) {
+                    telegramBotConfig.sendNotificationViaTelegramApi(sourceAuthor.getChatId(),
+                            "New like for you comment: " + ecoNewsComment.getText()
+                                    + "\nFrom user: " + author.getName());
+                }
+            }
         } else {
             throw new NotFoundException("Not found source author");
         }
@@ -280,6 +325,15 @@ public class NotificationServiceImpl implements NotificationService {
             NotifiedUser notifiedParentUser = createNotifiedUser(savedNotification, parentCommentAuthor);
             NotifiedUser savedParentUser = notifiedUserRepo.save(notifiedParentUser);
             log.info("Notification for user with id {} saved for parent comment", savedParentUser.getId());
+
+            if (savedParentUser.getUser().getChatId() != null) {
+                String newsTitle = ecoNewsRepo.findById(savedNotification.getSourceId())
+                        .orElseThrow(() -> new NotFoundException("Eco news with id: "
+                                + savedNotification.getSourceId() + " not found"))
+                        .getTitle();
+                telegramBotConfig.sendNotificationViaTelegramApi(savedParentUser.getUser().getChatId(),
+                        "New reply for you comment to news: " + newsTitle + "\nFrom user: " + author.getName());
+            }
         }
     }
 

@@ -147,6 +147,11 @@
             <artifactId>httpclient</artifactId>
             <version>${apache.http.client.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.telegram</groupId>
+            <artifactId>telegrambots</artifactId>
+            <version>6.9.7.0</version>
+        </dependency>
     </dependencies>
 
 </project>

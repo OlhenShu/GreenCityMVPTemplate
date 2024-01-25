@@ -10,6 +10,7 @@ import greencity.enums.NotificationSourceType;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Service handling operations related to notifications.
@@ -117,4 +118,13 @@ public interface NotificationService {
      * @param user {@link UserVO}, which notification will be deleted
      */
     void delete(Long notificationId, UserVO user);
+
+    /**
+     * Retrieves a list of unread notifications for a user based on their user ID.
+     * This method fetches and returns a list of unread notifications for the user with the specified user ID.
+     *
+     * @param userId the unique identifier of the user for whom unread notifications are being retrieved
+     * @return A list of NotificationsDto representing unread notifications for the user.
+     */
+    List<NotificationsDto> findAllUnreadNotificationByUserId(Long userId);
 }

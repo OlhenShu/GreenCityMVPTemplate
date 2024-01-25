@@ -4,20 +4,20 @@ import greencity.dto.habit.HabitVO;
 import greencity.dto.user.*;
 import greencity.entity.User;
 import greencity.repository.options.UserFilter;
-import java.sql.Timestamp;
-import java.time.ZonedDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import greencity.dto.user.UserFriendFilterDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.sql.Timestamp;
+import java.time.ZonedDateTime;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
@@ -28,6 +28,15 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
      * @return {@link User}
      */
     Optional<User> findByEmail(String email);
+
+    /**
+     * Retrieves an optional user by their chat ID.
+     * This method searches for a user in the database using the provided chat ID.
+     *
+     * @param chatId the chat ID of the user to be retrieved
+     * @return An Optional containing the user with the specified chat ID, or empty if not found.
+     */
+    Optional<User> findUserByChatId(Long chatId);
 
     /**
      * Find all {@link UserManagementVO}.
@@ -59,6 +68,16 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
      */
     @Query("SELECT id FROM User WHERE email=:email")
     Optional<Long> findIdByEmail(String email);
+
+
+    /**
+     * Retrieves an optional user by their phone number.
+     * This method searches for a user in the database using the provided phone number.
+     *
+     * @param phoneNumber the phone number of the user to be retrieved
+     * @return An Optional containing the user with the specified phone number, or empty if not found.
+     */
+    Optional<User> findUserByPhoneNumber(String phoneNumber);
 
     /**
      * Updates last activity time for a given user.
@@ -143,6 +162,18 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
     List<User> getAllUserFriends(Long userId);
 
     /**
+     * Get all user friend requests.
+     *
+     * @param userId The ID of the user.
+     *
+     * @return list of {@link User}.
+     */
+    @Query(nativeQuery = true, value = "SELECT * FROM users WHERE id IN ( "
+            + "(SELECT user_id FROM users_friends WHERE friend_id = :userId and status = 'REQUEST')"
+            + "UNION (SELECT friend_id FROM users_friends WHERE user_id = :userId and status = 'REQUEST'))")
+    Page<User> getAllUserFriendRequests(Pageable pageable, Long userId);
+
+    /**
      * Retrieves a filtered list of users and their friend-related details based on specified criteria.
      *
      * @param nameCriteria      The criteria for filtering user's names.
@@ -194,7 +225,7 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
     @Query(nativeQuery = true, value = "INSERT INTO users_friends "
             + "(user_id, friend_id, status, created_date) VALUES (:userId, :friendId, 'REQUEST', NOW());")
     void addFriend(Long userId, Long friendId);
-  
+
     /**
      * Accepts a friend request between two users.
      * This method updates the status of the friendship between the specified user and friend to 'FRIEND'
