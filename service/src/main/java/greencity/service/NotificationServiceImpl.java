@@ -179,9 +179,13 @@ public class NotificationServiceImpl implements NotificationService {
         switch (sourceType) {
             case EVENT_CANCELED:
                 notifyUsersForEventCanceled(event);
+                break;
             case EVENT_EDITED:
                 //TODO: add all 3 possible variants
                 notifyUsersForEventUpdated(event);
+                break;
+            default:
+                return;
         }
     }
 
@@ -234,6 +238,8 @@ public class NotificationServiceImpl implements NotificationService {
                 telegramBotConfig.sendNotificationViaTelegramApi(author.getChatId(),
                         String.format("%s commented on your event %s. Date: %s", userVO.getName(), eventVO.getTitle(), ZonedDateTime.now()));
                 break;
+            default:
+                return;
         }
     }
 
