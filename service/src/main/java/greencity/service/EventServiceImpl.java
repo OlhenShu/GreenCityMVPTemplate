@@ -11,13 +11,13 @@ import greencity.dto.geocoding.AddressLatLngResponse;
 import greencity.dto.search.SearchEventDto;
 import greencity.dto.tag.TagUaEnDto;
 import greencity.dto.tag.TagVO;
-
 import greencity.dto.user.UserVO;
 import greencity.entity.Tag;
 import greencity.entity.User;
 import greencity.entity.event.Event;
 import greencity.entity.event.EventDateLocation;
 import greencity.entity.event.EventImages;
+import greencity.enums.NotificationSourceType;
 import greencity.enums.Role;
 import greencity.enums.TagType;
 import greencity.exception.exceptions.BadRequestException;
@@ -26,13 +26,7 @@ import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.rating.RatingCalculation;
 import greencity.repository.EventRepo;
 import greencity.repository.EventSearchRepo;
-import java.util.concurrent.CompletableFuture;
-import javax.servlet.http.HttpServletRequest;
 import greencity.repository.UserRepo;
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
@@ -46,9 +40,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static greencity.constant.AppConstant.AUTHORIZATION;
@@ -66,6 +62,7 @@ public class EventServiceImpl implements EventService {
     private final EventSearchRepo eventSearchRepo;
     private final UserRepo userRepo;
     private final FileService fileService;
+    private final NotificationService notificationService;
     private static final String DEFAULT_TITLE_IMAGE_PATH = AppConstant.DEFAULT_EVENT_IMAGES;
     private final HttpServletRequest httpServletRequest;
     private final RatingCalculation ratingCalculation;
@@ -94,7 +91,7 @@ public class EventServiceImpl implements EventService {
 
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture.runAsync(
-            () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_EVENT, userVO, accessToken));
+                () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_EVENT, userVO, accessToken));
         return eventDto;
     }
 
@@ -108,6 +105,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public EventDto update(@NotNull UpdateEventDto eventDto, String email, MultipartFile[] images) {
+        UserVO userVO = restClient.findByEmail(email);
         Event eventToUpdate = eventRepo.findById(eventDto.getId())
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND));
 
@@ -124,6 +122,8 @@ public class EventServiceImpl implements EventService {
 
         Event updatedEvent = eventRepo.save(eventToUpdate);
 
+        notificationService.createNotificationForEventChanges(userVO, updatedEvent.getId(), NotificationSourceType.EVENT_EDITED);
+
         return buildEventDto(updatedEvent);
     }
 
@@ -132,7 +132,7 @@ public class EventServiceImpl implements EventService {
     public void delete(Long eventId, String email) {
         UserVO userVO = restClient.findByEmail(email);
         Event toDelete =
-            eventRepo.findById(eventId).orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND));
+                eventRepo.findById(eventId).orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND));
         List<String> eventImages = new ArrayList<>();
         eventImages.add(toDelete.getTitleImage());
 
@@ -144,14 +144,46 @@ public class EventServiceImpl implements EventService {
 
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture.runAsync(
-            () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.DELETE_EVENT, userVO, accessToken));
+                () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.DELETE_EVENT, userVO, accessToken));
+
+        notificationService.createNotificationForEventChanges(userVO, toDelete.getId(), NotificationSourceType.EVENT_CANCELED);
     }
 
     @Override
     public EventVO findById(Long eventId) {
         Event event = eventRepo.findById(eventId)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND_BY_ID + eventId));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND_BY_ID + eventId));
         return modelMapper.map(event, EventVO.class);
+    }
+
+    @Override
+    @Transactional
+    public void like(Long id, UserVO userVO, NotificationSourceType sourceType) {
+        EventVO event = findById(id);
+        boolean alreadyLiked = event.getUsersLikedEvents().stream()
+                .anyMatch(user -> user.getId().equals(userVO.getId()));
+        if (alreadyLiked) {
+            event.getUsersLikedEvents().removeIf(user -> user.getId().equals(userVO.getId()));
+        } else {
+            event.getUsersLikedEvents().add(userVO);
+            notificationService.createNotificationForEvent(userVO, event, sourceType);
+        }
+        eventRepo.save(modelMapper.map(event, Event.class));
+    }
+
+    @Override
+    @Transactional
+    public List<EventDtoForSubscribedUser> getAllSubscribedEvents(Long id) {
+        return eventRepo.findByUsersLikedEvents_id(id).stream()
+                .map(this::toSubscriberDto)
+                .collect(Collectors.toList());
+    }
+
+    private EventDtoForSubscribedUser toSubscriberDto(Event event) {
+        return EventDtoForSubscribedUser.builder()
+                .eventTitle(event.getTitle())
+                .creationDate(event.getCreationDate())
+                .build();
     }
 
     /**
@@ -159,20 +191,20 @@ public class EventServiceImpl implements EventService {
      */
     @Override
     public PageableDto<SearchEventDto> search(Pageable pageable, String searchQuery, String languageCode) {
-        Page<Event> eventPage = eventSearchRepo.find(pageable,searchQuery,languageCode);
+        Page<Event> eventPage = eventSearchRepo.find(pageable, searchQuery, languageCode);
         return getSearchEventDtoPageableDto(eventPage);
     }
 
     private PageableDto<SearchEventDto> getSearchEventDtoPageableDto(Page<Event> page) {
         List<SearchEventDto> searchEventDtos = page.stream()
-            .map(event -> modelMapper.map(event, SearchEventDto.class))
-            .collect(Collectors.toList());
+                .map(event -> modelMapper.map(event, SearchEventDto.class))
+                .collect(Collectors.toList());
 
         return new PageableDto<>(
-            searchEventDtos,
-            page.getTotalElements(),
-            page.getPageable().getPageNumber(),
-            page.getTotalPages());
+                searchEventDtos,
+                page.getTotalElements(),
+                page.getPageable().getPageNumber(),
+                page.getTotalPages());
     }
 
     /**
