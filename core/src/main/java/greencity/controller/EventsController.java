@@ -39,7 +39,7 @@ public class EventsController {
      *
      * @param eventId The unique identifier of the event.
      * @return A ResponseEntity with the event DTO if found (HTTP 200),
-     *         or an empty body with an appropriate HTTP status if not found.
+     * or an empty body with an appropriate HTTP status if not found.
      */
     @ApiOperation(value = "Get the event")
     @ApiResponses(value = {
@@ -82,7 +82,7 @@ public class EventsController {
      * Method for creating an event.
      *
      * @param addEventDtoRequest {@link AddEventDtoRequest} The DTO containing information for create event.
-     * @param images      Optional array of images related to the event.
+     * @param images             Optional array of images related to the event.
      * @return {@link EventDto}.
      * @author Vlada Proskurina.
      */
@@ -132,14 +132,20 @@ public class EventsController {
     @ApiOperation(value = "Find count of events")
     @GetMapping("/count")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = HttpStatuses.OK),
-        @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(code = 404,message = HttpStatuses.NOT_FOUND)
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     public ResponseEntity<Long> findAmountOfEvents(@RequestParam Long userId) {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getAmountOfEvents(userId));
     }
 
+    /**
+     * Likes an event.
+     *
+     * @param id     The ID of the event to be liked.
+     * @param userVO The UserVO who is liking the event.
+     */
     @ApiOperation(value = "Like event")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = HttpStatuses.OK),
@@ -152,6 +158,12 @@ public class EventsController {
         eventService.like(id, userVO, NotificationSourceType.EVENT_LIKED);
     }
 
+    /**
+     * Retrieves all subscribed events for the current user.
+     *
+     * @param userVO The UserVO representing the current user.
+     * @return ResponseEntity containing a list of EventDtoForSubscribedUser for subscribed events.
+     */
     @ApiOperation(value = "Get all subscribed events for current user")
     @GetMapping
     public ResponseEntity<List<EventDtoForSubscribedUser>> getAllSubscribedEvents(@ApiIgnore @CurrentUser UserVO userVO) {

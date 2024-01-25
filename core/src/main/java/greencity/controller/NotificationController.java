@@ -250,11 +250,23 @@ public class NotificationController {
                 .getNotificationsForCurrentUser(userVO.getId(), NotificationSourceType.COMMENT_REPLY));
     }
 
+    /**
+     * Retrieves all notifications related to liked events for the current user.
+     *
+     * @param userVO The UserVO representing the current user.
+     * @return ResponseEntity containing a list of NotificationsDto for liked events.
+     */
     @GetMapping("/likes/event")
     public ResponseEntity<List<NotificationsDto>> getAllLikesForEvent(@ApiIgnore @CurrentUser UserVO userVO) {
         return ResponseEntity.ok(notificationService.getNotificationsForCurrentUser(userVO.getId(), NotificationSourceType.EVENT_LIKED));
     }
 
+    /**
+     * Retrieves all notifications related to comments on events for the current user.
+     *
+     * @param userVO The UserVO representing the current user.
+     * @return ResponseEntity containing a list of NotificationsDto for event comments.
+     */
     @GetMapping("/events/comments")
     public ResponseEntity<List<NotificationsDto>> getAllCommentsForCurrentUser(@ApiIgnore @CurrentUser UserVO userVO) {
         return ResponseEntity.ok(notificationService.getNotificationsForCurrentUser(userVO.getId(), NotificationSourceType.EVENT_COMMENTED));
