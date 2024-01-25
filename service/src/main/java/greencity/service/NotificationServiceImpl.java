@@ -4,6 +4,7 @@ import greencity.config.TelegramBotConfig;
 import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
 import greencity.dto.econews.EcoNewsVO;
+import greencity.dto.event.EventVO;
 import greencity.dto.notification.NewNotificationDtoRequest;
 import greencity.dto.notification.NotificationDtoResponse;
 import greencity.dto.notification.NotificationsDto;
@@ -146,6 +147,28 @@ public class NotificationServiceImpl implements NotificationService {
                 .stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void createNotificationForEvent(UserVO userVO, EventVO eventVO, NotificationSourceType sourceType) {
+        User author = userRepo.findById(eventVO.getOrganizer().getId())
+                .orElseThrow(() -> new NotFoundException("Not found"));
+        Notification notification = Notification.builder()
+                .title(eventVO.getTitle())
+                .notificationSource(NotificationSource.EVENT)
+                .author(modelMapper.map(userVO, User.class))
+                .sourceType(sourceType)
+                .sourceId(eventVO.getId())
+                .build();
+        Notification savedNotification = notificationRepo.save(notification);
+        log.info("Notification with id {} was saved", savedNotification.getId());
+
+        NotifiedUser notifiedUser = createNotifiedUser(savedNotification, modelMapper.map(author, UserVO.class));
+        NotifiedUser savedNotifiedUser = notifiedUserRepo.save(notifiedUser);
+        log.info("Notified user with id {} was saved", savedNotifiedUser.getId());
+        telegramBotConfig.sendNotificationViaTelegramApi(author.getChatId(),
+                String.format("%s likes your event: %s", userVO.getName(), eventVO.getTitle()));
     }
 
     private NotificationsDto convertToDto(NotifiedUser notifiedUser) {

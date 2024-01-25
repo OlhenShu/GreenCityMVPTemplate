@@ -247,4 +247,9 @@ public class NotificationController {
         return ResponseEntity.ok(notificationService
                 .getNotificationsForCurrentUser(userVO.getId(), NotificationSourceType.COMMENT_REPLY));
     }
+
+    @GetMapping("/likes/event")
+    public ResponseEntity<List<NotificationsDto>> getAllLikesForEvent(@ApiIgnore @CurrentUser UserVO userVO) {
+        return ResponseEntity.ok(notificationService.getNotificationsForCurrentUser(userVO.getId(), NotificationSourceType.EVENT_LIKED));
+    }
 }

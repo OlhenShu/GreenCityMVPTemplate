@@ -190,10 +190,8 @@
     <include file="db/changelog/logs/ch-add-table-events-image-Proskurina.xml"/>
     <include file="db/changelog/logs/ch-add-table-events-tags-Proskurina.xml"/>
     <include file="/db/changelog/logs/ch-add-table-coordinates-Proskurina.xml"/>
-    <include file="db/changelog/logs/ch-add-table-events-dates-locations-Proskurina.xml"/>
     <include file="db/changelog/logs/ch-add-table-events-comment-Veremienko.xml"/>
     <include file="db/changelog/logs/ch-change-table-social-networks-Malov.xml"/>
     <include file="db/changelog/logs/ch-add-table-news-subscribers-Malov.xml"/>
     <include file="db/changelog/logs/ch-add-column-users-Klopov.xml"/>
 </databaseChangeLog>
-

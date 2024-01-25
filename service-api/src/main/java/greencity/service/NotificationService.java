@@ -1,6 +1,7 @@
 package greencity.service;
 
 import greencity.dto.PageableDto;
+import greencity.dto.event.EventVO;
 import greencity.dto.notification.NewNotificationDtoRequest;
 import greencity.dto.notification.NotificationDtoResponse;
 import greencity.dto.notification.NotificationsDto;
@@ -127,4 +128,6 @@ public interface NotificationService {
      * @return A list of NotificationsDto representing unread notifications for the user.
      */
     List<NotificationsDto> findAllUnreadNotificationByUserId(Long userId);
+
+    void createNotificationForEvent(UserVO userVO, EventVO eventVO, NotificationSourceType sourceType);
 }

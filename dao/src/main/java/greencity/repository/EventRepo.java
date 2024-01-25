@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
+
 public interface EventRepo extends JpaRepository<Event, Long>, JpaSpecificationExecutor<Event> {
     /**
      * Deletes all records from the "events_dates_locations" table associated with a specific event.
@@ -36,4 +38,6 @@ public interface EventRepo extends JpaRepository<Event, Long>, JpaSpecificationE
      */
     @Query("select count(*) from Event e where e.organizer.id =:organizerId")
     Long countByOrganizerId(Long organizerId);
+
+    List<Event> findByUsersLikedEvents_id(Long userId);
 }

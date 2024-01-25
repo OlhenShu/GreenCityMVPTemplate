@@ -44,6 +44,8 @@ public class EventCommentServiceImpl implements EventCommentService {
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture.runAsync(
             () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_COMMENT, userVO, accessToken));
+
+        //TODO: add comment notification
         return addEventCommentDtoResponse;
     }
 }
