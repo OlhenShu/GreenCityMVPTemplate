@@ -105,7 +105,6 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public EventDto update(@NotNull UpdateEventDto eventDto, String email, MultipartFile[] images) {
-        UserVO userVO = restClient.findByEmail(email);
         Event eventToUpdate = eventRepo.findById(eventDto.getId())
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND));
 
@@ -122,7 +121,7 @@ public class EventServiceImpl implements EventService {
 
         Event updatedEvent = eventRepo.save(eventToUpdate);
 
-        notificationService.createNotificationForEventChanges(userVO, updatedEvent.getId(), NotificationSourceType.EVENT_EDITED);
+        notificationService.createNotificationForEventChanges(restClient.findByEmail(email), updatedEvent.getId(), NotificationSourceType.EVENT_EDITED);
 
         return buildEventDto(updatedEvent);
     }
