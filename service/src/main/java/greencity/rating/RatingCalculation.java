@@ -6,6 +6,7 @@ import greencity.dto.ratingstatistics.RatingStatisticsVO;
 import greencity.dto.user.UserVO;
 import greencity.entity.RatingStatistics;
 import greencity.entity.User;
+import greencity.repository.UserRepo;
 import greencity.service.RatingStatisticsService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -32,6 +33,24 @@ public class RatingCalculation {
         RatingStatistics ratingStatistics = RatingStatistics
             .builder()
             .rating(userVo.getRating())
+            .ratingCalculationEnum(rating)
+            .user(user)
+            .pointsChanged(rating.getRatingPoints())
+            .build();
+        ratingStatisticsService.save(modelMapper.map(ratingStatistics, RatingStatisticsVO.class));
+    }
+
+    /**
+     * Method that calculates the user rating locally.
+     *
+     * @param rating      of {@link RatingCalculationEnum}
+     * @param user        of {@link User}
+     */
+    public void ratingCalculation(RatingCalculationEnum rating, User user) {
+        user.setRating(user.getRating() + rating.getRatingPoints());
+        RatingStatistics ratingStatistics = RatingStatistics
+            .builder()
+            .rating(user.getRating())
             .ratingCalculationEnum(rating)
             .user(user)
             .pointsChanged(rating.getRatingPoints())

@@ -8,6 +8,10 @@ import greencity.dto.notification.NewNotificationDtoRequest;
 import greencity.dto.notification.NotificationDtoResponse;
 import greencity.dto.notification.ShortNotificationDtoResponse;
 import greencity.dto.user.UserVO;
+import greencity.dto.notification.NotificationsDto;
+import greencity.dto.notification.ShortNotificationDtoResponse;
+import greencity.dto.user.UserVO;
+import greencity.enums.NotificationSourceType;
 import greencity.service.NotificationService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -116,8 +120,133 @@ public class NotificationController {
             @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
     })
     @PostMapping("/create")
-    public ResponseEntity<NotificationDtoResponse> createNewNotification(@ApiIgnore @CurrentUser UserVO userVO,
-                                                                         @RequestBody NewNotificationDtoRequest request) {
+    public ResponseEntity<NotificationDtoResponse> createNewNotification(
+            @ApiIgnore @CurrentUser UserVO userVO,
+            @RequestBody NewNotificationDtoRequest request
+    ) {
         return ResponseEntity.ok(notificationService.createNewNotification(userVO.getId(), request));
+    }
+
+    /**
+     * Method for deleting Notification by its id.
+     *
+     * @param notificationId Notification id which will be deleted.
+     * @return status
+     */
+    @ApiOperation(value = "Delete notification.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 403, message = HttpStatuses.FORBIDDEN),
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @DeleteMapping("/{notificationId}")
+    public ResponseEntity<ResponseEntity.BodyBuilder> delete(@PathVariable Long notificationId,
+                                                             @ApiIgnore @CurrentUser UserVO user) {
+        notificationService.delete(notificationId, user);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * Retrieves a pageable list of friend requests for the specified user.
+     * This endpoint is mapped to the HTTP GET method and is accessible at "/friend-requests".
+     *
+     * @param userVO The current user information obtained from the authentication context.
+     * @param page   The pagination information for retrieving a specific page of friend requests.
+     * @return A ResponseEntity containing a PageableDto of NotificationDtoResponse objects and an HTTP status code.
+     * @see NotificationDtoResponse
+     */
+    @ApiOperation(value = "Get all user friend requests")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/friend-requests")
+    public ResponseEntity<PageableDto<NotificationDtoResponse>> findAllFriendRequestsByUserId(
+            @ApiIgnore @CurrentUser UserVO userVO,
+            @ApiIgnore Pageable page
+    ) {
+        return ResponseEntity.ok(notificationService.findAllFriendRequestsByUserId(userVO.getId(), page));
+    }
+
+    /**
+     * Retrieves the latest notifications related to likes for the current user.
+     *
+     * @param userVO The authenticated user.
+     * @return ResponseEntity with a list of {@link NotificationsDto} representing like notifications.
+     */
+    @ApiOperation(value = "Get likes notifications for EcoNews")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/likes/eco-news")
+    public ResponseEntity<List<NotificationsDto>> getLastLikesForEcoNews(@ApiIgnore @CurrentUser UserVO userVO) {
+        return ResponseEntity.ok(notificationService
+                .getNotificationsForCurrentUser(userVO.getId(), NotificationSourceType.NEWS_LIKED)
+        );
+    }
+
+    /**
+     * Retrieves the last likes notifications for EcoNews comments for the current user.
+     *
+     * @param userVO The UserVO representing the current user.
+     * @return A {@link ResponseEntity} containing a list of {@link NotificationsDto} representing the last likes
+     */
+    @ApiOperation(value = "Get likes notification for EcoNews comments")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/likes/eco-news-comments")
+    public ResponseEntity<List<NotificationsDto>> getLastLikesForEcoNewsComments(
+            @ApiIgnore @CurrentUser UserVO userVO
+    ) {
+        return ResponseEntity.ok(notificationService
+                .getNotificationsForCurrentUser(userVO.getId(), NotificationSourceType.COMMENT_LIKED)
+        );
+    }
+
+    /**
+     * Retrieves the latest notifications related to comments for the current user.
+     *
+     * @param userVO The authenticated user.
+     * @return ResponseEntity with a list of {@link NotificationsDto}o representing comment notifications.
+     */
+    @ApiOperation(value = "Get comments notifications")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/comments")
+    public ResponseEntity<List<NotificationsDto>> getLastComments(@ApiIgnore @CurrentUser UserVO userVO) {
+        return ResponseEntity.ok(notificationService
+                .getNotificationsForCurrentUser(userVO.getId(), NotificationSourceType.NEWS_COMMENTED)
+        );
+    }
+
+    /**
+     * Get comments reply notifications for the current user.
+     * This endpoint retrieves the latest notifications related to comment replies for the
+     * authenticated user. The notifications include information about who replied to the user's comments.
+     *
+     * @param userVO The authenticated user's information.
+     * @return ResponseEntity containing a list of NotificationsDto representing comment reply notifications.
+     * @author Dmytro Kizerov
+     */
+    @ApiOperation(value = "Get comments reply notifications")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/comments-reply")
+    public ResponseEntity<List<NotificationsDto>> getLastCommentsReply(@ApiIgnore @CurrentUser UserVO userVO) {
+        return ResponseEntity.ok(notificationService
+                .getNotificationsForCurrentUser(userVO.getId(), NotificationSourceType.COMMENT_REPLY));
     }
 }

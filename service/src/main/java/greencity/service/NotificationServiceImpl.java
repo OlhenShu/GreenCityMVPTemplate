@@ -10,11 +10,34 @@ import greencity.entity.User;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.mapping.NotificationDtoResponseMapper;
+import greencity.config.TelegramBotConfig;
+import greencity.constant.ErrorMessage;
+import greencity.dto.PageableDto;
+import greencity.dto.econews.EcoNewsVO;
+import greencity.dto.notification.NewNotificationDtoRequest;
+import greencity.dto.notification.NotificationDtoResponse;
+import greencity.dto.notification.NotificationsDto;
+import greencity.dto.notification.ShortNotificationDtoResponse;
+import greencity.dto.user.UserVO;
+import greencity.entity.EcoNewsComment;
+import greencity.entity.Notification;
+import greencity.entity.NotifiedUser;
+import greencity.entity.User;
+import greencity.enums.NotificationSource;
+import greencity.enums.NotificationSourceType;
+import greencity.enums.Role;
+import greencity.exception.exceptions.BadRequestException;
+import greencity.exception.exceptions.NotFoundException;
+import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
+import greencity.mapping.NotificationDtoResponseMapper;
+import greencity.repository.EcoNewsRepo;
 import greencity.repository.NotificationRepo;
 import greencity.repository.NotifiedUserRepo;
 import greencity.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,14 +48,21 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static greencity.enums.NotificationSourceType.*;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepo notificationRepo;
-    private final UserRepo userRepo;
+    private final UserService userService;
     private final NotificationDtoResponseMapper mapper;
     private final NotifiedUserRepo notifiedUserRepo;
+    private final UserRepo userRepo;
+    private final ModelMapper modelMapper;
+    private final TelegramBotConfig telegramBotConfig;
+    private final EcoNewsRepo ecoNewsRepo;
 
     /**
      * {@inheritDoc}
@@ -59,7 +89,8 @@ public class NotificationServiceImpl implements NotificationService {
                 .map(NotificationDtoResponse::getId)
                 .collect(Collectors.toList());
 
-        List<NotifiedUser> notifiedUsers = notifiedUserRepo.findByUserIdAndNotificationIdIn(userId, unreadNotificationsIds);
+        List<NotifiedUser> notifiedUsers = notifiedUserRepo
+                .findByUserIdAndNotificationIdIn(userId, unreadNotificationsIds);
 
         notifiedUsers.forEach(notifiedUser -> notifiedUser.setIsRead(true));
 
@@ -78,17 +109,64 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
+    public PageableDto<NotificationDtoResponse> findAllFriendRequestsByUserId(Long userId, Pageable page) {
+        Page<NotificationDtoResponse> allFriendRequestsByUserId =
+                notificationRepo.findAllFriendRequestsByUserId(userId, page);
+
+        List<NotificationDtoResponse> content = allFriendRequestsByUserId.getContent();
+
+        return new PageableDto<>(
+                content,
+                allFriendRequestsByUserId.getTotalElements(),
+                allFriendRequestsByUserId.getPageable().getPageNumber(),
+                allFriendRequestsByUserId.getTotalPages()
+        );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     @Transactional
     public void markAsReadNotification(Long userId, Long notificationId) {
         NotifiedUser notifiedUser = notifiedUserRepo.findByUserIdAndNotificationId(userId, notificationId)
                 .orElseThrow(() -> new NotFoundException("Notified user or notification not found"));
-        if (notifiedUser.getIsRead()) {
-            throw new BadRequestException("Notification already read");
+        if (Boolean.TRUE.equals(notifiedUser.getIsRead())) {
+            throw new BadRequestException(ErrorMessage.NOTIFICATION_ALREADY_READ);
         }
         notifiedUser.setIsRead(true);
         log.info("Set flag isRead: {}", notifiedUser.getIsRead());
         notifiedUserRepo.save(notifiedUser);
         log.info("Successfully update status");
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long notificationId, UserVO user) {
+        Notification notification = notificationRepo.findById(notificationId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND_BY_ID + notificationId));
+        if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(notification.getAuthor().getId())) {
+            throw new UserHasNoPermissionToAccessException(ErrorMessage.USER_HAS_NO_PERMISSION);
+        }
+        notificationRepo.deleteById(notificationId);
+    }
+
+    @Override
+    public List<NotificationsDto> findAllUnreadNotificationByUserId(Long userId) {
+        return notifiedUserRepo.findAllUnreadNotificationsByUserId(userId)
+                .orElseThrow(() -> new NotFoundException("User don't have unread notification"))
+                .stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    private NotificationsDto convertToDto(NotifiedUser notifiedUser) {
+        return NotificationsDto.builder()
+                .userName(notifiedUser.getUser().getName())
+                .notificationTime(notifiedUser.getNotification().getCreationDate())
+                .objectTitle(notifiedUser.getNotification().getTitle())
+                .notificationSource(notifiedUser.getNotification().getSourceType().name().toLowerCase())
+                .build();
     }
 
     /**
@@ -99,14 +177,15 @@ public class NotificationServiceImpl implements NotificationService {
     public void readLatestNotification(Long userId) {
         List<Notification> unreadNotificationsForUser = notifiedUserRepo.findTop3UnreadNotificationsForUser(userId);
         if (unreadNotificationsForUser.isEmpty()) {
-            throw new NotFoundException("Not found unread notifications for current user");
+            throw new NotFoundException(ErrorMessage.NOT_FOUND_UNREAD_NOTIFICATION);
         }
 
         List<Long> notificationsIds = unreadNotificationsForUser.stream()
                 .map(Notification::getId)
                 .collect(Collectors.toList());
 
-        List<NotifiedUser> userNotifications = notifiedUserRepo.findByUserIdAndNotificationIdIn(userId, notificationsIds);
+        List<NotifiedUser> userNotifications = notifiedUserRepo
+                .findByUserIdAndNotificationIdIn(userId, notificationsIds);
 
         userNotifications.forEach(notifiedUser -> notifiedUser.setIsRead(true));
 
@@ -120,8 +199,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public NotificationDtoResponse createNewNotification(Long authorId, NewNotificationDtoRequest request) {
-        User author = userRepo.findById(authorId)
-                .orElseThrow(() -> new NotFoundException("User with current id not found"));
+        User author = modelMapper.map(userService.findById(authorId), User.class);
         Notification newNotification = Notification.builder()
                 .creationDate(ZonedDateTime.now())
                 .title(request.getTitle())
@@ -132,5 +210,172 @@ public class NotificationServiceImpl implements NotificationService {
         Notification savedNotification = notificationRepo.save(newNotification);
         log.info("Notification with id {} saved", savedNotification.getId());
         return mapper.convert(savedNotification);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void friendRequestNotification(Long authorId, Long friendId) {
+        User author = modelMapper.map(userService.findById(authorId), User.class);
+        Notification save = notificationRepo.save(createFriendNotification(author));
+        User friend = modelMapper.map(userService.findById(friendId), User.class);
+        notifiedUserRepo.save(NotifiedUser.builder()
+                .notification(save)
+                .user(friend)
+                .isRead(false)
+                .build());
+        if (friend.getChatId() != null) {
+            telegramBotConfig.sendNotificationViaTelegramApi(friend.getChatId(),
+                    "New friend request from user: " + author.getName());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public NotificationDtoResponse findById(Long notificationId) {
+        Notification notification =
+                notificationRepo.findById(notificationId)
+                        .orElseThrow(() ->
+                                new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND_BY_ID + notificationId)
+                        );
+        return modelMapper.map(notification, NotificationDtoResponse.class);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public List<NotificationsDto> getNotificationsForCurrentUser(Long userId, NotificationSourceType sourceType) {
+        List<NotifiedUser> allUnreadNotificationsByUserId = notifiedUserRepo
+                .findAllUnreadNotificationsByUserId(userId, sourceType);
+        List<NotificationsDto> notifications = allUnreadNotificationsByUserId.stream()
+                .map(user -> NotificationsDto.builder()
+                        .userName(user.getNotification().getAuthor().getName())
+                        .objectTitle(user.getNotification().getTitle())
+                        .notificationTime(user.getNotification().getCreationDate())
+                        .notificationSource(user.getNotification().getNotificationSource().name().toLowerCase())
+                        .build())
+                .collect(Collectors.toList());
+        if (notifications.isEmpty()) {
+            throw new NotFoundException("No new notification for current user");
+        }
+        return notifications;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void createNotification(UserVO userVO, Object sourceVO, NotificationSourceType sourceType) {
+        User author = getUserById(userVO.getId());
+
+        String title;
+        Long sourceId;
+        UserVO sourceAuthor;
+        NotificationSource source;
+        UserVO parentCommentAuthor;
+
+        if (sourceVO instanceof EcoNewsVO) {
+            parentCommentAuthor = null;
+            EcoNewsVO ecoNewsVO = (EcoNewsVO) sourceVO;
+            title = ecoNewsVO.getTitle();
+            sourceId = ecoNewsVO.getId();
+            sourceAuthor = ecoNewsVO.getAuthor();
+            source = NotificationSource.NEWS;
+
+            if (sourceAuthor.getChatId() != null) {
+                if (sourceType.equals(NEWS_LIKED)) {
+                    telegramBotConfig.sendNotificationViaTelegramApi(sourceAuthor.getChatId(),
+                            "New like for you news: " + ecoNewsVO.getTitle() + "\nFrom user: " + author.getName());
+                }
+                if (sourceType.equals(NEWS_COMMENTED)) {
+                    telegramBotConfig.sendNotificationViaTelegramApi(sourceAuthor.getChatId(),
+                            "New comment for your news: " + ecoNewsVO.getTitle() + "\nFrom user: " + author.getName());
+                }
+            }
+        } else if (sourceVO instanceof EcoNewsComment) {
+            EcoNewsComment ecoNewsComment = (EcoNewsComment) sourceVO;
+            parentCommentAuthor = getParentCommentAuthor(ecoNewsComment);
+            title = ecoNewsComment.getEcoNews().getTitle();
+            sourceId = ecoNewsComment.getEcoNews().getId();
+            sourceAuthor = modelMapper.map(ecoNewsComment.getEcoNews().getAuthor(), UserVO.class);
+            source = NotificationSource.NEWS;
+
+            if (sourceAuthor.getChatId() != null) {
+                if (sourceType.equals(COMMENT_LIKED)) {
+                    telegramBotConfig.sendNotificationViaTelegramApi(sourceAuthor.getChatId(),
+                            "New like for you comment: " + ecoNewsComment.getText()
+                                    + "\nFrom user: " + author.getName());
+                }
+            }
+        } else {
+            throw new NotFoundException("Not found source author");
+        }
+
+        Notification newNotification = Notification.builder()
+                .title(title)
+                .sourceId(sourceId)
+                .sourceType(sourceType)
+                .author(author)
+                .creationDate(ZonedDateTime.now())
+                .notificationSource(source)
+                .build();
+
+        Notification savedNotification = notificationRepo.save(newNotification);
+        log.info("Notification with id: {} was saved", savedNotification.getId());
+
+        NotifiedUser notifiedUser = createNotifiedUser(savedNotification, sourceAuthor);
+        NotifiedUser savedUser = notifiedUserRepo.save(notifiedUser);
+        log.info("Notified user with id {} was saved", savedUser.getId());
+
+        if (parentCommentAuthor != null) {
+            NotifiedUser notifiedParentUser = createNotifiedUser(savedNotification, parentCommentAuthor);
+            NotifiedUser savedParentUser = notifiedUserRepo.save(notifiedParentUser);
+            log.info("Notification for user with id {} saved for parent comment", savedParentUser.getId());
+
+            if (savedParentUser.getUser().getChatId() != null) {
+                String newsTitle = ecoNewsRepo.findById(savedNotification.getSourceId())
+                        .orElseThrow(() -> new NotFoundException("Eco news with id: "
+                                + savedNotification.getSourceId() + " not found"))
+                        .getTitle();
+                telegramBotConfig.sendNotificationViaTelegramApi(savedParentUser.getUser().getChatId(),
+                        "New reply for you comment to news: " + newsTitle + "\nFrom user: " + author.getName());
+            }
+        }
+    }
+
+    private NotifiedUser createNotifiedUser(Notification savedNotification, UserVO userVO) {
+        return NotifiedUser.builder()
+                .isRead(false)
+                .user(getUserById(userVO.getId()))
+                .notification(savedNotification)
+                .build();
+    }
+
+    private User getUserById(Long userId) {
+        return userRepo.findById(userId)
+                .orElseThrow(() -> new NotFoundException(String.format("User with id: %d not found", userId)));
+    }
+
+    private UserVO getParentCommentAuthor(EcoNewsComment ecoNewsComment) {
+        if (ecoNewsComment.getParentComment() != null) {
+            return modelMapper.map(ecoNewsComment.getParentComment().getUser(), UserVO.class);
+        }
+        return null;
+    }
+
+    private Notification createFriendNotification(User author) {
+        return Notification.builder()
+                .creationDate(ZonedDateTime.now())
+                .title(FRIEND_REQUEST.name())
+                .author(author)
+                .sourceType(FRIEND_REQUEST)
+                .sourceId(3L)
+                .build();
     }
 }

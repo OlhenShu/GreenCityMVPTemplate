@@ -11,12 +11,6 @@ import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotDeletedException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.repository.UserRepo;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -27,6 +21,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 /**
  * Implementation of {@link FriendService}.
  */
@@ -35,8 +36,27 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class FriendServiceImpl implements FriendService {
-    private final UserRepo userRepo;
     private final ModelMapper modelMapper;
+    private final UserRepo userRepo;
+    private final NotificationService notificationService;
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PageableDto<UserFriendDto> getUserFriendsByUserId(Long userId, Pageable pageable) {
+        validateUserExist(userId);
+        Page<User> allUserFriends = userRepo.getAllUserFriendsPage(pageable, userId);
+        List<UserFriendDto> userFriendDtoList =
+                allUserFriends.stream().map(e -> modelMapper.map(e, UserFriendDto.class))
+                        .collect(Collectors.toList());
+        return new PageableDto<>(
+                userFriendDtoList,
+                allUserFriends.getTotalElements(),
+                allUserFriends.getPageable().getPageNumber(),
+                allUserFriends.getTotalPages()
+        );
+    }
 
     /**
      * {@inheritDoc}
@@ -55,7 +75,8 @@ public class FriendServiceImpl implements FriendService {
             friendDtoPage.getContent(),
             friendDtoPage.getTotalElements(),
             friendDtoPage.getPageable().getPageNumber(),
-            friendDtoPage.getTotalPages());
+            friendDtoPage.getTotalPages()
+        );
     }
 
     /**
@@ -90,6 +111,25 @@ public class FriendServiceImpl implements FriendService {
             listOfUsers.getTotalPages());
     }
 
+    @Override
+    public PageableDto<UserFriendDto> allFriendRequests(Long userId, Pageable pageable) {
+        validateUserExist(userId);
+        Page<User> allUserFriendRequests = userRepo.getAllUserFriendRequests(pageable, userId);
+
+        List<UserFriendDto> friendsDto = allUserFriendRequests.stream()
+                .map(user -> modelMapper.map(user, UserFriendDto.class))
+                .collect(Collectors.toList());
+
+        Page<UserFriendDto> friendRequestDtoPage = new PageImpl<>(friendsDto, pageable, friendsDto.size());
+
+        return new PageableDto<>(
+                friendRequestDtoPage.getContent(),
+                friendRequestDtoPage.getTotalElements(),
+                friendRequestDtoPage.getPageable().getPageNumber(),
+                friendRequestDtoPage.getTotalPages()
+        );
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -97,9 +137,7 @@ public class FriendServiceImpl implements FriendService {
     @Transactional
     public void addFriend(Long userId, Long friendId) {
         validateUserExist(friendId);
-        if (Objects.equals(userId, friendId)) {
-            throw new BadRequestException(ErrorMessage.OWN_USER_ID);
-        }
+        validateIsNotSameUsers(userId, friendId);
         User user = userRepo.findById(userId)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + userId));
         String status = user.getConnections().stream().filter(c -> Objects.equals(c.getFriend().getId(), friendId))
@@ -107,8 +145,52 @@ public class FriendServiceImpl implements FriendService {
         if (status != null) {
             throw new BadRequestException(String.format(ErrorMessage.USER_ALREADY_HAS_CONNECTION, status));
         }
+        notificationService.friendRequestNotification(userId, friendId);
         userRepo.addFriend(userId, friendId);
     }
+
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void acceptFriendRequest(Long userId, Long friendId) {
+        validateUserExist(userId);
+        validateUserExist(friendId);
+        validateIsNotSameUsers(userId, friendId);
+        User user = userRepo.findById(friendId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + friendId));
+        String status = user.getConnections().stream().filter(c -> Objects.equals(c.getFriend().getId(), userId))
+                .findAny().map(UserFriend::getStatus).orElseThrow(() ->
+                        new NotFoundException(ErrorMessage.USER_HAS_WRONG_CONNECTION));
+        if (!status.equals("REQUEST")) {
+            throw new BadRequestException(String.format(ErrorMessage.USER_ALREADY_HAS_CONNECTION, status));
+        }
+        userRepo.acceptFriendRequest(userId, friendId);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void declineFriendRequest(Long userId, Long friendId) {
+        validateUserExist(userId);
+        validateUserExist(friendId);
+        validateIsNotSameUsers(userId, friendId);
+        User user = userRepo.findById(friendId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + friendId));
+        String status = user.getConnections().stream().filter(c -> Objects.equals(c.getFriend().getId(), userId))
+                .findAny().map(UserFriend::getStatus).orElseThrow(() ->
+                        new NotFoundException(ErrorMessage.USER_HAS_WRONG_CONNECTION));
+        if (!status.equals("REQUEST")) {
+            throw new BadRequestException(String.format(ErrorMessage.USER_ALREADY_HAS_CONNECTION, status));
+        }
+        userRepo.declineFriendRequest(userId, friendId);
+    }
+
 
     /**
      * {@inheritDoc}
@@ -179,6 +261,12 @@ public class FriendServiceImpl implements FriendService {
     private void validateUserExist(Long userId) {
         if (!userRepo.existsById(userId)) {
             throw new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID + userId);
+        }
+    }
+
+    private void validateIsNotSameUsers(Long userId, Long friendId) {
+        if (Objects.equals(userId, friendId)) {
+            throw new BadRequestException(ErrorMessage.OWN_USER_ID);
         }
     }
 
