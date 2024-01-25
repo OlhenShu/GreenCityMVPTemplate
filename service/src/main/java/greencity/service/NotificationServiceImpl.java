@@ -14,6 +14,7 @@ import greencity.entity.EcoNewsComment;
 import greencity.entity.Notification;
 import greencity.entity.NotifiedUser;
 import greencity.entity.User;
+import greencity.entity.event.Event;
 import greencity.enums.NotificationSource;
 import greencity.enums.NotificationSourceType;
 import greencity.enums.Role;
@@ -21,10 +22,7 @@ import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.mapping.NotificationDtoResponseMapper;
-import greencity.repository.EcoNewsRepo;
-import greencity.repository.NotificationRepo;
-import greencity.repository.NotifiedUserRepo;
-import greencity.repository.UserRepo;
+import greencity.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -53,6 +51,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final ModelMapper modelMapper;
     private final TelegramBotConfig telegramBotConfig;
     private final EcoNewsRepo ecoNewsRepo;
+    private final EventRepo eventRepo;
 
     /**
      * {@inheritDoc}
@@ -129,6 +128,42 @@ public class NotificationServiceImpl implements NotificationService {
         log.info("Successfully update status");
     }
 
+    private void notifyUsersForEventCanceled(Event event) {
+        eventRepo.findUsersByUsersLikedEvents_Id(event.getId())
+                .forEach(user -> telegramBotConfig.sendNotificationViaTelegramApi(user.getChatId(),
+                        String.format("Unfortunately, event %s was cancelled. %s", event.getTitle(), ZonedDateTime.now())));
+    }
+
+    private void notifyUsersForEventUpdated(Event event) {
+        eventRepo.findUsersByUsersLikedEvents_Id(event.getId())
+                .forEach(user -> telegramBotConfig.sendNotificationViaTelegramApi(user.getChatId(),
+                        String.format("Event %s was updated. New name is %s. %s", event.getTitle(), event.getTitle(), event.getCreationDate())));
+    }
+
+    @Override
+    @Transactional
+    public void createNotificationForEventChanges(UserVO userVO, Long eventId, NotificationSourceType sourceType) {
+        Event event = eventRepo.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event not found"));
+        Notification notification = Notification.builder()
+                .title(event.getTitle())
+                .creationDate(ZonedDateTime.from(event.getCreationDate()))
+                .notificationSource(NotificationSource.EVENT)
+                .sourceId(event.getId())
+                .author(modelMapper.map(userVO, User.class))
+                .sourceType(sourceType)
+                .build();
+        Notification savedNotification = notificationRepo.save(notification);
+        log.info("Notification with id {} saved", savedNotification.getId());
+        switch (sourceType) {
+            case EVENT_CANCELED:
+                notifyUsersForEventCanceled(event);
+            case EVENT_EDITED:
+                //TODO: add all 3 possible variants
+                notifyUsersForEventUpdated(event);
+        }
+    }
+
     @Override
     @Transactional
     public void delete(Long notificationId, UserVO user) {
@@ -141,6 +176,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @Transactional
     public List<NotificationsDto> findAllUnreadNotificationByUserId(Long userId) {
         return notifiedUserRepo.findAllUnreadNotificationsByUserId(userId)
                 .orElseThrow(() -> new NotFoundException("User don't have unread notification"))

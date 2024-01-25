@@ -130,4 +130,5 @@ public interface NotificationService {
     List<NotificationsDto> findAllUnreadNotificationByUserId(Long userId);
 
     void createNotificationForEvent(UserVO userVO, EventVO eventVO, NotificationSourceType sourceType);
+    void createNotificationForEventChanges(UserVO userVO, Long eventId, NotificationSourceType sourceType);
 }

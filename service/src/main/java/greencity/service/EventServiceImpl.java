@@ -91,7 +91,7 @@ public class EventServiceImpl implements EventService {
 
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture.runAsync(
-            () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_EVENT, userVO, accessToken));
+                () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_EVENT, userVO, accessToken));
         return eventDto;
     }
 
@@ -105,6 +105,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public EventDto update(@NotNull UpdateEventDto eventDto, String email, MultipartFile[] images) {
+        UserVO userVO = restClient.findByEmail(email);
         Event eventToUpdate = eventRepo.findById(eventDto.getId())
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND));
 
@@ -120,8 +121,9 @@ public class EventServiceImpl implements EventService {
         updatedEventWithNewData(eventToUpdate, eventDto, images);
 
         Event updatedEvent = eventRepo.save(eventToUpdate);
-        //TODO: add event update notification
-        //notificationService.createNotificationForEvent();
+
+        notificationService.createNotificationForEventChanges(userVO, updatedEvent.getId(), NotificationSourceType.EVENT_EDITED);
+
         return buildEventDto(updatedEvent);
     }
 
@@ -130,7 +132,7 @@ public class EventServiceImpl implements EventService {
     public void delete(Long eventId, String email) {
         UserVO userVO = restClient.findByEmail(email);
         Event toDelete =
-            eventRepo.findById(eventId).orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND));
+                eventRepo.findById(eventId).orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND));
         List<String> eventImages = new ArrayList<>();
         eventImages.add(toDelete.getTitleImage());
 
@@ -142,15 +144,15 @@ public class EventServiceImpl implements EventService {
 
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture.runAsync(
-            () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.DELETE_EVENT, userVO, accessToken));
-        //TODO: add event cancel notification
-        notificationService.createNotificationForEvent(userVO, modelMapper.map(toDelete, EventVO.class), NotificationSourceType.EVENT_CANCELED);
+                () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.DELETE_EVENT, userVO, accessToken));
+
+        notificationService.createNotificationForEventChanges(userVO, toDelete.getId(), NotificationSourceType.EVENT_CANCELED);
     }
 
     @Override
     public EventVO findById(Long eventId) {
         Event event = eventRepo.findById(eventId)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND_BY_ID + eventId));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND_BY_ID + eventId));
         return modelMapper.map(event, EventVO.class);
     }
 
@@ -189,20 +191,20 @@ public class EventServiceImpl implements EventService {
      */
     @Override
     public PageableDto<SearchEventDto> search(Pageable pageable, String searchQuery, String languageCode) {
-        Page<Event> eventPage = eventSearchRepo.find(pageable,searchQuery,languageCode);
+        Page<Event> eventPage = eventSearchRepo.find(pageable, searchQuery, languageCode);
         return getSearchEventDtoPageableDto(eventPage);
     }
 
     private PageableDto<SearchEventDto> getSearchEventDtoPageableDto(Page<Event> page) {
         List<SearchEventDto> searchEventDtos = page.stream()
-            .map(event -> modelMapper.map(event, SearchEventDto.class))
-            .collect(Collectors.toList());
+                .map(event -> modelMapper.map(event, SearchEventDto.class))
+                .collect(Collectors.toList());
 
         return new PageableDto<>(
-            searchEventDtos,
-            page.getTotalElements(),
-            page.getPageable().getPageNumber(),
-            page.getTotalPages());
+                searchEventDtos,
+                page.getTotalElements(),
+                page.getPageable().getPageNumber(),
+                page.getTotalPages());
     }
 
     /**
