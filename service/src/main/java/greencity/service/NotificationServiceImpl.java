@@ -127,14 +127,15 @@ public class NotificationServiceImpl implements NotificationService {
         notifiedUserRepo.save(notifiedUser);
         log.info("Successfully update status");
     }
-
-    private void notifyUsersForEventCanceled(Event event) {
+    @Transactional
+    public void notifyUsersForEventCanceled(Event event) {
         eventRepo.findUsersByUsersLikedEvents_Id(event.getId())
                 .forEach(user -> telegramBotConfig.sendNotificationViaTelegramApi(user.getChatId(),
                         String.format("Unfortunately, event %s was cancelled. %s", event.getTitle(), ZonedDateTime.now())));
     }
 
-    private void notifyUsersForEventUpdated(Event event) {
+    @Transactional
+    public void notifyUsersForEventUpdated(Event event) {
         eventRepo.findUsersByUsersLikedEvents_Id(event.getId())
                 .forEach(user -> telegramBotConfig.sendNotificationViaTelegramApi(user.getChatId(),
                         String.format("Event %s was updated. New name is %s. %s", event.getTitle(), event.getTitle(), event.getCreationDate())));
@@ -147,7 +148,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .orElseThrow(() -> new NotFoundException("Event not found"));
         Notification notification = Notification.builder()
                 .title(event.getTitle())
-                .creationDate(ZonedDateTime.from(event.getCreationDate()))
+                .creationDate(ZonedDateTime.now())
                 .notificationSource(NotificationSource.EVENT)
                 .sourceId(event.getId())
                 .author(modelMapper.map(userVO, User.class))
@@ -208,9 +209,11 @@ public class NotificationServiceImpl implements NotificationService {
             case EVENT_LIKED:
                 telegramBotConfig.sendNotificationViaTelegramApi(author.getChatId(),
                         String.format("%s likes your event: %s", userVO.getName(), eventVO.getTitle()));
+                break;
             case EVENT_COMMENTED:
                 telegramBotConfig.sendNotificationViaTelegramApi(author.getChatId(),
                         String.format("%s commented on your event %s. Date: %s", userVO.getName(), eventVO.getTitle(), ZonedDateTime.now()));
+                break;
         }
     }
 
