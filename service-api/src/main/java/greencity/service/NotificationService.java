@@ -132,6 +132,21 @@ public interface NotificationService {
      */
     List<NotificationsDto> findAllUnreadNotificationByUserId(Long userId);
 
+    /**
+     * Creates a notification for a specific event and notifies users based on the source type.
+     *
+     * @param userVO     The UserVO initiating the event notification.
+     * @param eventVO    The EventVO for which the notification is created.
+     * @param sourceType The type of the notification source.
+     */
     void createNotificationForEvent(UserVO userVO, EventVO eventVO, NotificationSourceType sourceType);
+
+    /**
+     * Creates a notification for changes in an event and notifies users based on the source type.
+     *
+     * @param userVO     The UserVO initiating the event changes.
+     * @param eventId    The ID of the event for which the notification is created.
+     * @param sourceType The type of the notification source.
+     */
     void createNotificationForEventChanges(UserVO userVO, Long eventId, NotificationSourceType sourceType);
 }
