@@ -1,15 +1,5 @@
 package greencity.service;
 
-import greencity.dto.PageableDto;
-import greencity.dto.notification.NewNotificationDtoRequest;
-import greencity.dto.notification.NotificationDtoResponse;
-import greencity.dto.notification.ShortNotificationDtoResponse;
-import greencity.entity.Notification;
-import greencity.entity.NotifiedUser;
-import greencity.entity.User;
-import greencity.exception.exceptions.BadRequestException;
-import greencity.exception.exceptions.NotFoundException;
-import greencity.mapping.NotificationDtoResponseMapper;
 import greencity.config.TelegramBotConfig;
 import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
@@ -35,7 +25,6 @@ import greencity.mapping.NotificationDtoResponseMapper;
 import greencity.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
