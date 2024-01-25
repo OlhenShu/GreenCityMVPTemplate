@@ -54,7 +54,8 @@ public interface NotificationService {
     List<ShortNotificationDtoResponse> getTheLatestThreeNotifications(Long receiverId);
 
     /**
-     * Creates a new notification based on the provided data in the request and returns the corresponding notification DTO.
+     * Creates a new notification based on the provided data in the
+     * request and returns the corresponding notification DTO.
      * @param authorId the ID of the author for the notification
      * @param request  the object containing data to create the notification
      * @return the DTO representing the notification {@link NotificationDtoResponse}

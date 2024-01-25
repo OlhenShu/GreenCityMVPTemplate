@@ -90,8 +90,8 @@ public class EventServiceImpl implements EventService {
         tagConvertor(event, eventDto);
 
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
-        CompletableFuture.runAsync(
-                () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_EVENT, userVO, accessToken));
+        CompletableFuture.runAsync(() -> ratingCalculation
+                .ratingCalculation(RatingCalculationEnum.ADD_EVENT, userVO, accessToken));
         return eventDto;
     }
 
@@ -140,10 +140,11 @@ public class EventServiceImpl implements EventService {
         }
 
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
-        CompletableFuture.runAsync(
-                () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.DELETE_EVENT, userVO, accessToken));
+        CompletableFuture.runAsync(() -> ratingCalculation
+                .ratingCalculation(RatingCalculationEnum.DELETE_EVENT, userVO, accessToken));
 
-        notificationService.createNotificationForEventChanges(userVO, toDelete.getId(), NotificationSourceType.EVENT_CANCELED);
+        notificationService
+                .createNotificationForEventChanges(userVO, toDelete.getId(), NotificationSourceType.EVENT_CANCELED);
     }
 
     /**

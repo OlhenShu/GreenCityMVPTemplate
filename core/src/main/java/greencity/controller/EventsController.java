@@ -39,7 +39,7 @@ public class EventsController {
      *
      * @param eventId The unique identifier of the event.
      * @return A ResponseEntity with the event DTO if found (HTTP 200),
-     * or an empty body with an appropriate HTTP status if not found.
+     *      or an empty body with an appropriate HTTP status if not found.
      */
     @ApiOperation(value = "Get the event")
     @ApiResponses(value = {
@@ -166,7 +166,8 @@ public class EventsController {
      */
     @ApiOperation(value = "Get all subscribed events for current user")
     @GetMapping
-    public ResponseEntity<List<EventDtoForSubscribedUser>> getAllSubscribedEvents(@ApiIgnore @CurrentUser UserVO userVO) {
+    public ResponseEntity<List<EventDtoForSubscribedUser>> getAllSubscribedEvents(
+            @ApiIgnore @CurrentUser UserVO userVO) {
         return ResponseEntity.ok(eventService.getAllSubscribedEvents(userVO.getId()));
     }
 }

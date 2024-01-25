@@ -138,7 +138,8 @@ public class NotificationServiceImpl implements NotificationService {
     public void notifyUsersForEventCanceled(Event event) {
         eventRepo.findUsersByUsersLikedEvents_Id(event.getId())
                 .forEach(user -> telegramBotConfig.sendNotificationViaTelegramApi(user.getChatId(),
-                        String.format("Unfortunately, event %s was cancelled. %s", event.getTitle(), ZonedDateTime.now())));
+                        String.format("Unfortunately, event %s was cancelled. %s",
+                                event.getTitle(), ZonedDateTime.now())));
     }
 
     /**
@@ -150,7 +151,8 @@ public class NotificationServiceImpl implements NotificationService {
     public void notifyUsersForEventUpdated(Event event) {
         eventRepo.findUsersByUsersLikedEvents_Id(event.getId())
                 .forEach(user -> telegramBotConfig.sendNotificationViaTelegramApi(user.getChatId(),
-                        String.format("Event %s was updated. New name is %s. %s", event.getTitle(), event.getTitle(), event.getCreationDate())));
+                        String.format("Event %s was updated. New name is %s. %s", event.getTitle(),
+                                event.getTitle(), event.getCreationDate())));
     }
 
     /**
@@ -235,8 +237,10 @@ public class NotificationServiceImpl implements NotificationService {
                         String.format("%s likes your event: %s", userVO.getName(), eventVO.getTitle()));
                 break;
             case EVENT_COMMENTED:
-                telegramBotConfig.sendNotificationViaTelegramApi(author.getChatId(),
-                        String.format("%s commented on your event %s. Date: %s", userVO.getName(), eventVO.getTitle(), ZonedDateTime.now()));
+                telegramBotConfig
+                        .sendNotificationViaTelegramApi(author.getChatId(),
+                                String.format("%s commented on your event %s. Date: %s", userVO.getName(),
+                                        eventVO.getTitle(), ZonedDateTime.now()));
                 break;
             default:
                 return;
@@ -393,7 +397,7 @@ public class NotificationServiceImpl implements NotificationService {
                 if (sourceType.equals(COMMENT_LIKED)) {
                     telegramBotConfig.sendNotificationViaTelegramApi(sourceAuthor.getChatId(),
                             "New like for you comment: " + ecoNewsComment.getText()
-                            + "\nFrom user: " + author.getName());
+                                    + "\nFrom user: " + author.getName());
                 }
             }
         } else {
@@ -424,7 +428,7 @@ public class NotificationServiceImpl implements NotificationService {
             if (savedParentUser.getUser().getChatId() != null) {
                 String newsTitle = ecoNewsRepo.findById(savedNotification.getSourceId())
                         .orElseThrow(() -> new NotFoundException("Eco news with id: "
-                                                                 + savedNotification.getSourceId() + " not found"))
+                                + savedNotification.getSourceId() + " not found"))
                         .getTitle();
                 telegramBotConfig.sendNotificationViaTelegramApi(savedParentUser.getUser().getChatId(),
                         "New reply for you comment to news: " + newsTitle + "\nFrom user: " + author.getName());
