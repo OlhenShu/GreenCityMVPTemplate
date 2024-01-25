@@ -168,6 +168,19 @@ public class FriendController {
                 PageRequest.of(pageable.getPageNumber(), pageable.getPageSize())));
     }
 
+    /**
+     * Retrieves a paginated list of friend requests for the authenticated user.
+     * This endpoint allows the authenticated user to retrieve a pageable list of friend requests they have received.
+     *
+     * @param pageable   the pagination information, specifying the page number, size, and sorting criteria
+     * @param user       the authenticated user for whom friend requests are being retrieved
+     * @return ResponseEntity with a PageableDto containing a list of UserFriendDto representing friend requests,
+     */
+    @ApiOperation(value = "Get all friend requests of current user")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED)
+    })
     @ApiPageable
     @GetMapping("/friendRequests")
     public ResponseEntity<PageableDto<UserFriendDto>> getAllFriendRequest(

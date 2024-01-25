@@ -297,7 +297,8 @@ public class NotificationServiceImpl implements NotificationService {
             if (sourceAuthor.getChatId() != null) {
                 if (sourceType.equals(COMMENT_LIKED)) {
                     telegramBotConfig.sendNotificationViaTelegramApi(sourceAuthor.getChatId(),
-                            "New like for you comment: " + ecoNewsComment.getText() + "\nFrom user: " + author.getName());
+                            "New like for you comment: " + ecoNewsComment.getText()
+                                    + "\nFrom user: " + author.getName());
                 }
             }
         } else {
@@ -327,7 +328,8 @@ public class NotificationServiceImpl implements NotificationService {
 
             if (savedParentUser.getUser().getChatId() != null) {
                 String newsTitle = ecoNewsRepo.findById(savedNotification.getSourceId())
-                        .orElseThrow(() -> new NotFoundException("Eco news with id: " + savedNotification.getSourceId() + " not found"))
+                        .orElseThrow(() -> new NotFoundException("Eco news with id: "
+                                + savedNotification.getSourceId() + " not found"))
                         .getTitle();
                 telegramBotConfig.sendNotificationViaTelegramApi(savedParentUser.getUser().getChatId(),
                         "New reply for you comment to news: " + newsTitle + "\nFrom user: " + author.getName());

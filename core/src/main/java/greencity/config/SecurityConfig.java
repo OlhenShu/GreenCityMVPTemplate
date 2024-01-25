@@ -237,8 +237,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 USER_SHOPPING_LIST + "/{userShoppingListItemId}",
                 "/user/profilePicture",
                 "/user/deleteProfilePicture",
-                "/friends/{friendId}/acceptRequest",
-                "/friends/{friendId}/rejectRequest")
+                "/friends/{friendId}/acceptFriend")
             .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.DELETE,
                 ECONEWS_COMMENTS,
@@ -251,7 +250,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/friends/{friendId}",
                 USER_CUSTOM_SHOPPING_LIST_ITEMS,
                 USER_SHOPPING_LIST + "/user-shopping-list-items",
-                "/notifications/{notificationId:[0-9]+}")
+                "/notifications/{notificationId:[0-9]+}",
+                "/friends/{friendId}/declineFriend")
             .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
             .antMatchers(HttpMethod.GET,
                 "/newsSubscriber",

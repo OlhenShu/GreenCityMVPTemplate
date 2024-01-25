@@ -29,6 +29,13 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
      */
     Optional<User> findByEmail(String email);
 
+    /**
+     * Retrieves an optional user by their chat ID.
+     * This method searches for a user in the database using the provided chat ID.
+     *
+     * @param chatId the chat ID of the user to be retrieved
+     * @return An Optional containing the user with the specified chat ID, or empty if not found.
+     */
     Optional<User> findUserByChatId(Long chatId);
 
     /**
@@ -62,6 +69,14 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
     @Query("SELECT id FROM User WHERE email=:email")
     Optional<Long> findIdByEmail(String email);
 
+
+    /**
+     * Retrieves an optional user by their phone number.
+     * This method searches for a user in the database using the provided phone number.
+     *
+     * @param phoneNumber the phone number of the user to be retrieved
+     * @return An Optional containing the user with the specified phone number, or empty if not found.
+     */
     Optional<User> findUserByPhoneNumber(String phoneNumber);
 
     /**
@@ -146,6 +161,13 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
             + "UNION (SELECT friend_id FROM users_friends WHERE user_id = :userId and status = 'FRIEND'));")
     List<User> getAllUserFriends(Long userId);
 
+    /**
+     * Get all user friend requests.
+     *
+     * @param userId The ID of the user.
+     *
+     * @return list of {@link User}.
+     */
     @Query(nativeQuery = true, value = "SELECT * FROM users WHERE id IN ( "
             + "(SELECT user_id FROM users_friends WHERE friend_id = :userId and status = 'REQUEST')"
             + "UNION (SELECT friend_id FROM users_friends WHERE user_id = :userId and status = 'REQUEST'))")

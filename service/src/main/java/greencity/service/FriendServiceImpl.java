@@ -128,7 +128,6 @@ public class FriendServiceImpl implements FriendService {
                 friendRequestDtoPage.getPageable().getPageNumber(),
                 friendRequestDtoPage.getTotalPages()
         );
-
     }
 
     /**

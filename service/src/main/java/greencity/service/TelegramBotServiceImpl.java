@@ -24,6 +24,9 @@ public class TelegramBotServiceImpl implements TelegramBotService {
     private final UserRepo userRepo;
     private final NotificationRepo notificationRepo;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public TelegramUserDto findByChatId(Long chatId) {
@@ -35,6 +38,9 @@ public class TelegramBotServiceImpl implements TelegramBotService {
                 .build();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public void saveTelegramUser(Long chatId, String phoneNumber) {
@@ -45,6 +51,9 @@ public class TelegramBotServiceImpl implements TelegramBotService {
         log.info("User with id {} was register in telegram bot", user.getId());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void deleteTelegramUser(Long chatId) {
         User user = userRepo.findUserByChatId(chatId)
@@ -54,24 +63,34 @@ public class TelegramBotServiceImpl implements TelegramBotService {
         log.info("User with id {} was unregistered in telegram bot", user.getId());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isRegister(Long chatId) {
         return userRepo.findUserByChatId(chatId).isPresent();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getAllUnreadNotification(Long chatId) {
         User user = userRepo.findUserByChatId(chatId)
                 .orElseThrow(() -> new NotFoundException("User with current chat id not found"));
-        Page<NotificationDtoResponse> allReceivedNotificationDtoByUserId = notificationRepo.findAllReceivedNotificationDtoByUserId(user.getId(), PageRequest.of(0, 3));
+        Page<NotificationDtoResponse> allReceivedNotificationDtoByUserId = notificationRepo
+                .findAllReceivedNotificationDtoByUserId(user.getId(), PageRequest.of(0, 3));
         return getUnreadNotification(allReceivedNotificationDtoByUserId);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     private String getUnreadNotification(Page<NotificationDtoResponse> notifications) {
         StringJoiner joiner = new StringJoiner("/n");
         for (NotificationDtoResponse notification : notifications) {
-            joiner.add("Повідомлення від: " + notification.getAuthor()  +
-                    "\nТекст: " + notification.getTitle()
+            joiner.add("Повідомлення від: " + notification.getAuthor()
+                        + "\nТекст: " + notification.getTitle()
                        + "\nКоли: " + notification.getCreationDate()
                                .format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM))
                        + "\n");

@@ -29,10 +29,20 @@ public class TelegramBotConfig extends TelegramLongPollingBot {
     private final String botUsername;
     private final TelegramBotService botService;
 
-    public TelegramBotConfig(
-            @Value("${telegram.bot.token}") String botToken,
-            @Value("${telegram.bot.name}") String botName,
-            TelegramBotService botService) {
+    /**
+     * Constructor for configuring a Telegram bot instance.
+     * This constructor is responsible for setting up and configuring a Telegram bot with the provided bot token,
+     * bot name, and an instance of TelegramBotService. It extends the TelegramLongPollingBot class, and upon
+     * instantiation, registers the bot for handling incoming updates.
+     *
+     * @param botToken    the token associated with the Telegram bot
+     * @param botName     the username of the Telegram bot
+     * @param botService  an instance of TelegramBotService for handling bot-related operations
+     */
+    public TelegramBotConfig(@Value("${telegram.bot.token}") String botToken,
+                             @Value("${telegram.bot.name}") String botName,
+                             TelegramBotService botService
+    ) {
         super(botToken);
         this.botUsername = botName;
         this.botService = botService;
@@ -41,7 +51,6 @@ public class TelegramBotConfig extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-
         if (update.hasMessage() && update.getMessage().hasText()) {
             String messageText = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
@@ -58,25 +67,24 @@ public class TelegramBotConfig extends TelegramLongPollingBot {
                 if (botService.isRegister(chatId)) {
                     sendMessage(chatId, botService.getAllUnreadNotification(chatId));
                 } else {
-                    sendMessage(chatId, "Ви ще не прив'язували цей номер до аккаунту GreenCity. " +
-                            "Прив'язати: /subscribe");
+                    sendMessage(chatId, "Ви ще не прив'язували цей номер до аккаунту GreenCity. "
+                            + "Прив'язати: /subscribe");
                 }
             } else if (messageText.equals("/unsubscribe")) {
                 if (botService.isRegister(chatId)) {
                     botService.deleteTelegramUser(chatId);
-                    sendMessage(chatId, "Ваш профіль успішно відв'язано, " +
-                            "переадресація повідомлень в Telegram вимкнена.");
+                    sendMessage(chatId, "Ваш профіль успішно відв'язано, "
+                            + "переадресація повідомлень в Telegram вимкнена.");
                 } else {
-                    sendMessage(chatId, "Ви ще не прив'язували цей номер до аккаунту GreenCity. " +
-                            "Прив'язати: /subscribe");
+                    sendMessage(chatId, "Ви ще не прив'язували цей номер до аккаунту GreenCity. "
+                            + "Прив'язати: /subscribe");
                 }
             } else if (messageText.equals("/help")) {
                 sendHelpCommand(chatId);
-            }
-            else {
+            } else {
                 sendMessage(update.getMessage().getChatId(),
-                        "Не знайома мені команда. Повний перелік: " +
-                                "\n1/ /start, /subscribe, /notification, /unsubscribe, /help");
+                        "Не знайома мені команда. Повний перелік: "
+                                + "\n1/ /start, /subscribe, /notification, /unsubscribe, /help");
             }
         } else {
             if (update.getMessage().hasContact()) {
@@ -93,6 +101,13 @@ public class TelegramBotConfig extends TelegramLongPollingBot {
         return botUsername;
     }
 
+    /**
+     * Sends a notification to a Telegram user with the specified chat ID.
+     * This method constructs a Telegram message with the given chat ID and message content,
+     *
+     * @param chatId   the chat ID of the Telegram user to whom the notification will be sent
+     * @param message  the content of the notification message
+     */
     public void sendNotification(Long chatId, String message) {
         var msg = new SendMessage();
         msg.setChatId(chatId);
@@ -125,9 +140,10 @@ public class TelegramBotConfig extends TelegramLongPollingBot {
     }
 
     private void sendGreeting(long chatId) {
-        String text = "Привіт! \uD83D\uDC7D \n\nЗа допомогою бота можна отримувати " +
-                "нові повідомлення за вашим профілем на GreenCity. \n\nСписок команд, які можна використовувати зараз: " +
-                "\n/start, /subscribe, /notification, /unsubscribe, /help";
+        String text = "Привіт! За допомогою бота можна отримувати "
+                + "нові повідомлення за вашим профілем на GreenCity. "
+                + "\n\nСписок команд, які можна використовувати зараз: "
+                + "\n/start, /subscribe, /notification, /unsubscribe, /help";
 
         SendMessage message = SendMessage.builder()
                 .text(text)
@@ -141,7 +157,8 @@ public class TelegramBotConfig extends TelegramLongPollingBot {
     }
 
     private void sendHelpCommand(long chatId) {
-        String text = "Список команд, які можна використовувати зараз: \n/start, /subscribe, /notification, /unsubscribe, /help";
+        String text = "Список команд, які можна використовувати зараз: "
+                + "\n/start, /subscribe, /notification, /unsubscribe, /help";
 
         SendMessage message = SendMessage.builder()
                 .text(text)
@@ -180,6 +197,14 @@ public class TelegramBotConfig extends TelegramLongPollingBot {
         }
     }
 
+    /**
+     * Sends a notification to a Telegram user with the specified chat ID using the Telegram API.
+     * This method constructs and sends a HTTP GET request to the Telegram API's "sendMessage" endpoint
+     * with the provided chat ID and message content. The response status code and body are printed to the console.
+     *
+     * @param chatId   the chat ID of the Telegram user to whom the notification will be sent
+     * @param message  the content of the notification message
+     */
     public void sendNotificationViaTelegramApi(Long chatId, String message) {
         HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(5))

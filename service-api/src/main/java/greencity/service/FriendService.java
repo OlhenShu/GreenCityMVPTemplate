@@ -34,6 +34,15 @@ public interface FriendService {
     PageableDto<UserFriendDto> searchFriends(Pageable pageable, String name, UserVO userVO,
                                              Boolean hasSameCity, Boolean hasMutualFriends);
 
+    /**
+     * Retrieves a paginated list of friend requests for a user.
+     * This method retrieves a pageable list of friend requests for the user with the specified user ID.
+     *
+     * @param userId    the unique identifier of the user for whom friend requests are being retrieved
+     * @param pageable  the pagination information, specifying the page number, size, and sorting criteria
+     * @return A PageableDto containing a list of UserFriendDto representing friend requests,
+     *         along with pagination information such as total elements, total pages, current page, and more.
+     */
     PageableDto<UserFriendDto> allFriendRequests(Long userId, Pageable pageable);
 
     /**
