@@ -167,8 +167,15 @@ public class NotificationServiceImpl implements NotificationService {
         NotifiedUser notifiedUser = createNotifiedUser(savedNotification, modelMapper.map(author, UserVO.class));
         NotifiedUser savedNotifiedUser = notifiedUserRepo.save(notifiedUser);
         log.info("Notified user with id {} was saved", savedNotifiedUser.getId());
-        telegramBotConfig.sendNotificationViaTelegramApi(author.getChatId(),
-                String.format("%s likes your event: %s", userVO.getName(), eventVO.getTitle()));
+
+        switch (sourceType) {
+            case EVENT_LIKED:
+                telegramBotConfig.sendNotificationViaTelegramApi(author.getChatId(),
+                        String.format("%s likes your event: %s", userVO.getName(), eventVO.getTitle()));
+            case EVENT_COMMENTED:
+                telegramBotConfig.sendNotificationViaTelegramApi(author.getChatId(),
+                        String.format("%s commented on your event %s. Date: %s", userVO.getName(), eventVO.getTitle(), ZonedDateTime.now()));
+        }
     }
 
     private NotificationsDto convertToDto(NotifiedUser notifiedUser) {
@@ -321,7 +328,7 @@ public class NotificationServiceImpl implements NotificationService {
                 if (sourceType.equals(COMMENT_LIKED)) {
                     telegramBotConfig.sendNotificationViaTelegramApi(sourceAuthor.getChatId(),
                             "New like for you comment: " + ecoNewsComment.getText()
-                                    + "\nFrom user: " + author.getName());
+                            + "\nFrom user: " + author.getName());
                 }
             }
         } else {
@@ -352,7 +359,7 @@ public class NotificationServiceImpl implements NotificationService {
             if (savedParentUser.getUser().getChatId() != null) {
                 String newsTitle = ecoNewsRepo.findById(savedNotification.getSourceId())
                         .orElseThrow(() -> new NotFoundException("Eco news with id: "
-                                + savedNotification.getSourceId() + " not found"))
+                                                                 + savedNotification.getSourceId() + " not found"))
                         .getTitle();
                 telegramBotConfig.sendNotificationViaTelegramApi(savedParentUser.getUser().getChatId(),
                         "New reply for you comment to news: " + newsTitle + "\nFrom user: " + author.getName());

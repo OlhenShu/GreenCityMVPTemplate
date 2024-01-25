@@ -9,6 +9,7 @@ import greencity.dto.user.UserVO;
 import greencity.entity.User;
 import greencity.entity.event.Event;
 import greencity.entity.event.EventComment;
+import greencity.enums.NotificationSourceType;
 import greencity.rating.RatingCalculation;
 import greencity.repository.EventCommentRepo;
 import java.util.concurrent.CompletableFuture;
@@ -27,6 +28,7 @@ public class EventCommentServiceImpl implements EventCommentService {
     private ModelMapper modelMapper;
     private final HttpServletRequest httpServletRequest;
     private final RatingCalculation ratingCalculation;
+    private final NotificationService notificationService;
 
     @Override
     public AddEventCommentDtoResponse save(Long eventId, AddEventCommentDtoRequest addEventCommentDtoRequest,
@@ -45,7 +47,7 @@ public class EventCommentServiceImpl implements EventCommentService {
         CompletableFuture.runAsync(
             () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_COMMENT, userVO, accessToken));
 
-        //TODO: add comment notification
+        notificationService.createNotificationForEvent(userVO, eventVO, NotificationSourceType.EVENT_COMMENTED);
         return addEventCommentDtoResponse;
     }
 }
