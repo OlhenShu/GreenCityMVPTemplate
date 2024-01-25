@@ -1,5 +1,6 @@
 package greencity.repository;
 
+import greencity.entity.User;
 import greencity.entity.event.Event;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -7,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
 
 public interface EventRepo extends JpaRepository<Event, Long>, JpaSpecificationExecutor<Event> {
     /**
@@ -45,4 +48,20 @@ public interface EventRepo extends JpaRepository<Event, Long>, JpaSpecificationE
      * @return list of {@link Event} instances.
      */
     Page<Event> findAllByOrderByIdDesc(Pageable page);
+
+    /**
+     * Retrieves a list of events liked by a user based on the user's ID.
+     *
+     * @param userId The ID of the user for whom liked events are retrieved.
+     * @return A list of Event objects representing events liked by the user.
+     */
+    List<Event> findByUsersLikedEvents_id(Long userId);
+
+    /**
+     * Retrieves a list of users who have liked a specific event based on the event's ID.
+     *
+     * @param eventId The ID of the event for which users who liked the event are retrieved.
+     * @return A list of User objects representing users who have liked the event.
+     */
+    List<User> findUsersByUsersLikedEvents_Id(Long eventId);
 }

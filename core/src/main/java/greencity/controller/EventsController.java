@@ -7,8 +7,10 @@ import greencity.constant.SwaggerExampleModel;
 import greencity.dto.PageableAdvancedDto;
 import greencity.dto.event.AddEventDtoRequest;
 import greencity.dto.event.EventDto;
+import greencity.dto.event.EventDtoForSubscribedUser;
 import greencity.dto.event.UpdateEventDto;
 import greencity.dto.user.UserVO;
+import greencity.enums.NotificationSourceType;
 import greencity.service.EventService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -26,6 +28,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.annotation.Nullable;
 import java.security.Principal;
+import java.util.List;
 
 @Validated
 @RestController
@@ -138,6 +141,36 @@ public class EventsController {
     })
     public ResponseEntity<Long> findAmountOfEvents(@RequestParam Long userId) {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getAmountOfEvents(userId));
+    }
+
+    /**
+     * Likes an event.
+     *
+     * @param id     The ID of the event to be liked.
+     * @param userVO The UserVO who is liking the event.
+     */
+    @ApiOperation(value = "Like event")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = HttpStatuses.OK),
+            @ApiResponse(code = 400, message = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(code = 401, message = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(code = 404, message = HttpStatuses.NOT_FOUND)
+    })
+    @PostMapping("/like")
+    public void likeEvent(@RequestParam("id") Long id, @ApiIgnore @CurrentUser UserVO userVO) {
+        eventService.like(id, userVO, NotificationSourceType.EVENT_LIKED);
+    }
+
+    /**
+     * Retrieves all subscribed events for the current user.
+     *
+     * @param userVO The UserVO representing the current user.
+     * @return ResponseEntity containing a list of EventDtoForSubscribedUser for subscribed events.
+     */
+    @ApiOperation(value = "Get all subscribed events for current user")
+    @GetMapping
+    public ResponseEntity<List<EventDtoForSubscribedUser>> getAllSubscribedEvents(@ApiIgnore @CurrentUser UserVO userVO) {
+        return ResponseEntity.ok(eventService.getAllSubscribedEvents(userVO.getId()));
     }
 
     /**

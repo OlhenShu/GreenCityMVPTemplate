@@ -12,13 +12,13 @@ import greencity.dto.geocoding.AddressLatLngResponse;
 import greencity.dto.search.SearchEventDto;
 import greencity.dto.tag.TagUaEnDto;
 import greencity.dto.tag.TagVO;
-
 import greencity.dto.user.UserVO;
 import greencity.entity.Tag;
 import greencity.entity.User;
 import greencity.entity.event.Event;
 import greencity.entity.event.EventDateLocation;
 import greencity.entity.event.EventImages;
+import greencity.enums.NotificationSourceType;
 import greencity.enums.Role;
 import greencity.enums.TagType;
 import greencity.exception.exceptions.BadRequestException;
@@ -27,18 +27,7 @@ import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.rating.RatingCalculation;
 import greencity.repository.EventRepo;
 import greencity.repository.EventSearchRepo;
-
-import java.security.Principal;
-import java.util.concurrent.CompletableFuture;
-import javax.servlet.http.HttpServletRequest;
-
 import greencity.repository.UserRepo;
-
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
@@ -51,6 +40,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
+import java.security.Principal;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import static greencity.constant.AppConstant.AUTHORIZATION;
 
@@ -67,6 +64,7 @@ public class EventServiceImpl implements EventService {
     private final EventSearchRepo eventSearchRepo;
     private final UserRepo userRepo;
     private final FileService fileService;
+    private final NotificationService notificationService;
     private static final String DEFAULT_TITLE_IMAGE_PATH = AppConstant.DEFAULT_EVENT_IMAGES;
     private final HttpServletRequest httpServletRequest;
     private final RatingCalculation ratingCalculation;
@@ -148,6 +146,13 @@ public class EventServiceImpl implements EventService {
                 .ratingCalculation(RatingCalculationEnum.DELETE_EVENT, userVO, accessToken));
     }
 
+    /**
+     * Retrieves an EventVO by its ID.
+     *
+     * @param eventId The ID of the event to be retrieved.
+     * @return The corresponding EventVO if found.
+     * @throws NotFoundException If no event is found with the specified ID.
+     */
     @Override
     public EventVO findById(Long eventId) {
         Event event = eventRepo.findById(eventId)
@@ -160,6 +165,43 @@ public class EventServiceImpl implements EventService {
         Page<Event> events = eventRepo.findAllByOrderByIdDesc(page);
 
         return buildPageableAdvancedDto(events);
+    }
+
+    /**
+     * Handles the like functionality for an event.
+     *
+     * @param id          The ID of the event to be liked.
+     * @param userVO      The UserVO who is performing the like action.
+     * @param sourceType  The type of the notification source.
+     */
+    @Override
+    @Transactional
+    public void like(Long id, UserVO userVO, NotificationSourceType sourceType) {
+        EventVO event = findById(id);
+        boolean alreadyLiked = event.getUsersLikedEvents().stream()
+                .anyMatch(user -> user.getId().equals(userVO.getId()));
+        if (alreadyLiked) {
+            event.getUsersLikedEvents().removeIf(user -> user.getId().equals(userVO.getId()));
+        } else {
+            event.getUsersLikedEvents().add(userVO);
+            notificationService.createNotificationForEvent(userVO, event, sourceType);
+        }
+        eventRepo.save(modelMapper.map(event, Event.class));
+    }
+
+    @Override
+    @Transactional
+    public List<EventDtoForSubscribedUser> getAllSubscribedEvents(Long id) {
+        return eventRepo.findByUsersLikedEvents_id(id).stream()
+                .map(this::toSubscriberDto)
+                .collect(Collectors.toList());
+    }
+
+    private EventDtoForSubscribedUser toSubscriberDto(Event event) {
+        return EventDtoForSubscribedUser.builder()
+                .eventTitle(event.getTitle())
+                .creationDate(event.getCreationDate())
+                .build();
     }
 
     /**

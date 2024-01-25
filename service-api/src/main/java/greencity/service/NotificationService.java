@@ -1,6 +1,7 @@
 package greencity.service;
 
 import greencity.dto.PageableDto;
+import greencity.dto.event.EventVO;
 import greencity.dto.notification.NewNotificationDtoRequest;
 import greencity.dto.notification.NotificationDtoResponse;
 import greencity.dto.notification.NotificationsDto;
@@ -48,8 +49,7 @@ public interface NotificationService {
     List<ShortNotificationDtoResponse> getTheLatestThreeNotifications(Long receiverId);
 
     /**
-     * Creates a new notification based on the provided data in the request and returns the corresponding notification.
-     *
+     * Creates a new notification based on the provided data in the request and returns the corresponding notification DTO.
      * @param authorId the ID of the author for the notification
      * @param request  the object containing data to create the notification
      * @return the DTO representing the notification {@link NotificationDtoResponse}
@@ -117,4 +117,31 @@ public interface NotificationService {
      * @param user {@link UserVO}, which notification will be deleted
      */
     void delete(Long notificationId, UserVO user);
+
+    /**
+     * Retrieves a list of unread notifications for a user based on their user ID.
+     * This method fetches and returns a list of unread notifications for the user with the specified user ID.
+     *
+     * @param userId the unique identifier of the user for whom unread notifications are being retrieved
+     * @return A list of NotificationsDto representing unread notifications for the user.
+     */
+    List<NotificationsDto> findAllUnreadNotificationByUserId(Long userId);
+
+    /**
+     * Creates a notification for a specific event and notifies users based on the source type.
+     *
+     * @param userVO     The UserVO initiating the event notification.
+     * @param eventVO    The EventVO for which the notification is created.
+     * @param sourceType The type of the notification source.
+     */
+    void createNotificationForEvent(UserVO userVO, EventVO eventVO, NotificationSourceType sourceType);
+
+    /**
+     * Creates a notification for changes in an event and notifies users based on the source type.
+     *
+     * @param userVO     The UserVO initiating the event changes.
+     * @param eventId    The ID of the event for which the notification is created.
+     * @param sourceType The type of the notification source.
+     */
+    void createNotificationForEventChanges(UserVO userVO, Long eventId, NotificationSourceType sourceType);
 }

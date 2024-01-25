@@ -56,4 +56,19 @@ public interface NotifiedUserRepo extends JpaRepository<NotifiedUser, Long> {
             + "ORDER BY n.creationDate DESC")
     List<NotifiedUser> findAllUnreadNotificationsByUserId(@Param("userId") Long userId,
                                                           @Param("sourceType") NotificationSourceType sourceType);
+
+    /**
+    * Retrieves a list of unread notifications for a specific user.
+    * This method performs a query to fetch NotifiedUser entities with associated unread notifications
+    * for the specified user, ordered by the creation date of the notifications in descending order.
+    *
+    * @param userId the unique identifier of the user for whom unread notifications are being retrieved
+    * @return An Optional containing a List of NotifiedUser entities with associated unread notifications.
+    */
+    @Query("SELECT nu FROM NotifiedUser nu "
+           + "JOIN FETCH nu.notification n "
+           + "WHERE nu.user.id = :userId "
+           + "AND nu.isRead = false "
+           + "ORDER BY n.creationDate DESC")
+    Optional<List<NotifiedUser>> findAllUnreadNotificationsByUserId(@Param("userId") Long userId);
 }

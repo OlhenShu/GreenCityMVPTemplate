@@ -1,8 +1,10 @@
 package greencity.service;
 
+import greencity.config.TelegramBotConfig;
 import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
 import greencity.dto.econews.EcoNewsVO;
+import greencity.dto.event.EventVO;
 import greencity.dto.notification.NewNotificationDtoRequest;
 import greencity.dto.notification.NotificationDtoResponse;
 import greencity.dto.notification.NotificationsDto;
@@ -12,6 +14,7 @@ import greencity.entity.EcoNewsComment;
 import greencity.entity.Notification;
 import greencity.entity.NotifiedUser;
 import greencity.entity.User;
+import greencity.entity.event.Event;
 import greencity.enums.NotificationSource;
 import greencity.enums.NotificationSourceType;
 import greencity.enums.Role;
@@ -19,9 +22,7 @@ import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.mapping.NotificationDtoResponseMapper;
-import greencity.repository.NotificationRepo;
-import greencity.repository.NotifiedUserRepo;
-import greencity.repository.UserRepo;
+import greencity.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -35,7 +36,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static greencity.enums.NotificationSourceType.FRIEND_REQUEST;
+import static greencity.enums.NotificationSourceType.*;
 
 @Service
 @RequiredArgsConstructor
@@ -48,11 +49,15 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotifiedUserRepo notifiedUserRepo;
     private final UserRepo userRepo;
     private final ModelMapper modelMapper;
+    private final TelegramBotConfig telegramBotConfig;
+    private final EcoNewsRepo ecoNewsRepo;
+    private final EventRepo eventRepo;
 
     /**
      * {@inheritDoc}
      */
     @Override
+    @Transactional(readOnly = true)
     public List<ShortNotificationDtoResponse> getTheLatestThreeNotifications(Long receiverId) {
         return notificationRepo.findTop3ByReceiversIdOrderByCreationDate(receiverId, PageRequest.of(0, 3));
     }
@@ -124,6 +129,66 @@ public class NotificationServiceImpl implements NotificationService {
         log.info("Successfully update status");
     }
 
+    /**
+     * Notifies users about the cancellation of an event.
+     *
+     * @param event The event that has been canceled.
+     */
+    @Transactional
+    public void notifyUsersForEventCanceled(Event event) {
+        eventRepo.findUsersByUsersLikedEvents_Id(event.getId())
+                .forEach(user -> telegramBotConfig.sendNotificationViaTelegramApi(user.getChatId(),
+                        String.format("Unfortunately, event %s was cancelled. %s", event.getTitle(), ZonedDateTime.now())));
+    }
+
+    /**
+     * Notifies users about updates to an event.
+     *
+     * @param event The event that has been updated.
+     */
+    @Transactional
+    public void notifyUsersForEventUpdated(Event event) {
+        eventRepo.findUsersByUsersLikedEvents_Id(event.getId())
+                .forEach(user -> telegramBotConfig.sendNotificationViaTelegramApi(user.getChatId(),
+                        String.format("Event %s was updated. New name is %s. %s", event.getTitle(), event.getTitle(), event.getCreationDate())));
+    }
+
+    /**
+     * Creates a notification for changes in an event and notifies users based on the source type.
+     *
+     * @param userVO     The UserVO initiating the event changes.
+     * @param eventId    The ID of the event for which the notification is created.
+     * @param sourceType The type of the notification source.
+     * @throws NotFoundException If the event with the specified ID is not found.
+     */
+    @Override
+    @Transactional
+    public void createNotificationForEventChanges(UserVO userVO, Long eventId, NotificationSourceType sourceType) {
+        Event event = eventRepo.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event not found"));
+        Notification notification = Notification.builder()
+                .title(event.getTitle())
+                .creationDate(ZonedDateTime.now())
+                .notificationSource(NotificationSource.EVENT)
+                .sourceId(event.getId())
+                .author(modelMapper.map(userVO, User.class))
+                .sourceType(sourceType)
+                .build();
+        Notification savedNotification = notificationRepo.save(notification);
+        log.info("Notification with id {} saved", savedNotification.getId());
+        switch (sourceType) {
+            case EVENT_CANCELED:
+                notifyUsersForEventCanceled(event);
+                break;
+            case EVENT_EDITED:
+                //TODO: add all 3 possible variants
+                notifyUsersForEventUpdated(event);
+                break;
+            default:
+                return;
+        }
+    }
+
     @Override
     @Transactional
     public void delete(Long notificationId, UserVO user) {
@@ -133,6 +198,58 @@ public class NotificationServiceImpl implements NotificationService {
             throw new UserHasNoPermissionToAccessException(ErrorMessage.USER_HAS_NO_PERMISSION);
         }
         notificationRepo.deleteById(notificationId);
+    }
+
+    @Override
+    @Transactional
+    public List<NotificationsDto> findAllUnreadNotificationByUserId(Long userId) {
+        return notifiedUserRepo.findAllUnreadNotificationsByUserId(userId)
+                .orElseThrow(() -> new NotFoundException("User don't have unread notification"))
+                .stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void createNotificationForEvent(UserVO userVO, EventVO eventVO, NotificationSourceType sourceType) {
+        User author = userRepo.findById(eventVO.getOrganizer().getId())
+                .orElseThrow(() -> new NotFoundException("Not found"));
+        Notification notification = Notification.builder()
+                .title(eventVO.getTitle())
+                .notificationSource(NotificationSource.EVENT)
+                .author(modelMapper.map(userVO, User.class))
+                .sourceType(sourceType)
+                .sourceId(eventVO.getId())
+                .build();
+        Notification savedNotification = notificationRepo.save(notification);
+        log.info("Notification with id {} was saved", savedNotification.getId());
+
+        NotifiedUser notifiedUser = createNotifiedUser(savedNotification, modelMapper.map(author, UserVO.class));
+        NotifiedUser savedNotifiedUser = notifiedUserRepo.save(notifiedUser);
+        log.info("Notified user with id {} was saved", savedNotifiedUser.getId());
+
+        switch (sourceType) {
+            case EVENT_LIKED:
+                telegramBotConfig.sendNotificationViaTelegramApi(author.getChatId(),
+                        String.format("%s likes your event: %s", userVO.getName(), eventVO.getTitle()));
+                break;
+            case EVENT_COMMENTED:
+                telegramBotConfig.sendNotificationViaTelegramApi(author.getChatId(),
+                        String.format("%s commented on your event %s. Date: %s", userVO.getName(), eventVO.getTitle(), ZonedDateTime.now()));
+                break;
+            default:
+                return;
+        }
+    }
+
+    private NotificationsDto convertToDto(NotifiedUser notifiedUser) {
+        return NotificationsDto.builder()
+                .userName(notifiedUser.getUser().getName())
+                .notificationTime(notifiedUser.getNotification().getCreationDate())
+                .objectTitle(notifiedUser.getNotification().getTitle())
+                .notificationSource(notifiedUser.getNotification().getSourceType().name().toLowerCase())
+                .build();
     }
 
     /**
@@ -191,6 +308,10 @@ public class NotificationServiceImpl implements NotificationService {
                 .user(friend)
                 .isRead(false)
                 .build());
+        if (friend.getChatId() != null) {
+            telegramBotConfig.sendNotificationViaTelegramApi(friend.getChatId(),
+                    "New friend request from user: " + author.getName());
+        }
     }
 
     /**
@@ -249,6 +370,17 @@ public class NotificationServiceImpl implements NotificationService {
             sourceId = ecoNewsVO.getId();
             sourceAuthor = ecoNewsVO.getAuthor();
             source = NotificationSource.NEWS;
+
+            if (sourceAuthor.getChatId() != null) {
+                if (sourceType.equals(NEWS_LIKED)) {
+                    telegramBotConfig.sendNotificationViaTelegramApi(sourceAuthor.getChatId(),
+                            "New like for you news: " + ecoNewsVO.getTitle() + "\nFrom user: " + author.getName());
+                }
+                if (sourceType.equals(NEWS_COMMENTED)) {
+                    telegramBotConfig.sendNotificationViaTelegramApi(sourceAuthor.getChatId(),
+                            "New comment for your news: " + ecoNewsVO.getTitle() + "\nFrom user: " + author.getName());
+                }
+            }
         } else if (sourceVO instanceof EcoNewsComment) {
             EcoNewsComment ecoNewsComment = (EcoNewsComment) sourceVO;
             parentCommentAuthor = getParentCommentAuthor(ecoNewsComment);
@@ -256,6 +388,14 @@ public class NotificationServiceImpl implements NotificationService {
             sourceId = ecoNewsComment.getEcoNews().getId();
             sourceAuthor = modelMapper.map(ecoNewsComment.getEcoNews().getAuthor(), UserVO.class);
             source = NotificationSource.NEWS;
+
+            if (sourceAuthor.getChatId() != null) {
+                if (sourceType.equals(COMMENT_LIKED)) {
+                    telegramBotConfig.sendNotificationViaTelegramApi(sourceAuthor.getChatId(),
+                            "New like for you comment: " + ecoNewsComment.getText()
+                            + "\nFrom user: " + author.getName());
+                }
+            }
         } else {
             throw new NotFoundException("Not found source author");
         }
@@ -280,6 +420,15 @@ public class NotificationServiceImpl implements NotificationService {
             NotifiedUser notifiedParentUser = createNotifiedUser(savedNotification, parentCommentAuthor);
             NotifiedUser savedParentUser = notifiedUserRepo.save(notifiedParentUser);
             log.info("Notification for user with id {} saved for parent comment", savedParentUser.getId());
+
+            if (savedParentUser.getUser().getChatId() != null) {
+                String newsTitle = ecoNewsRepo.findById(savedNotification.getSourceId())
+                        .orElseThrow(() -> new NotFoundException("Eco news with id: "
+                                                                 + savedNotification.getSourceId() + " not found"))
+                        .getTitle();
+                telegramBotConfig.sendNotificationViaTelegramApi(savedParentUser.getUser().getChatId(),
+                        "New reply for you comment to news: " + newsTitle + "\nFrom user: " + author.getName());
+            }
         }
     }
 

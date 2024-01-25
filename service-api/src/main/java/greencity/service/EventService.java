@@ -2,14 +2,14 @@ package greencity.service;
 
 import greencity.dto.PageableAdvancedDto;
 import greencity.dto.PageableDto;
-import greencity.dto.event.AddEventDtoRequest;
-import greencity.dto.event.EventDto;
-import greencity.dto.event.UpdateEventDto;
+import greencity.dto.event.*;
 import greencity.dto.search.SearchEventDto;
+import greencity.enums.NotificationSourceType;
 import org.springframework.data.domain.Pageable;
 import greencity.dto.user.UserVO;
 import org.springframework.web.multipart.MultipartFile;
-import greencity.dto.event.EventVO;
+
+import java.util.List;
 
 import java.security.Principal;
 
@@ -76,6 +76,23 @@ public interface EventService {
      * @param eventId - id of event
      */
     EventVO findById(Long eventId);
+
+    /**
+     * Handles the like functionality for an event.
+     *
+     * @param id          The ID of the event to be liked.
+     * @param userVO      The UserVO who is performing the like action.
+     * @param sourceType  The type of the notification source.
+     */
+    void like(Long id, UserVO userVO, NotificationSourceType sourceType);
+
+    /**
+     * Retrieves a list of EventDtoForSubscribedUser objects for all events subscribed by a user.
+     *
+     * @param id The ID of the user for whom subscribed events are retrieved.
+     * @return A list of EventDtoForSubscribedUser objects representing subscribed events for the user.
+     */
+    List<EventDtoForSubscribedUser> getAllSubscribedEvents(Long id);
 
     /**
      * Retrieves a paginated list of events associated with the authenticated user.
