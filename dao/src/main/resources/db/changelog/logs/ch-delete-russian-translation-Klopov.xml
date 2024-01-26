@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet id="klopov-2" author="Dmytro Klopov">
+        <delete tableName="event_tags">
+            <where>language_id = 3</where>
+        </delete>
+
+        <delete tableName="shopping_list_item_translations">
+            <where>language_id = 3</where>
+        </delete>
+
+        <delete tableName="tag_translations">
+            <where>language_id = 3</where>
+        </delete>
+
+        <delete tableName="habit_fact_translations">
+            <where>language_id = 3</where>
+        </delete>
+    </changeSet>
+</databaseChangeLog>

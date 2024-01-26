@@ -16,12 +16,10 @@ import greencity.dto.user.PlaceAuthorDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.*;
 import greencity.entity.localization.TagTranslation;
+import greencity.enums.NotificationSourceType;
 import greencity.enums.Role;
 import greencity.enums.TagType;
-import greencity.exception.exceptions.BadRequestException;
-import greencity.exception.exceptions.NotFoundException;
-import greencity.exception.exceptions.NotSavedException;
-import greencity.exception.exceptions.UnsupportedSortException;
+import greencity.exception.exceptions.*;
 import greencity.filters.EcoNewsSpecification;
 import greencity.filters.SearchCriteria;
 import greencity.repository.EcoNewsRepo;
@@ -36,10 +34,12 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
@@ -60,6 +60,7 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     private final greencity.rating.RatingCalculation ratingCalculation;
     private final HttpServletRequest httpServletRequest;
     private final EcoNewsSearchRepo ecoNewsSearchRepo;
+    private final NotificationService notificationService;
     private final List<String> languageCode = List.of("en", "ua");
 
     /**
@@ -70,7 +71,7 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     @CacheEvict(value = CacheConstants.NEWEST_ECO_NEWS_CACHE_NAME, allEntries = true)
     @Override
     public AddEcoNewsDtoResponse save(AddEcoNewsDtoRequest addEcoNewsDtoRequest,
-        MultipartFile image, String email) {
+                                      MultipartFile image, String email) {
         EcoNews toSave = genericSave(addEcoNewsDtoRequest, image, email);
 
         AddEcoNewsDtoResponse addEcoNewsDtoResponse = modelMapper.map(toSave, AddEcoNewsDtoResponse.class);
@@ -99,18 +100,18 @@ public class EcoNewsServiceImpl implements EcoNewsService {
      * @author Zakhar Veremchuk.
      */
     public void sendEmailDto(AddEcoNewsDtoResponse addEcoNewsDtoResponse,
-        User user) {
+                             User user) {
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         PlaceAuthorDto placeAuthorDto = modelMapper.map(user, PlaceAuthorDto.class);
         EcoNewsForSendEmailDto dto = EcoNewsForSendEmailDto.builder()
-            .author(placeAuthorDto)
-            .creationDate(addEcoNewsDtoResponse.getCreationDate())
-            .unsubscribeToken(accessToken)
-            .text(addEcoNewsDtoResponse.getText())
-            .title(addEcoNewsDtoResponse.getTitle())
-            .source(addEcoNewsDtoResponse.getSource())
-            .imagePath(addEcoNewsDtoResponse.getImagePath())
-            .build();
+                .author(placeAuthorDto)
+                .creationDate(addEcoNewsDtoResponse.getCreationDate())
+                .unsubscribeToken(accessToken)
+                .text(addEcoNewsDtoResponse.getText())
+                .title(addEcoNewsDtoResponse.getTitle())
+                .source(addEcoNewsDtoResponse.getSource())
+                .imagePath(addEcoNewsDtoResponse.getImagePath())
+                .build();
         restClient.addEcoNews(dto);
     }
 
@@ -120,18 +121,18 @@ public class EcoNewsServiceImpl implements EcoNewsService {
      * @author Danylo Hlynskyi.
      */
     public void sendEmailDto(EcoNewsGenericDto ecoNewsDto,
-        User user) {
+                             User user) {
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         PlaceAuthorDto placeAuthorDto = modelMapper.map(user, PlaceAuthorDto.class);
         EcoNewsForSendEmailDto dto = EcoNewsForSendEmailDto.builder()
-            .author(placeAuthorDto)
-            .creationDate(ecoNewsDto.getCreationDate())
-            .unsubscribeToken(accessToken)
-            .text(ecoNewsDto.getContent())
-            .title(ecoNewsDto.getTitle())
-            .imagePath(ecoNewsDto.getImagePath())
-            .source(ecoNewsDto.getSource())
-            .build();
+                .author(placeAuthorDto)
+                .creationDate(ecoNewsDto.getCreationDate())
+                .unsubscribeToken(accessToken)
+                .text(ecoNewsDto.getContent())
+                .title(ecoNewsDto.getTitle())
+                .imagePath(ecoNewsDto.getImagePath())
+                .source(ecoNewsDto.getSource())
+                .build();
         restClient.addEcoNews(dto);
     }
 
@@ -220,8 +221,6 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     /**
      * {@inheritDoc}
      *
-     * @author Kovaliv Taras.
-     * @return
      */
     @Override
     public PageableAdvancedDto<EcoNewsGenericDto> find(Pageable page, List<String> tags) {
@@ -233,37 +232,37 @@ public class EcoNewsServiceImpl implements EcoNewsService {
 
     private PageableAdvancedDto<EcoNewsDto> buildPageableAdvancedDto(Page<EcoNews> ecoNewsPage) {
         List<EcoNewsDto> ecoNewsDtos = ecoNewsPage.stream()
-            .map(ecoNews -> modelMapper.map(ecoNews, EcoNewsDto.class))
+                .map(ecoNews -> modelMapper.map(ecoNews, EcoNewsDto.class))
 
-            .collect(Collectors.toList());
+                .collect(Collectors.toList());
 
         return new PageableAdvancedDto<>(
-            ecoNewsDtos,
-            ecoNewsPage.getTotalElements(),
-            ecoNewsPage.getPageable().getPageNumber(),
-            ecoNewsPage.getTotalPages(),
-            ecoNewsPage.getNumber(),
-            ecoNewsPage.hasPrevious(),
-            ecoNewsPage.hasNext(),
-            ecoNewsPage.isFirst(),
-            ecoNewsPage.isLast());
+                ecoNewsDtos,
+                ecoNewsPage.getTotalElements(),
+                ecoNewsPage.getPageable().getPageNumber(),
+                ecoNewsPage.getTotalPages(),
+                ecoNewsPage.getNumber(),
+                ecoNewsPage.hasPrevious(),
+                ecoNewsPage.hasNext(),
+                ecoNewsPage.isFirst(),
+                ecoNewsPage.isLast());
     }
 
     private PageableAdvancedDto<EcoNewsGenericDto> buildPageableAdvancedGeneticDto(Page<EcoNews> ecoNewsPage) {
         List<EcoNewsGenericDto> ecoNewsDtos = ecoNewsPage.stream()
-            .map(this::getEcoNewsGenericDtoWithEnTags)
-            .collect(Collectors.toList());
+                .map(this::getEcoNewsGenericDtoWithEnTags)
+                .collect(Collectors.toList());
 
         return new PageableAdvancedDto<>(
-            ecoNewsDtos,
-            ecoNewsPage.getTotalElements(),
-            ecoNewsPage.getPageable().getPageNumber(),
-            ecoNewsPage.getTotalPages(),
-            ecoNewsPage.getNumber(),
-            ecoNewsPage.hasPrevious(),
-            ecoNewsPage.hasNext(),
-            ecoNewsPage.isFirst(),
-            ecoNewsPage.isLast());
+                ecoNewsDtos,
+                ecoNewsPage.getTotalElements(),
+                ecoNewsPage.getPageable().getPageNumber(),
+                ecoNewsPage.getTotalPages(),
+                ecoNewsPage.getNumber(),
+                ecoNewsPage.hasPrevious(),
+                ecoNewsPage.hasNext(),
+                ecoNewsPage.isFirst(),
+                ecoNewsPage.isLast());
     }
 
     /**
@@ -274,8 +273,8 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     @Override
     public EcoNewsVO findById(Long id) {
         EcoNews ecoNews = ecoNewsRepo
-            .findById(id)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.ECO_NEWS_NOT_FOUND_BY_ID + id));
+                .findById(id)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.ECO_NEWS_NOT_FOUND_BY_ID + id));
         return modelMapper.map(ecoNews, EcoNewsVO.class);
     }
 
@@ -287,7 +286,7 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     @Override
     public EcoNewsDto getById(Long id) {
         EcoNews ecoNews = ecoNewsRepo.findById(id)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.ECO_NEWS_NOT_FOUND_BY_ID + id));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.ECO_NEWS_NOT_FOUND_BY_ID + id));
         return modelMapper.map(ecoNews, EcoNewsDto.class);
     }
 
@@ -299,13 +298,13 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     @Override
     public EcoNewsDto findDtoByIdAndLanguage(Long id, String language) {
         var ecoNews = ecoNewsRepo.findById(id)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.ECO_NEWS_NOT_FOUND_BY_ID + id));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.ECO_NEWS_NOT_FOUND_BY_ID + id));
         List<String> tags = new ArrayList<>();
         for (String lang : languageCode) {
             tags.addAll(ecoNews.getTags().stream().flatMap(t -> t.getTagTranslations().stream())
-                .filter(tagTranslation -> tagTranslation.getLanguage().getCode().equals(lang))
-                .map(TagTranslation::getName)
-                .collect(Collectors.toList()));
+                    .filter(tagTranslation -> tagTranslation.getLanguage().getCode().equals(lang))
+                    .map(TagTranslation::getName)
+                    .collect(Collectors.toList()));
         }
         return getEcoNewsDto(ecoNews, tags);
     }
@@ -320,11 +319,12 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     public void delete(Long id, UserVO user) {
         EcoNewsVO ecoNewsVO = findById(id);
         if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(ecoNewsVO.getAuthor().getId())) {
-            throw new BadRequestException(ErrorMessage.USER_HAS_NO_PERMISSION);
+            throw new UserHasNoPermissionToAccessException(ErrorMessage.USER_HAS_NO_PERMISSION);
         }
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
-        CompletableFuture.runAsync(
-            () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.DELETE_ECO_NEWS, user, accessToken));
+        CompletableFuture.runAsync(() -> ratingCalculation.ratingCalculation(
+                RatingCalculationEnum.DELETE_ECO_NEWS, user, accessToken)
+        );
         ecoNewsRepo.deleteById(ecoNewsVO.getId());
     }
 
@@ -347,6 +347,9 @@ public class EcoNewsServiceImpl implements EcoNewsService {
         return getSearchNewsDtoPageableDto(page);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PageableDto<SearchNewsDto> search(Pageable pageable, String searchQuery, String languageCode) {
         Page<EcoNews> page = ecoNewsSearchRepo.find(pageable, searchQuery, languageCode);
@@ -355,14 +358,14 @@ public class EcoNewsServiceImpl implements EcoNewsService {
 
     private PageableDto<SearchNewsDto> getSearchNewsDtoPageableDto(Page<EcoNews> page) {
         List<SearchNewsDto> searchNewsDtos = page.stream()
-            .map(ecoNews -> modelMapper.map(ecoNews, SearchNewsDto.class))
-            .collect(Collectors.toList());
+                .map(ecoNews -> modelMapper.map(ecoNews, SearchNewsDto.class))
+                .collect(Collectors.toList());
 
         return new PageableDto<>(
-            searchNewsDtos,
-            page.getTotalElements(),
-            page.getPageable().getPageNumber(),
-            page.getTotalPages());
+                searchNewsDtos,
+                page.getTotalElements(),
+                page.getPageable().getPageNumber(),
+                page.getTotalPages());
     }
 
     /**
@@ -374,8 +377,8 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     @Override
     public List<EcoNewsDto> getAllPublishedNewsByUserId(Long userId) {
         return ecoNewsRepo.findAllByUserId(userId).stream()
-            .map(ecoNews -> modelMapper.map(ecoNews, EcoNewsDto.class))
-            .collect(Collectors.toList());
+                .map(ecoNews -> modelMapper.map(ecoNews, EcoNewsDto.class))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -388,8 +391,8 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     @Override
     public List<EcoNewsDto> getAllPublishedNewsByUser(UserVO user) {
         return ecoNewsRepo.findAllByUserId(user.getId()).stream()
-            .map(ecoNews -> modelMapper.map(ecoNews, EcoNewsDto.class))
-            .collect(Collectors.toList());
+                .map(ecoNews -> modelMapper.map(ecoNews, EcoNewsDto.class))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -415,7 +418,8 @@ public class EcoNewsServiceImpl implements EcoNewsService {
         comment.getUsersLiked().add(user);
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         CompletableFuture
-            .runAsync(() -> ratingCalculation.ratingCalculation(RatingCalculationEnum.LIKE_COMMENT, user, accessToken));
+                .runAsync(() -> ratingCalculation
+                        .ratingCalculation(RatingCalculationEnum.LIKE_COMMENT, user, accessToken));
     }
 
     /**
@@ -428,8 +432,8 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     public void unlikeComment(UserVO user, EcoNewsCommentVO comment) {
         String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
         comment.getUsersLiked().removeIf(u -> u.getId().equals(user.getId()));
-        CompletableFuture
-            .runAsync(() -> ratingCalculation.ratingCalculation(RatingCalculationEnum.LIKE_COMMENT, user, accessToken));
+        CompletableFuture.runAsync(() -> ratingCalculation
+                .ratingCalculation(RatingCalculationEnum.LIKE_COMMENT, user, accessToken));
     }
 
     @Override
@@ -439,28 +443,28 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     }
 
     private void enhanceWithNewManagementData(EcoNews toUpdate, EcoNewsDtoManagement ecoNewsDtoManagement,
-        MultipartFile image) {
+                                              MultipartFile image) {
         toUpdate.setTitle(ecoNewsDtoManagement.getTitle());
         toUpdate.setText(ecoNewsDtoManagement.getText());
         toUpdate.setTags(modelMapper
-            .map(tagService.findTagsByNamesAndType(ecoNewsDtoManagement.getTags(), TagType.ECO_NEWS),
-                new TypeToken<List<Tag>>() {
-                }.getType()));
+                .map(tagService.findTagsByNamesAndType(ecoNewsDtoManagement.getTags(), TagType.ECO_NEWS),
+                        new TypeToken<List<Tag>>() {
+                        }.getType()));
         if (image != null) {
             toUpdate.setImagePath(fileService.upload(image));
         }
     }
 
     private void enhanceWithNewData(EcoNews toUpdate, UpdateEcoNewsDto updateEcoNewsDto,
-        MultipartFile image) {
+                                    MultipartFile image) {
         toUpdate.setTitle(updateEcoNewsDto.getTitle());
         toUpdate.setText(updateEcoNewsDto.getContent());
         toUpdate.setShortInfo(updateEcoNewsDto.getShortInfo());
         toUpdate.setSource(updateEcoNewsDto.getSource());
         toUpdate.setTags(modelMapper.map(tagService
-            .findTagsByNamesAndType(updateEcoNewsDto.getTags(), TagType.ECO_NEWS),
-            new TypeToken<List<Tag>>() {
-            }.getType()));
+                        .findTagsByNamesAndType(updateEcoNewsDto.getTags(), TagType.ECO_NEWS),
+                new TypeToken<List<Tag>>() {
+                }.getType()));
         if (updateEcoNewsDto.getImage() != null) {
             image = fileService.convertToMultipartImage(updateEcoNewsDto.getImage());
         }
@@ -483,7 +487,7 @@ public class EcoNewsServiceImpl implements EcoNewsService {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @return EcoNewsGenericDto
      */
     @CacheEvict(value = CacheConstants.NEWEST_ECO_NEWS_CACHE_NAME, allEntries = true)
@@ -491,7 +495,7 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     public EcoNewsGenericDto update(UpdateEcoNewsDto updateEcoNewsDto, MultipartFile image, UserVO user) {
         EcoNews toUpdate = modelMapper.map(findById(updateEcoNewsDto.getId()), EcoNews.class);
         if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(toUpdate.getAuthor().getId())) {
-            throw new BadRequestException(ErrorMessage.USER_HAS_NO_PERMISSION);
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
         enhanceWithNewData(toUpdate, updateEcoNewsDto, image);
         ecoNewsRepo.save(toUpdate);
@@ -500,7 +504,7 @@ public class EcoNewsServiceImpl implements EcoNewsService {
 
     @Override
     public PageableAdvancedDto<EcoNewsDto> getFilteredDataForManagementByPage(
-        Pageable pageable, EcoNewsViewDto ecoNewsViewDto) {
+            Pageable pageable, EcoNewsViewDto ecoNewsViewDto) {
         Page<EcoNews> page = ecoNewsRepo.findAll(getSpecification(ecoNewsViewDto), pageable);
         return buildPageableAdvancedDto(page);
     }
@@ -523,6 +527,7 @@ public class EcoNewsServiceImpl implements EcoNewsService {
             ecoNewsVO.getUsersLikedNews().add(userVO);
         }
         ecoNewsRepo.save(modelMapper.map(ecoNewsVO, EcoNews.class));
+        notificationService.createNotification(userVO, ecoNewsVO, NotificationSourceType.NEWS_LIKED);
     }
 
     /**
@@ -637,10 +642,10 @@ public class EcoNewsServiceImpl implements EcoNewsService {
 
         if (!ecoNewsViewDto.getStartDate().isEmpty() && !ecoNewsViewDto.getEndDate().isEmpty()) {
             searchCriteria = SearchCriteria.builder()
-                .key(EcoNews_.CREATION_DATE)
-                .type("dateRange")
-                .value(new String[] {ecoNewsViewDto.getStartDate(), ecoNewsViewDto.getEndDate()})
-                .build();
+                    .key(EcoNews_.CREATION_DATE)
+                    .type("dateRange")
+                    .value(new String[]{ecoNewsViewDto.getStartDate(), ecoNewsViewDto.getEndDate()})
+                    .build();
             criteriaList.add(searchCriteria);
         }
 
@@ -650,25 +655,25 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     private void setValueIfNotEmpty(List<SearchCriteria> searchCriteria, String key, String value) {
         if (!StringUtils.isEmpty(value)) {
             searchCriteria.add(SearchCriteria.builder()
-                .key(key)
-                .type(key)
-                .value(value)
-                .build());
+                    .key(key)
+                    .type(key)
+                    .value(value)
+                    .build());
         }
     }
 
     private List<EcoNewsDto> getEcoNewsList(List<EcoNews> ecoNewsList) {
         return ecoNewsList
-            .stream()
-            .map(ecoNews -> modelMapper.map(ecoNews, EcoNewsDto.class))
-            .collect(Collectors.toList());
+                .stream()
+                .map(ecoNews -> modelMapper.map(ecoNews, EcoNewsDto.class))
+                .collect(Collectors.toList());
     }
 
     private EcoNewsGenericDto getEcoNewsGenericDtoWithAllTags(EcoNews ecoNews) {
         List<String> tags = ecoNews.getTags().stream()
-            .flatMap(t -> t.getTagTranslations().stream())
-            .map(TagTranslation::getName)
-            .collect(Collectors.toList());
+                .flatMap(t -> t.getTagTranslations().stream())
+                .map(TagTranslation::getName)
+                .collect(Collectors.toList());
 
         return buildEcoNewsGenericDto(ecoNews, tags);
     }
@@ -677,10 +682,10 @@ public class EcoNewsServiceImpl implements EcoNewsService {
         List<String> tags = new ArrayList<>();
         for (String language : languageCode) {
             tags.addAll(ecoNews.getTags().stream()
-                .flatMap(t -> t.getTagTranslations().stream())
-                .filter(t -> t.getLanguage().getCode().equals(language))
-                .map(TagTranslation::getName)
-                .collect(Collectors.toList()));
+                    .flatMap(t -> t.getTagTranslations().stream())
+                    .filter(t -> t.getLanguage().getCode().equals(language))
+                    .map(TagTranslation::getName)
+                    .collect(Collectors.toList()));
         }
 
         return buildEcoNewsGenericDto(ecoNews, tags);
@@ -690,43 +695,43 @@ public class EcoNewsServiceImpl implements EcoNewsService {
         User author = ecoNews.getAuthor();
         var ecoNewsAuthorDto = new EcoNewsAuthorDto(author.getId(), author.getName());
         int countOfComments = ecoNews.getEcoNewsComments() != null
-            ? (int) ecoNews.getEcoNewsComments().stream().filter(notDeleted -> !notDeleted.isDeleted()).count()
-            : 0;
+                ? (int) ecoNews.getEcoNewsComments().stream().filter(notDeleted -> !notDeleted.isDeleted()).count()
+                : 0;
         int countOfEcoNews = ecoNewsRepo.totalCountOfCreationNews();
         return EcoNewsGenericDto.builder()
-            .id(ecoNews.getId())
-            .imagePath(ecoNews.getImagePath())
-            .author(ecoNewsAuthorDto)
-            .tagsEn(tags.stream().filter(tag -> tag.matches("^([A-Za-z-])+$")).collect(Collectors.toList()))
-            .tagsUa(tags.stream().filter(tag -> tag.matches("^([А-Яа-яієїґ'-])+$")).collect(Collectors.toList()))
-            .shortInfo(ecoNews.getShortInfo())
-            .content(ecoNews.getText())
-            .title(ecoNews.getTitle())
-            .creationDate(ecoNews.getCreationDate())
-            .source(ecoNews.getSource())
-            .likes(ecoNews.getUsersLikedNews() != null ? ecoNews.getUsersLikedNews().size() : 0)
-            .countComments(countOfComments)
-            .countOfEcoNews(countOfEcoNews)
-            .build();
+                .id(ecoNews.getId())
+                .imagePath(ecoNews.getImagePath())
+                .author(ecoNewsAuthorDto)
+                .tagsEn(tags.stream().filter(tag -> tag.matches("^([A-Za-z-])+$")).collect(Collectors.toList()))
+                .tagsUa(tags.stream().filter(tag -> tag.matches("^([А-Яа-яієїґ'-])+$")).collect(Collectors.toList()))
+                .shortInfo(ecoNews.getShortInfo())
+                .content(ecoNews.getText())
+                .title(ecoNews.getTitle())
+                .creationDate(ecoNews.getCreationDate())
+                .source(ecoNews.getSource())
+                .likes(ecoNews.getUsersLikedNews() != null ? ecoNews.getUsersLikedNews().size() : 0)
+                .countComments(countOfComments)
+                .countOfEcoNews(countOfEcoNews)
+                .build();
     }
 
     private EcoNewsDto getEcoNewsDto(EcoNews ecoNews, List<String> list) {
         User author = ecoNews.getAuthor();
         var ecoNewsAuthorDto = new EcoNewsAuthorDto(author.getId(),
-            author.getName());
+                author.getName());
 
         return EcoNewsDto.builder()
-            .id(ecoNews.getId())
-            .imagePath(ecoNews.getImagePath())
-            .author(ecoNewsAuthorDto)
-            .likes(ecoNews.getUsersLikedNews().size())
-            .tags(list.stream().filter(tag -> tag.matches("^([A-Za-z-])+$")).collect(Collectors.toList()))
-            .tagsUa(list.stream().filter(tag -> tag.matches("^([А-Яа-яієїґ'-])+$")).collect(Collectors.toList()))
-            .shortInfo(ecoNews.getShortInfo())
-            .content(ecoNews.getText())
-            .title(ecoNews.getTitle())
-            .creationDate(ecoNews.getCreationDate())
-            .build();
+                .id(ecoNews.getId())
+                .imagePath(ecoNews.getImagePath())
+                .author(ecoNewsAuthorDto)
+                .likes(ecoNews.getUsersLikedNews().size())
+                .tags(list.stream().filter(tag -> tag.matches("^([A-Za-z-])+$")).collect(Collectors.toList()))
+                .tagsUa(list.stream().filter(tag -> tag.matches("^([А-Яа-яієїґ'-])+$")).collect(Collectors.toList()))
+                .shortInfo(ecoNews.getShortInfo())
+                .content(ecoNews.getText())
+                .title(ecoNews.getTitle())
+                .creationDate(ecoNews.getCreationDate())
+                .build();
     }
 
     /**
@@ -737,19 +742,19 @@ public class EcoNewsServiceImpl implements EcoNewsService {
      */
     public EcoNewContentSourceDto getContentAndSourceForEcoNewsById(Long id) {
         EcoNews ecoNews = ecoNewsRepo.findById(id)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.ECO_NEWS_NOT_FOUND_BY_ID + id));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.ECO_NEWS_NOT_FOUND_BY_ID + id));
         return getContentSourceEcoNewsDto(ecoNews);
     }
 
     private EcoNewContentSourceDto getContentSourceEcoNewsDto(EcoNews ecoNews) {
         return EcoNewContentSourceDto.builder()
-            .content(ecoNews.getText())
-            .source(ecoNews.getSource())
-            .build();
+                .content(ecoNews.getText())
+                .source(ecoNews.getSource())
+                .build();
     }
 
     private EcoNews genericSave(AddEcoNewsDtoRequest addEcoNewsDtoRequest,
-        MultipartFile image, String email) {
+                                MultipartFile image, String email) {
         EcoNews toSave = modelMapper.map(addEcoNewsDtoRequest, EcoNews.class);
         UserVO byEmail = restClient.findByEmail(email);
         User user = modelMapper.map(byEmail, User.class);
@@ -768,16 +773,16 @@ public class EcoNewsServiceImpl implements EcoNewsService {
         }
 
         List<TagVO> tagVOS = tagService.findTagsByNamesAndType(
-            addEcoNewsDtoRequest.getTags(), TagType.ECO_NEWS);
+                addEcoNewsDtoRequest.getTags(), TagType.ECO_NEWS);
 
         toSave.setTags(modelMapper.map(tagVOS,
-            new TypeToken<List<Tag>>() {
-            }.getType()));
+                new TypeToken<List<Tag>>() {
+                }.getType()));
         try {
             ecoNewsRepo.save(toSave);
             String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
-            CompletableFuture.runAsync(
-                () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_ECO_NEWS, byEmail, accessToken));
+            CompletableFuture.runAsync(() -> ratingCalculation
+                    .ratingCalculation(RatingCalculationEnum.ADD_ECO_NEWS, byEmail, accessToken));
         } catch (DataIntegrityViolationException e) {
             throw new NotSavedException(ErrorMessage.ECO_NEWS_NOT_SAVED);
         }
@@ -787,8 +792,8 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     @Override
     public Set<UserVO> findUsersWhoLikedPost(Long id) {
         EcoNews ecoNews = ecoNewsRepo
-            .findById(id)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.ECO_NEWS_NOT_FOUND_BY_ID + id));
+                .findById(id)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.ECO_NEWS_NOT_FOUND_BY_ID + id));
         Set<User> usersLikedNews = ecoNews.getUsersLikedNews();
         return usersLikedNews.stream().map(u -> modelMapper.map(u, UserVO.class)).collect(Collectors.toSet());
     }
@@ -796,8 +801,8 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     @Override
     public Set<UserVO> findUsersWhoDislikedPost(Long id) {
         EcoNews ecoNews = ecoNewsRepo
-            .findById(id)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.ECO_NEWS_NOT_FOUND_BY_ID + id));
+                .findById(id)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.ECO_NEWS_NOT_FOUND_BY_ID + id));
         Set<User> usersDislikedNews = ecoNews.getUsersDislikedNews();
         return usersDislikedNews.stream().map(u -> modelMapper.map(u, UserVO.class)).collect(Collectors.toSet());
     }

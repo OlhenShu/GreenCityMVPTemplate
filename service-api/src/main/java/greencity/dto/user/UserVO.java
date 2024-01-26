@@ -42,6 +42,8 @@ public class UserVO {
 
     private VerifyEmailVO verifyEmail;
 
+    private Long chatId;
+
     private Double rating;
 
     private EmailNotification emailNotification;

@@ -7,12 +7,14 @@ import greencity.dto.PageableAdvancedDto;
 import greencity.dto.econews.EcoNewsForSendEmailDto;
 import greencity.dto.user.*;
 import greencity.enums.EmailNotification;
+import greencity.message.NotificationDto;
 import greencity.message.SendHabitNotification;
 import greencity.message.SendReportEmailMessage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.internal.matchers.Not;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -29,6 +31,7 @@ import java.util.*;
 import static greencity.constant.AppConstant.AUTHORIZATION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @ExtendWith(MockitoExtension.class)
 class RestClientTest {
@@ -378,12 +381,14 @@ class RestClientTest {
         String accessToken = "accessToken";
         HttpHeaders headers = new HttpHeaders();
         headers.set(AUTHORIZATION, accessToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<UserVO> entity = new HttpEntity<>(userVO, headers);
-        when(restTemplate.exchange(greenCityUserServerAddress
+        restClient.setGreenCityUserServerAddress("http://localhost:8060");
+        when(restTemplate.exchange("http://localhost:8060"
             + RestTemplateLinks.USER, HttpMethod.POST, entity, Object.class)).thenReturn(ResponseEntity.ok(Object));
         restClient.save(userVO, accessToken);
 
-        verify(restTemplate).exchange(greenCityUserServerAddress
+        verify(restTemplate).exchange("http://localhost:8060"
             + RestTemplateLinks.USER, HttpMethod.POST, entity, Object.class);
 
     }
@@ -493,5 +498,24 @@ class RestClientTest {
             }))
                 .thenReturn(ResponseEntity.status(HttpStatus.OK).body(expected));
         assertEquals(expected, restClient.findAllUsersCities());
+    }
+
+    @Test
+    public void sendNotificationTest() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        NotificationDto notificationDto = new NotificationDto("Test","test1");
+        String email = "test@gmail.com";
+        HttpEntity<NotificationDto> entity = new HttpEntity<>(notificationDto, headers);
+        restClient.setGreenCityUserServerAddress("http://localhost:8060");
+        UriComponentsBuilder url = UriComponentsBuilder.fromHttpUrl("http://localhost:8060"
+                + RestTemplateLinks.NOTIFICATION)
+            .queryParam("email", email);
+        when(restTemplate.exchange(url.toUriString(), HttpMethod.POST, entity, Object.class))
+            .thenReturn(ResponseEntity.ok(Object));
+
+        restClient.sendNotification(notificationDto,email);
+
+        verify(restTemplate).exchange(url.toUriString(), HttpMethod.POST, entity, Object.class);
     }
 }

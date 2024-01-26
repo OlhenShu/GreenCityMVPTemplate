@@ -16,10 +16,7 @@ import greencity.entity.EcoNews;
 import greencity.entity.Tag;
 import greencity.entity.User;
 import greencity.enums.TagType;
-import greencity.exception.exceptions.BadRequestException;
-import greencity.exception.exceptions.NotFoundException;
-import greencity.exception.exceptions.NotSavedException;
-import greencity.exception.exceptions.UnsupportedSortException;
+import greencity.exception.exceptions.*;
 import greencity.filters.EcoNewsSpecification;
 import greencity.filters.SearchCriteria;
 import greencity.repository.EcoNewsRepo;
@@ -35,6 +32,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.*;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -69,6 +67,9 @@ class EcoNewsServiceImplTest {
 
     @Mock
     HttpServletRequest httpServletRequest;
+
+    @Mock
+    NotificationService notificationService;
 
     @Mock
     EcoNewsSearchRepo ecoNewsSearchRepo;
@@ -364,7 +365,7 @@ class EcoNewsServiceImplTest {
         when(ecoNewsRepo.findById(1L)).thenReturn(Optional.of(ecoNews));
         when(modelMapper.map(ecoNews, EcoNewsVO.class)).thenReturn(ecoNewsVO);
         ecoNewsVO.setAuthor(author);
-        assertThrows(BadRequestException.class, () -> ecoNewsService.delete(1L, userVO));
+        assertThrows(UserHasNoPermissionToAccessException.class, () -> ecoNewsService.delete(1L, userVO));
     }
 
     @Test
@@ -502,7 +503,7 @@ class EcoNewsServiceImplTest {
         when(ecoNewsRepo.findById(1L)).thenReturn(Optional.of(ecoNews));
         when(ecoNewsService.findById(1L)).thenReturn(ecoNewsVO);
         when(modelMapper.map(ecoNewsVO, EcoNews.class)).thenReturn(ecoNews);
-        assertThrows(BadRequestException.class, () -> ecoNewsService.update(updateEcoNewsDto, null, user));
+        assertThrows(ResponseStatusException.class, () -> ecoNewsService.update(updateEcoNewsDto, null, user));
 
     }
 
@@ -565,7 +566,7 @@ class EcoNewsServiceImplTest {
         EcoNews ecoNews = ModelUtils.getEcoNews();
         EcoNewsVO ecoNewsVO = ModelUtils.getEcoNewsVO();
         ecoNewsVO.setUsersLikedNews(new HashSet<>());
-        when(ecoNewsRepo.findById(1L)).thenReturn(Optional.of(ecoNews));
+        when(ecoNewsRepo.findById(anyLong())).thenReturn(Optional.of(ecoNews));
         when(modelMapper.map(ecoNews, EcoNewsVO.class)).thenReturn(ecoNewsVO);
         when(modelMapper.map(ecoNewsVO, EcoNews.class)).thenReturn(ecoNews);
 
